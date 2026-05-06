@@ -1,6 +1,14 @@
 # Word source files (stay local — run pipeline to regenerate data.json)
 ערכים/*.docx
 
+# Design reference files (not part of the site)
+design-canvas.jsx
+uploads/
+v1-classic.html
+v2-mystical.html
+v3-modern.html
+v4-treasure.html
+
 # Python intermediate output
 ערכים/data.js
 
@@ -15,3 +23,5 @@ Thumbs.db
 
 # Local dev
 *.log
+
+.vercel
