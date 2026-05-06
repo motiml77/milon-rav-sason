@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>מילון פנימיות התורה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood-dark: #4a2f17;
+    --wood: #6b4520;
+    --wood-warm: #8b6428;
+    --wood-light: #c9a060;
+    --cream: #f8f0dc;
+    --cream-2: #efe4c8;
+    --cream-3: #e2d3b0;
+    --gold: #b8893a;
+    --gold-bright: #e2b558;
+    --gold-deep: #8a6018;
+    --ink: #2a1a08;
+    --ink-soft: #5a3e1e;
+    --ink-faint: #8a6e48;
+    --crimson: #8b2e1c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html, body{height:100%; overflow:hidden;}
+  body{
+    font-family: 'Frank Ruhl Libre', 'David Libre', serif;
+    color: var(--ink);
+    background:
+      linear-gradient(135deg, #2a1808 0%, #4a2f17 100%);
+    direction: rtl;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .page{
+    display: grid;
+    grid-template-columns: var(--sidebar-width, 340px) 6px 1fr;
+    height: 100vh;
+    padding: 16px;
+    gap: 0;
+  }
+
+  /* ─── Splitter (גרירה לשינוי פרופורציה בין סרגל וחלון) ─── */
+  .splitter{
+    cursor: col-resize;
+    position: relative;
+    background: transparent;
+    transition: background 0.15s;
+    z-index: 10;
+  }
+  .splitter::before{
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 60px;
+    background: var(--gold);
+    border-radius: 2px;
+    opacity: 0.55;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .splitter:hover::before{ opacity: 1; background: var(--gold-bright); }
+  .splitter.dragging::before{ opacity: 1; background: var(--crimson); }
+  body.resizing{ cursor: col-resize; user-select: none; }
+  body.resizing iframe, body.resizing *{ pointer-events: none; }
+  body.resizing .splitter{ pointer-events: auto; }
+
+  /* ─── Sidebar ─── */
+  .sidebar{
+    position: relative;
+    background:
+      linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
+    border-radius: 8px 0 0 8px;
+    box-shadow:
+      0 12px 40px rgba(0,0,0,0.5),
+      inset 0 0 0 1px rgba(184, 137, 58, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar::before{
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(180deg,
+        transparent 0px, transparent 2px,
+        rgba(120,80,30,0.03) 2px, rgba(120,80,30,0.03) 3px);
+    pointer-events: none;
+  }
+  .sidebar::after{
+    content: none;
+  }
+
+  .brand{
+    padding: 13px 12px 9px;
+    text-align: center;
+    border-bottom: 1px double var(--gold-deep);
+    position: relative;
+  }
+  .brand-emblem{
+    width: 48px; height: auto;
+    margin: 0 auto 5px;
+    display: block;
+    filter: drop-shadow(0 2px 3px rgba(90,30,16,0.2));
+  }
+  .brand-title{
+    font-weight: 900;
+    color: var(--ink);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .brand-subtitle{
+    color: var(--gold-deep);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+  }
+  .brand-tagline{
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--crimson);
+    letter-spacing: 0.4em;
+    font-weight: 700;
+    font-style: italic;
+    opacity: 0.75;
+  }
+    margin-top: 6px;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+  }
+
+  .search{
+    margin: 16px 18px 8px;
+    position: relative;
+  }
+  .search input{
+    width: 100%;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--gold-deep);
+    border-radius: 0;
+    color: var(--ink);
+    padding: 9px 32px 9px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    direction: rtl;
+  }
+  .search input::placeholder{ color: var(--ink-faint); }
+  .search input:focus{ outline: none; box-shadow: 0 0 0 2px var(--gold-bright); }
+  .search-icon{
+    position: absolute;
+    right: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-faint);
+  }
+
+  .nav{
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 16px 20px;
+  }
+  .nav::-webkit-scrollbar{ width: 6px; }
+  .nav::-webkit-scrollbar-thumb{ background: var(--gold-deep); border-radius: 3px; }
+
+  .topic{ margin-bottom: 8px; position: relative; }
+  .topic-head{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid var(--gold-deep);
+    transition: all 0.15s;
+    user-select: none;
+    position: relative;
+  }
+  .topic-head::before{
+    content: "";
+    position: absolute;
+    right: -8px; top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 14px; height: 14px;
+    background: var(--cream);
+    border: 1px solid var(--gold-deep);
+    border-left: none;
+    border-bottom: none;
+    z-index: 0;
+  }
+  .topic-head:hover{ background: rgba(212,176,106, 0.3); }
+  .topic-head.active{
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+  }
+  .topic-head.active::before{
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .topic-head.active .topic-subtitle{ color: var(--gold-bright); }
+  .topic-title{
+    font-weight: 700;
+    font-size: 18px;
+    position: relative;
+    z-index: 1;
+  }
+  .topic-subtitle{
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+    position: relative;
+    z-index: 1;
+  }
+  .topic-count{
+    background: var(--gold);
+    color: var(--cream);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    min-width: 22px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .topic-head.active .topic-count{ background: var(--gold-bright); color: var(--ink); }
+
+  .entries{
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+    padding: 0 8px;
+  }
+  /* גובה מספיק גדול שיכיל גם מדורים עם מאות ערכים — הגלילה נשארת ב-.nav */
+  .topic.open .entries{ max-height: 50000px; padding-top: 6px; padding-bottom: 6px;}
+
+  .entry-link{
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 6px 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 15px;
+    border-right: 2px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+    position: relative;
+  }
+  .entry-link::before{
+    content: attr(data-num);
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .entry-link:hover{ color: var(--ink); background: rgba(255,255,255,0.4); }
+  .entry-link.active{
+    color: var(--crimson);
+    border-right-color: var(--crimson);
+    background: rgba(139,46,28, 0.08);
+    font-weight: 700;
+  }
+  .entry-link.bookmarked::after{
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 7px;
+    height: 9px;
+    background: var(--crimson);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
+    opacity: 0.85;
+  }
+
+  /* ─── Main ─── */
+  .main{
+    position: relative;
+    background:
+      linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
+    border-radius: 0 8px 8px 0;
+    box-shadow:
+      0 12px 40px rgba(0,0,0,0.5),
+      inset 0 0 0 1px rgba(184, 137, 58, 0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .main::before{
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; right: 0;
+    width: 12px;
+    background: linear-gradient(270deg, transparent, rgba(0,0,0,0.15));
+    pointer-events: none;
+    z-index: 5;
+  }
+  .main::after{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(184,137,58,0.04) 0%, transparent 30%),
+      radial-gradient(circle at 80% 70%, rgba(184,137,58,0.04) 0%, transparent 30%);
+    pointer-events: none;
+  }
+
+  .topbar{
+    height: 56px;
+    flex-shrink: 0;
+    border-bottom: 2px double var(--gold-deep);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 36px;
+    position: relative;
+    z-index: 2;
+  }
+  .breadcrumb{
+    color: var(--ink-soft);
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .breadcrumb-current{ color: var(--ink); font-weight: 700; }
+  .breadcrumb-sep{ color: var(--gold-deep); }
+
+  .sidebar-pages{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    padding: 0 12px 12px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--gold);
+  }
+  .page-btn{
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--gold);
+    color: var(--ink-soft);
+    padding: 10px 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .page-btn:last-child{ border-left: none; }
+  .page-btn svg{ color: var(--gold-deep); transition: color 0.15s; }
+  .page-btn:hover{
+    color: var(--ink);
+    background: rgba(184,137,58, 0.08);
+  }
+  .page-btn:hover svg{ color: var(--crimson); }
+  .page-btn.active{
+    color: var(--crimson);
+  }
+  .page-btn.active svg{ color: var(--crimson); }
+
+  .toolbar{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .tool-btn{
+    background: rgba(255,255,255,0.5);
+    border: 1px solid var(--gold);
+    color: var(--gold-deep);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.18s ease;
+    font-family: inherit;
+    position: relative;
+  }
+  .tool-btn:hover{
+    background: var(--cream);
+    color: var(--ink);
+    border-color: var(--gold-deep);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(138,96,24, 0.2);
+  }
+  .tool-btn.active{
+    background: linear-gradient(180deg, var(--crimson), #6e1f11);
+    color: var(--gold-bright);
+    border-color: #6e1f11;
+    box-shadow: 0 2px 6px rgba(139,46,28, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .tool-btn svg{ display: block; }
+  .tool-divider{
+    width: 1px;
+    height: 22px;
+    background: var(--gold);
+    opacity: 0.5;
+    margin: 0 2px;
+  }
+
+  .scroll-area{
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .scroll-area::-webkit-scrollbar{ width: 8px; }
+  .scroll-area::-webkit-scrollbar-thumb{ background: var(--gold-deep); border-radius: 4px; }
+
+  .content{
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 50px 60px 80px;
+    position: relative;
+    min-height: 100%;
+  }
+
+  /* fade animation for content swap */
+  .fade-stage{
+    animation: fadeIn 250ms ease both;
+  }
+  @keyframes fadeIn{
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Topic landing (when no entry chosen yet) */
+  .topic-landing{
+    text-align: center;
+    padding-top: 40px;
+  }
+  .topic-landing-eyebrow{
+    color: var(--gold-deep);
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .topic-landing-title{
+    font-size: 64px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+  .topic-landing-subtitle{
+    font-size: 17px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-top: 8px;
+  }
+  .topic-landing-rule{
+    width: 60%;
+    margin: 28px auto 36px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    position: relative;
+  }
+  .topic-landing-rule::after{
+    content: "✦";
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--cream);
+    color: var(--gold);
+    padding: 0 16px;
+    font-size: 16px;
+  }
+  .topic-landing-hint{
+    color: var(--ink-faint);
+    font-size: 15px;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+  .entry-grid{
+    margin-top: 36px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+    text-align: right;
+  }
+  .entry-card{
+    padding: 10px 14px 12px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid var(--gold);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    min-width: 0;
+  }
+  .entry-card:hover{
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+  }
+  .entry-card-num{
+    color: var(--gold-deep);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    margin-bottom: 3px;
+  }
+  .entry-card:hover .entry-card-num{ color: var(--gold-bright); }
+  .entry-card-term{
+    font-size: 17px;
+    font-weight: 900;
+    color: inherit;
+    line-height: 1.2;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  /* Entry layout — single entry per page */
+  .entry-page{
+    position: relative;
+  }
+  .entry-page-header{
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--gold);
+    position: relative;
+  }
+  .entry-page-header::after{
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -3px;
+    height: 1px;
+    background: var(--gold);
+  }
+  .entry-eyebrow{
+    color: var(--gold-deep);
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .entry-eyebrow::after{
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    opacity: 0.5;
+  }
+  .entry-term{
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+    line-height: 1.05;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .entry-bookmark{
+    background: transparent;
+    border: 1.5px solid var(--gold);
+    color: var(--gold-deep);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+    align-self: center;
+    margin-top: 6px;
+  }
+  .entry-bookmark:hover{
+    background: var(--cream);
+    border-color: var(--crimson);
+    color: var(--crimson);
+    transform: translateY(-1px) scale(1.05);
+  }
+  .entry-bookmark.active{
+    background: var(--crimson);
+    border-color: var(--crimson);
+    color: var(--gold-bright);
+    box-shadow: 0 3px 8px rgba(139,46,28, 0.3);
+  }
+  .entry-bookmark.active svg{ fill: currentColor; }
+  .entry-topic-label{
+    font-size: 14px;
+    color: var(--ink-faint);
+    font-style: italic;
+    letter-spacing: 0.03em;
+  }
+
+  .definition{
+    position: relative;
+  }
+  /* רווח קטן בין פסקאות המשכיות (אותה הגדרה לוגית) */
+  .definition + .definition{
+    margin-top: 10px;
+  }
+  /* קו מפריד + רווח גדול לפני התחלה של הגדרה חדשה (אחרי מקור) */
+  .definition.new-block{
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px dotted var(--gold);
+  }
+  .definition-num{
+    position: absolute;
+    right: -2px; top: 0;
+    color: var(--gold);
+    font-size: 32px;
+    font-weight: 300;
+    line-height: 1;
+    font-family: 'Frank Ruhl Libre', serif;
+  }
+  .definition.first .definition-text::first-letter{
+    float: right;
+    font-size: 64px;
+    line-height: 0.9;
+    font-weight: 900;
+    color: var(--crimson);
+    margin-left: 8px;
+    margin-top: 4px;
+    margin-right: -2px;
+    font-family: 'Frank Ruhl Libre', serif;
+  }
+  .definition-text{
+    font-size: 19px;
+    line-height: 1.95;
+    color: var(--ink);
+    text-align: justify;
+    text-justify: inter-word;
+  }
+  .source-line{
+    margin-top: 18px;
+    display: flex;
+    justify-content: flex-start;
+  }
+  .source{
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.03em;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--gold);
+    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .source::before{
+    content: "✦";
+    color: var(--gold);
+    font-style: normal;
+  }
+
+  .related{
+    margin-top: 36px;
+    padding: 16px 20px;
+    background:
+      linear-gradient(180deg, rgba(184,137,58, 0.10), rgba(184,137,58, 0.04));
+    border: 1px solid var(--gold);
+    border-right: 4px solid var(--crimson);
+    position: relative;
+  }
+  .related::before{
+    content: "";
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 16px; height: 16px;
+    border-top: 2px solid var(--gold);
+    border-left: 2px solid var(--gold);
+  }
+  .related::after{
+    content: "";
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 16px; height: 16px;
+    border-bottom: 2px solid var(--gold);
+    border-right: 2px solid var(--gold);
+  }
+  .related-header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dotted var(--gold);
+  }
+  .related-icon{
+    color: var(--crimson);
+    flex-shrink: 0;
+  }
+  .related-label{
+    font-size: 11px;
+    color: var(--gold-deep);
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+  .related-sublabel{
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-style: italic;
+    margin-right: auto;
+  }
+  .related-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .related-link{
+    color: var(--ink);
+    cursor: pointer;
+    padding: 4px 10px 4px 8px;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid var(--gold);
+    border-radius: 999px;
+    font-size: 13px;
+    line-height: 1.3;
+    transition: all 0.18s;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .related-link::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(270deg, var(--crimson), transparent);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    z-index: 0;
+  }
+  .related-link > *{ position: relative; z-index: 1; }
+  .related-link:hover{
+    color: var(--cream);
+    border-color: var(--crimson);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139,46,28, 0.25);
+  }
+  .related-link:hover::before{ transform: translateX(0); }
+  .related-link-arrow{
+    color: var(--crimson);
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .related-link:hover .related-link-arrow{
+    color: var(--gold-bright);
+    transform: translateX(-4px);
+  }
+  .related-link-topic{
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+    font-weight: 500;
+    border-right: 1px solid var(--gold);
+    padding-right: 6px;
+    margin-right: 2px;
+  }
+  .related-link:hover .related-link-topic{ color: var(--gold-bright); }
+  .related-link-text{
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .entry-flourish{
+    text-align: center;
+    margin-top: 44px;
+    color: var(--gold);
+    font-size: 22px;
+    letter-spacing: 0.5em;
+    opacity: 0.7;
+  }
+
+  .folio{
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--gold-deep);
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    z-index: 4;
+  }
+
+  /* Rabbi card */
+  .rabbi-card{
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 28px;
+    margin: 32px 0 40px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(244,230,196,0.4));
+    border: 1px solid var(--gold);
+    border-right: 4px solid var(--crimson);
+    align-items: start;
+  }
+  .rabbi-portrait{
+    width: 200px;
+    aspect-ratio: 200/240;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(58,38,20,0.25), inset 0 0 0 4px var(--cream);
+  }
+  .rabbi-portrait svg{ display: block; width: 100%; height: 100%; }
+  .rabbi-details{ padding-top: 4px; }
+  .rabbi-name{
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .rabbi-role{
+    font-size: 13px;
+    color: var(--gold-deep);
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px dotted var(--gold);
+  }
+  .rabbi-bio{
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--ink);
+    text-align: justify;
+    margin-bottom: 14px;
+  }
+  .rabbi-tags{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .rabbi-tag{
+    background: var(--cream);
+    border: 1px solid var(--gold);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  /* Bookmarks page */
+  .empty-bookmarks{
+    text-align: center;
+    padding: 50px 30px;
+    color: var(--ink-faint);
+  }
+  .empty-bookmarks svg{
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.6;
+  }
+  .empty-bookmarks p{
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--ink-soft);
+  }
+  .bookmark-group{
+    margin-bottom: 32px;
+  }
+  .bookmark-topic{
+    font-size: 13px;
+    color: var(--gold-deep);
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+    border-bottom: 1px dotted var(--gold);
+  }
+  .bookmark-list{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bookmark-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid var(--gold);
+    border-right: 3px solid var(--gold-deep);
+    transition: all 0.15s;
+  }
+  .bookmark-row:hover{
+    border-right-color: var(--crimson);
+    background: rgba(255,255,255,0.85);
+    transform: translateX(-2px);
+  }
+  .bookmark-remove{
+    background: transparent;
+    border: none;
+    color: var(--crimson);
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    transition: all 0.15s;
+  }
+  .bookmark-remove:hover{ background: rgba(139,46,28, 0.12); }
+  .bookmark-content{
+    flex: 1;
+    cursor: pointer;
+    min-width: 0;
+  }
+  .bookmark-term{
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .bookmark-preview{
+    font-size: 13px;
+    color: var(--ink-faint);
+    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+  .bookmark-arrow{
+    color: var(--gold-deep);
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .bookmark-row:hover .bookmark-arrow{ color: var(--crimson); }
+
+  /* Info pages (About / Contact) */
+  .info-page{
+    text-align: right;
+    padding-top: 20px;
+  }
+  .info-eyebrow{
+    color: var(--gold-deep);
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .info-title{
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.05;
+    margin-bottom: 8px;
+  }
+  .info-subtitle{
+    font-size: 16px;
+    color: var(--ink-soft);
+    font-style: italic;
+    text-align: center;
+  }
+  .info-rule{
+    width: 60%;
+    margin: 28px auto 36px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    position: relative;
+  }
+  .info-rule::after{
+    content: "✦";
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--cream);
+    color: var(--gold);
+    padding: 0 16px;
+    font-size: 16px;
+  }
+  .info-section{ margin-bottom: 28px; }
+  .info-h2{
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--crimson);
+    margin-bottom: 10px;
+    padding-right: 14px;
+    border-right: 3px solid var(--gold);
+  }
+  .info-p{
+    font-size: 17px;
+    line-height: 1.9;
+    color: var(--ink);
+    text-align: justify;
+  }
+  .contact-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+  }
+  .contact-card{
+    padding: 22px 18px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid var(--gold);
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .contact-card:hover{
+    background: rgba(255,255,255,0.8);
+    border-color: var(--crimson);
+    transform: translateY(-2px);
+  }
+  .contact-icon{
+    color: var(--crimson);
+    margin-bottom: 10px;
+  }
+  .contact-label{
+    color: var(--gold-deep);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .contact-value{
+    color: var(--ink);
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  a.contact-value:hover{ color: var(--crimson); }
+
+  body[data-font="lg"] .definition-text{ font-size: 21px; }
+  body[data-font="xl"] .definition-text{ font-size: 24px; }
+
+  /* טקסט קטן — הערות בסוגריים עגולים והפניות פנימיות */
+  .definition-text .text-small,
+  .text-small{
+    font-size: 0.78em;
+    color: var(--ink-soft);
+    opacity: 0.92;
+  }
+
+  /* ציטוטים מתוך מקור — פסקאות שמסומנו בגופן/גודל שונה ב-Word */
+  .definition-text .quote{
+    display: block;
+    font-family: 'Heebo', 'Assistant', sans-serif;
+    font-weight: 300;
+    font-size: 0.92em;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(244,230,196,0.30));
+    border-right: 3px solid var(--gold);
+    border-radius: 0 4px 4px 0;
+    padding: 14px 22px 14px 22px;
+    margin: 16px 0 16px 8px;
+    position: relative;
+    text-align: justify;
+  }
+  /* קישוט עדין: ✦ קטן בפינה */
+  .definition-text .quote::before{
+    content: "✦";
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    font-size: 11px;
+    color: var(--gold);
+    opacity: 0.55;
+    line-height: 1;
+    pointer-events: none;
+  }
+  /* טקסט קטן בתוך ציטוט — שומר על האווירה אבל מעט יותר קטן */
+  .definition-text .quote .text-small{
+    font-size: 0.82em;
+    opacity: 0.85;
+  }
+  body[data-font="lg"] .definition-text .quote{ font-size: 0.94em; }
+  body[data-font="xl"] .definition-text .quote{ font-size: 0.95em; }
+</style>
+</head>
+<body data-font="md">
+
+<div class="page">
+  <aside class="sidebar">
+    <div class="sidebar-pages" id="sidebar-pages">
+      <button class="page-btn" data-page="dictionary" title="חזרה למילון">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>המילון</span>
+      </button>
+      <button class="page-btn" data-page="about" title="אודות">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>אודות</span>
+      </button>
+      <button class="page-btn" data-page="contact" title="צור קשר">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg>
+        <span>צור קשר</span>
+      </button>
+    </div>
+    <div class="brand">
+      <img class="brand-emblem" src="assets/logo-mlh.png" alt="מלאה הארץ דעה - בראשות הרב ראובן ששון"/>
+      <div class="brand-title">מילון מונחים</div>
+      <div class="brand-subtitle">פנימיות התורה</div>
+    </div>
+
+    <div class="search">
+      <input type="text" id="search" placeholder="חיפוש בערכים…" />
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    </div>
+
+    <nav class="nav" id="nav"></nav>
+  </aside>
+
+  <div class="splitter" id="splitter" title="גרור כדי לשנות פרופורציה" role="separator" aria-orientation="vertical"></div>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="breadcrumb" id="breadcrumb">
+        <span>אוצר המונחים</span>
+      </div>
+      <div class="toolbar">
+        <button class="tool-btn" id="bookmarks-page-btn" title="הסימניות שלי">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button class="tool-btn" id="font-btn" title="גודל טקסט">
+          <span style="font-weight:700;font-size:13px;">א<sup style="font-size:9px;">+</sup></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="scroll-area" id="scroll">
+      <div class="content" id="content"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const DATA_URL = "data.json";
+let data = null;
+let currentTopic = null;
+let currentEntry = null;
+
+async function load(){
+  const res = await fetch(DATA_URL);
+  data = await res.json();
+  renderNav();
+  if(data.topics.length){
+    currentTopic = data.topics[0].id;
+    document.querySelector('.topic').classList.add('open');
+    document.querySelector('.topic-head').classList.add('active');
+    renderTopicLanding(data.topics[0], 0);
+  }
+}
+
+function renderNav(){
+  document.getElementById('nav').innerHTML = data.topics.map((t) => `
+    <div class="topic" data-topic="${t.id}">
+      <div class="topic-head" onclick="selectTopic('${t.id}')">
+        <div>
+          <div class="topic-title">${t.title}</div>
+          <div class="topic-subtitle">${t.subtitle}</div>
+        </div>
+        <div class="topic-count">${t.entries.length}</div>
+      </div>
+      <div class="entries">
+        ${t.entries.map((e, i) => `
+          <div class="entry-link ${isBookmarked(e.id) ? 'bookmarked' : ''}" data-entry="${e.id}" data-num="${i+1}." onclick="event.stopPropagation(); goToEntry('${t.id}','${e.id}')">${e.term}</div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectTopic(id){
+  const ti = data.topics.findIndex(t => t.id === id);
+  const topic = data.topics[ti];
+  const wasOpen = document.querySelector(`.topic[data-topic="${id}"]`).classList.contains('open');
+  document.querySelectorAll('.topic').forEach(el => {
+    el.classList.toggle('open', el.dataset.topic === id ? !wasOpen : false);
+    el.querySelector('.topic-head').classList.toggle('active', el.dataset.topic === id);
+  });
+  document.querySelectorAll('.entry-link').forEach(el => el.classList.remove('active'));
+  currentTopic = id;
+  currentEntry = null;
+  renderTopicLanding(topic, ti);
+}
+
+function goToEntry(topicId, entryId){
+  const ti = data.topics.findIndex(t => t.id === topicId);
+  const topic = data.topics[ti];
+  const ei = topic.entries.findIndex(e => e.id === entryId);
+  const entry = topic.entries[ei];
+
+  if(currentTopic !== topicId){
+    document.querySelectorAll('.topic').forEach(el => {
+      el.classList.toggle('open', el.dataset.topic === topicId);
+      el.querySelector('.topic-head').classList.toggle('active', el.dataset.topic === topicId);
+    });
+  }else{
+    // make sure topic is open
+    document.querySelector(`.topic[data-topic="${topicId}"]`).classList.add('open');
+  }
+  currentTopic = topicId;
+  currentEntry = entryId;
+
+  document.querySelectorAll('.entry-link').forEach(el => {
+    el.classList.toggle('active', el.dataset.entry === entryId);
+  });
+  renderEntryPage(topic, ti, entry, ei);
+}
+
+const HEB_NUM = ['א','ב','ג','ד','ה','ו','ז','ח','ט','י','י״א','י״ב','י״ג','י״ד','ט״ו'];
+const HEB_NUM_BIG = ['ראשון','שני','שלישי','רביעי','חמישי','ששי','שביעי','שמיני','תשיעי','עשירי'];
+
+function setBreadcrumb(parts){
+  document.getElementById('breadcrumb').innerHTML = parts.map((p, i) =>
+    `${i > 0 ? '<span class="breadcrumb-sep">·</span>' : ''}<span class="${i === parts.length-1 ? 'breadcrumb-current' : ''}">${p}</span>`
+  ).join('');
+}
+
+function fadeContent(html){
+  const c = document.getElementById('content');
+  c.innerHTML = html;
+  // restart animation
+  c.classList.remove('fade-stage');
+  void c.offsetWidth;
+  c.classList.add('fade-stage');
+  document.getElementById('scroll').scrollTop = 0;
+}
+
+function renderTopicLanding(topic, ti){
+  setBreadcrumb(['אוצר המונחים', topic.title]);
+  
+  fadeContent(`
+    <div class="topic-landing">
+      <div class="topic-landing-eyebrow">שער ${HEB_NUM_BIG[ti] || ti+1}</div>
+      <h1 class="topic-landing-title">${topic.title}</h1>
+      <div class="topic-landing-subtitle">${topic.subtitle}</div>
+      <div class="topic-landing-rule"></div>
+      <div class="topic-landing-hint">בחר ערך מן הרשימה</div>
+      <div class="entry-grid">
+        ${topic.entries.map((e, i) => `
+          <div class="entry-card" onclick="goToEntry('${topic.id}','${e.id}')">
+            <div class="entry-card-num">ערך ${HEB_NUM[i] || (i+1)}</div>
+            <div class="entry-card-term">${e.term}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `);
+}
+
+function renderEntryPage(topic, ti, entry, ei){
+  setBreadcrumb(['אוצר המונחים', topic.title, entry.term]);
+  
+
+  const related = (entry.related || []).map(rid => {
+    const r = findEntry(rid);
+    if(!r) return '';
+    return `
+      <div class="related-link" onclick="goToEntryByEntryId('${rid}')">
+        <span class="related-link-arrow">←</span>
+        <span class="related-link-text">
+          <span>${r.entry.term}</span>
+          <span class="related-link-topic">${r.topic.title}</span>
+        </span>
+      </div>
+    `;
+  }).filter(Boolean).join('');
+
+  fadeContent(`
+    <article class="entry-page">
+      <header class="entry-page-header">
+        <div class="entry-eyebrow">ערך ${HEB_NUM[ei] || (ei+1)}</div>
+        <h1 class="entry-term">
+          <span>${entry.term}</span>
+          <button class="entry-bookmark ${isBookmarked(entry.id) ? 'active' : ''}" onclick="onToggleBookmark('${entry.id}', this)" title="הוסף לסימניות" aria-label="סימניה">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </button>
+        </h1>
+        <div class="entry-topic-label">${topic.title} · ${topic.subtitle}</div>
+      </header>
+      ${entry.definitions.map((d, i) => {
+        // אם הטקסט מתחיל ב-[ (הפניה / הערה) — לא נחיל את ה-drop-cap האדום
+        const stripped = (d.text || '').replace(/^(?:<[^>]+>\s*)+/, '');
+        const startsWithBracket = /^\s*\[/.test(stripped);
+        // מחלקת "first" עם drop-cap רק להגדרה הראשונה שאינה מתחילה בסוגריים
+        let cls = (i === 0 && !startsWithBracket) ? 'definition first' : 'definition';
+        // קו מפריד לפני הגדרה רק אם ההגדרה הקודמת הסתיימה במקור
+        if (i > 0 && entry.definitions[i-1].source) {
+          cls += ' new-block';
+        }
+        return `
+        <div class="${cls}">
+          <div class="definition-text">${d.text}</div>
+          ${d.source ? `<div class="source-line"><div class="source">${d.source}</div></div>` : ''}
+        </div>
+      `;}).join('')}
+      ${related ? `
+        <div class="related">
+          <div class="related-header">
+            <svg class="related-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <div class="related-label">ראה גם · ערכים קשורים</div>
+            <div class="related-sublabel">לחץ למעבר</div>
+          </div>
+          <div class="related-list">${related}</div>
+        </div>
+      ` : ''}
+      <div class="entry-flourish">❦ ✦ ❦</div>
+    </article>
+  `);
+}
+
+function findEntry(id){
+  for(const t of data.topics){
+    const e = t.entries.find(x => x.id === id);
+    if(e) return {topic: t, entry: e};
+  }
+  return null;
+}
+function goToEntryByEntryId(eid){
+  const found = findEntry(eid);
+  if(found) goToEntry(found.topic.id, found.entry.id);
+}
+
+document.getElementById('search').addEventListener('input', (e) => {
+  const q = e.target.value.trim();
+  document.querySelectorAll('.entry-link').forEach(el => {
+    el.style.display = !q || el.textContent.includes(q) ? 'flex' : 'none';
+  });
+  if(q) document.querySelectorAll('.topic').forEach(el => el.classList.add('open'));
+});
+
+const sizes = ['md','lg','xl'];
+let sizeIdx = 0;
+document.getElementById('font-btn').addEventListener('click', () => {
+  sizeIdx = (sizeIdx + 1) % sizes.length;
+  document.body.dataset.font = sizes[sizeIdx];
+});
+
+// ─── Bookmarks (per-entry) ───
+const BOOKMARKS_KEY = 'milon_bookmarks_v1';
+function getBookmarks(){
+  try{ return new Set(JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '[]')); }
+  catch(e){ return new Set(); }
+}
+function saveBookmarks(s){
+  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify([...s]));
+}
+function isBookmarked(eid){ return getBookmarks().has(eid); }
+function toggleBookmark(eid){
+  const s = getBookmarks();
+  if(s.has(eid)) s.delete(eid); else s.add(eid);
+  saveBookmarks(s);
+  return s.has(eid);
+}
+function updateBookmarkCount(){
+  const n = getBookmarks().size;
+  const badge = document.getElementById('bookmarks-badge');
+  if(badge){
+    badge.textContent = n;
+    badge.style.display = n > 0 ? 'inline-flex' : 'none';
+  }
+}
+document.getElementById('bookmarks-page-btn').addEventListener('click', () => setPage('bookmarks'));
+
+window.onToggleBookmark = function(eid, btn){
+  const now = toggleBookmark(eid);
+  if(btn) btn.classList.toggle('active', now);
+  // also update sidebar marker
+  document.querySelectorAll(`.entry-link[data-entry="${eid}"]`).forEach(el => {
+    el.classList.toggle('bookmarked', now);
+  });
+};
+
+// Page switching (about/contact)
+let currentPage = 'dictionary';
+function setPage(p){
+  currentPage = p;
+  document.querySelectorAll('.page-btn').forEach(b => b.classList.toggle('active', b.dataset.page === p));
+  if(p === 'about'){
+    setBreadcrumb(['אוצר המונחים', 'אודות']);
+    
+    fadeContent(renderAbout());
+  }else if(p === 'contact'){
+    setBreadcrumb(['אוצר המונחים', 'צור קשר']);
+    
+    fadeContent(renderContact());
+  }else if(p === 'bookmarks'){
+    setBreadcrumb(['אוצר המונחים', 'סימניות']);
+    
+    fadeContent(renderBookmarks());
+  }else{
+    // back to dictionary — restore current entry/topic
+    if(currentEntry){
+      const t = data.topics.find(t => t.entries.some(e => e.id === currentEntry));
+      if(t){
+        const e = t.entries.find(x => x.id === currentEntry);
+        renderEntryPage(t, data.topics.indexOf(t), e, t.entries.indexOf(e));
+      }
+    }else if(currentTopic){
+      const t = data.topics.find(x => x.id === currentTopic);
+      renderTopicLanding(t, data.topics.indexOf(t));
+    }
+  }
+}
+document.querySelectorAll('.page-btn').forEach(b => {
+  b.addEventListener('click', () => setPage(b.dataset.page));
+});
+
+function renderBookmarks(){
+  const ids = [...getBookmarks()];
+  if(!ids.length){
+    return `
+      <div class="info-page">
+        <div class="info-eyebrow">סימניות</div>
+        <h1 class="info-title">הערכים השמורים שלי</h1>
+        <div class="info-subtitle">עדיין לא נשמרו ערכים</div>
+        <div class="info-rule"></div>
+        <div class="empty-bookmarks">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>על מנת לשמור ערך, היכנס לערך ולחץ על אייקון הסימניה לצד שמו.<br/>הערכים השמורים יופיעו כאן לחזרה מהירה.</p>
+        </div>
+      </div>
+    `;
+  }
+  const items = ids.map(eid => {
+    const f = findEntry(eid);
+    if(!f) return null;
+    return f;
+  }).filter(Boolean);
+
+  // group by topic
+  const byTopic = {};
+  items.forEach(f => {
+    if(!byTopic[f.topic.id]){ byTopic[f.topic.id] = { topic: f.topic, entries: [] }; }
+    byTopic[f.topic.id].entries.push(f.entry);
+  });
+
+  return `
+    <div class="info-page">
+      <div class="info-eyebrow">סימניות</div>
+      <h1 class="info-title">הערכים השמורים שלי</h1>
+      <div class="info-subtitle">${items.length} ערכים בארכיון האישי</div>
+      <div class="info-rule"></div>
+      ${Object.values(byTopic).map(g => `
+        <div class="bookmark-group">
+          <div class="bookmark-topic">${g.topic.title}</div>
+          <div class="bookmark-list">
+            ${g.entries.map(e => `
+              <div class="bookmark-row">
+                <button class="bookmark-remove" onclick="onRemoveBookmark('${e.id}')" title="הסר">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </button>
+                <div class="bookmark-content" onclick="goToEntryByEntryId('${e.id}')">
+                  <div class="bookmark-term">${e.term}</div>
+                  <div class="bookmark-preview">${(e.definitions[0]?.text || '').replace(/<[^>]+>/g,'').slice(0, 100)}…</div>
+                </div>
+                <span class="bookmark-arrow">←</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+      <div class="entry-flourish">❦ ✦ ❦</div>
+    </div>
+  `;
+}
+
+window.onRemoveBookmark = function(eid){
+  toggleBookmark(eid);
+  document.querySelectorAll(`.entry-link[data-entry="${eid}"]`).forEach(el => el.classList.remove('bookmarked'));
+  setPage('bookmarks');
+};
+
+function renderAbout(){
+  return `
+    <div class="info-page">
+      <div class="info-eyebrow">אודות</div>
+      <h1 class="info-title">מילון מונחים בפנימיות התורה</h1>
+      <div class="info-subtitle">על פי תורת הרב ראובן ששון שליט"א</div>
+      <div class="info-rule"></div>
+
+      <div class="rabbi-card">
+        <div class="rabbi-portrait" aria-label="הרב ראובן ששון שליט&quot;א">
+          <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="bgg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f4e6c4"/>
+                <stop offset="100%" stop-color="#d4a851"/>
+              </linearGradient>
+              <radialGradient id="halo" cx="0.5" cy="0.35" r="0.7">
+                <stop offset="0%" stop-color="#fff5d4" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#d4a851" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="200" height="240" fill="url(#bgg)"/>
+            <circle cx="100" cy="95" r="80" fill="url(#halo)"/>
+            <!-- silhouette of rabbi: hat + beard -->
+            <!-- shoulders -->
+            <path d="M30 240 Q30 180 80 165 L120 165 Q170 180 170 240 Z" fill="#3a2614"/>
+            <!-- collar/white shirt v -->
+            <path d="M85 200 L100 180 L115 200 L100 240 Z" fill="#fdf6e6"/>
+            <!-- face -->
+            <ellipse cx="100" cy="110" rx="36" ry="44" fill="#e8c89a"/>
+            <!-- beard -->
+            <path d="M64 110 Q65 160 100 175 Q135 160 136 110 Q135 138 100 152 Q65 138 64 110 Z" fill="#5a3e1e"/>
+            <path d="M70 120 Q75 158 100 170 Q125 158 130 120 Q120 150 100 158 Q80 150 70 120 Z" fill="#3a2614"/>
+            <!-- mustache -->
+            <path d="M82 122 Q100 130 118 122 Q110 128 100 128 Q90 128 82 122 Z" fill="#3a2614"/>
+            <!-- eyes (closed/peaceful, downcast) -->
+            <path d="M82 100 Q88 103 94 100" stroke="#2a1a08" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M106 100 Q112 103 118 100" stroke="#2a1a08" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <!-- nose hint -->
+            <path d="M100 105 L98 118 L102 118" stroke="#a87a48" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <!-- black hat -->
+            <ellipse cx="100" cy="68" rx="58" ry="10" fill="#1a1208"/>
+            <path d="M50 68 Q50 36 100 32 Q150 36 150 68 Z" fill="#1a1208"/>
+            <ellipse cx="100" cy="50" rx="38" ry="6" fill="#2a1a08" opacity="0.8"/>
+            <!-- frame -->
+            <rect x="3" y="3" width="194" height="234" fill="none" stroke="#8a6018" stroke-width="2"/>
+            <rect x="9" y="9" width="182" height="222" fill="none" stroke="#b8893a" stroke-width="0.8" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="rabbi-details">
+          <div class="rabbi-name">הרב ראובן ששון שליט"א</div>
+          <div class="rabbi-role">ראש המרכז להפצת דעת ה' ואורו · מלאה הארץ דעה</div>
+          <div class="rabbi-bio">
+            הרב ראובן ששון שליט"א הוא ממורי ההלכה והפנימיות בדורנו, מעמיק ומבאר את תורת הסוד וחכמת הקבלה בלשון ברורה ונגישה. שיעוריו וספריו מאירים את עולם פנימיות התורה לרבים, מתוך אחיזה בשורשי תורת האר"י ז"ל, רבותינו החסידים, ובמיוחד דרכו של הרמח"ל.
+          </div>
+          <div class="rabbi-tags">
+            <span class="rabbi-tag">פנימיות התורה</span>
+            <span class="rabbi-tag">קבלה</span>
+            <span class="rabbi-tag">חסידות</span>
+            <span class="rabbi-tag">מחשבה יהודית</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h2 class="info-h2">מהות המילון</h2>
+        <p class="info-p">
+          מילון זה הוא אסופה של מונחי יסוד בפנימיות התורה, מבוארים בלשון בהירה ומסודרת על פי דרכו של מורנו הרב שליט"א. המטרה היא להעמיד בידי הלומד כלי עזר נגיש להעמקה במושגי הקבלה והחסידות, כפי שמתבארים בשיעוריו ובכתביו.
+        </p>
+      </div>
+      <div class="info-section">
+        <h2 class="info-h2">סדר המילון</h2>
+        <p class="info-p">
+          הערכים מסודרים בחמישה שערים מרכזיים: אלוקות, ספירות, נפש האדם, עולמות ועבודת ה'. כל ערך כולל הגדרות מתוך מקורות שונים בכתבי הרב, וקישורים לערכים קשורים המאפשרים מסע לימוד רציף בעולם המושגים.
+        </p>
+      </div>
+      <div class="info-section">
+        <h2 class="info-h2">דרך השימוש</h2>
+        <p class="info-p">
+          ניתן לבחור נושא בסרגל הצדדי, ולעיין ברשימת הערכים שתחתיו. לחיצה על כל ערך תפתח את ההגדרות המלאות, יחד עם ציון המקור והפניות לערכים נוספים. ניתן גם לחפש ערך מסוים בשורת החיפוש, להגדיל את גודל הטקסט, ולסמן ערכים אהובים.
+        </p>
+      </div>
+      <div class="entry-flourish">❦ ✦ ❦</div>
+    </div>
+  `;
+}
+
+function renderContact(){
+  return `
+    <div class="info-page">
+      <div class="info-eyebrow">צור קשר</div>
+      <h1 class="info-title">פנייה והערות</h1>
+      <div class="info-subtitle">נשמח לקבל הערות, תיקונים והצעות להעשרת המילון</div>
+      <div class="info-rule"></div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="contact-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg>
+          </div>
+          <div class="contact-label">דואר אלקטרוני</div>
+          <a class="contact-value" href="mailto:info@example.com">info@example.com</a>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div class="contact-label">טלפון</div>
+          <div class="contact-value">050-000-0000</div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="contact-label">בית המדרש</div>
+          <div class="contact-value">רחוב הרב, ירושלים</div>
+        </div>
+      </div>
+      <div class="info-section" style="margin-top: 36px;">
+        <p class="info-p" style="text-align: center; font-style: italic;">
+          לרכישת ספרי הרב ולהאזנה לשיעורים, ניתן לבקר באתר הראשי של המוסדות.
+        </p>
+      </div>
+      <div class="entry-flourish">❦ ✦ ❦</div>
+    </div>
+  `;
+}
+
+// ─── Splitter (גרירה לשינוי רוחב הסרגל הצדדי) ───
+(function setupSplitter(){
+  const SPLIT_KEY = 'milon_sidebar_width_v1';
+  const splitter = document.getElementById('splitter');
+  if(!splitter) return;
+
+  const MIN = 220;   // רוחב מינימום של הסרגל
+  const MAX_PCT = 0.6; // עד 60% מרוחב המסך
+
+  // שחזור רוחב שמור
+  const saved = parseInt(localStorage.getItem(SPLIT_KEY) || '', 10);
+  if(saved && saved >= MIN && saved <= window.innerWidth * MAX_PCT){
+    document.documentElement.style.setProperty('--sidebar-width', saved + 'px');
+  }
+
+  let dragging = false;
+  splitter.addEventListener('mousedown', (e) => {
+    dragging = true;
+    splitter.classList.add('dragging');
+    document.body.classList.add('resizing');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if(!dragging) return;
+    // ב-RTL הסרגל בצד ימין; הרוחב = (innerWidth - clientX - padding)
+    const padding = 16; // .page padding
+    let w = window.innerWidth - e.clientX - padding;
+    const max = window.innerWidth * MAX_PCT;
+    if(w < MIN) w = MIN;
+    if(w > max) w = max;
+    document.documentElement.style.setProperty('--sidebar-width', w + 'px');
+  });
+
+  document.addEventListener('mouseup', () => {
+    if(!dragging) return;
+    dragging = false;
+    splitter.classList.remove('dragging');
+    document.body.classList.remove('resizing');
+    // שמירה
+    const w = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width');
+    const px = parseInt(w, 10);
+    if(px) localStorage.setItem(SPLIT_KEY, px);
+  });
+
+  // double-click איפוס לברירת מחדל
+  splitter.addEventListener('dblclick', () => {
+    document.documentElement.style.removeProperty('--sidebar-width');
+    localStorage.removeItem(SPLIT_KEY);
+  });
+})();
+
+setPage('dictionary');
+load();
+</script>
+</body>
+</html>

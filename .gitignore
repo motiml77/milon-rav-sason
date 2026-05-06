@@ -1,0 +1,17 @@
+# Word source files (stay local — run pipeline to regenerate data.json)
+ערכים/*.docx
+
+# Python intermediate output
+ערכים/data.js
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local dev
+*.log

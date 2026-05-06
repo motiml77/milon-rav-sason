@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>מילון פנימיות התורה — כיווני עיצוב</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body, #root { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  iframe { display: block; border: 0; width: 100%; height: 100%; background: #faf6ef; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel">
+const { DesignCanvas, DCSection, DCArtboard } = window;
+
+function Frame({ src }){
+  return <iframe src={src} title={src} />;
+}
+
+const W = 1280;
+const H = 820;
+
+function App(){
+  return (
+    <DesignCanvas>
+      <DCSection
+        id="dictionary"
+        title="מילון מונחים בפנימיות התורה"
+        subtitle="ארבעה כיוונים עיצוביים — לחץ על כפתור הפוקוס שבכל קלף לצפייה במסך מלא"
+      >
+        <DCArtboard id="v1" label="א · קלאסי — מגילת קלף" width={W} height={H}>
+          <Frame src="v1-classic.html" />
+        </DCArtboard>
+        <DCArtboard id="v2" label="ב · מסתורי — אווירה קבלית" width={W} height={H}>
+          <Frame src="v2-mystical.html" />
+        </DCArtboard>
+        <DCArtboard id="v3" label="ג · מודרני — מינימליסטי חם" width={W} height={H}>
+          <Frame src="v3-modern.html" />
+        </DCArtboard>
+        <DCArtboard id="v4" label="ד · אוצר — ספר עם לשוניות" width={W} height={H}>
+          <Frame src="v4-treasure.html" />
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
