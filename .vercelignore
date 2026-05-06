@@ -1,0 +1,28 @@
+# הכל מוסתר ברירת מחדל — רק הקבצים הבאים מותרים לפריסה:
+# milon.html, data.json, assets/, vercel.json
+
+# קבצי עיצוב ישנים
+v1-classic.html
+v2-mystical.html
+v3-modern.html
+v4-treasure.html
+
+# קנבס עיצוב / React
+design-canvas.jsx
+index.html
+
+# תיקיית העלאות
+uploads/
+
+# סקריפטים (צינור Python — רק לעבודה מקומית)
+ערכים/
+
+# תיעוד פנימי
+INSTRUCTIONS.md
+
+# כלים
+.vercel/
+.git/
+__pycache__/
+*.pyc
+*.log
