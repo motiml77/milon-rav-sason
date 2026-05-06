@@ -1163,14 +1163,18 @@
 </div>
 
 <script>
-const DATA_URL = "data.json";
-let data = null;
-let currentTopic = null;
-let currentEntry = null;
+const DATA_URL  = "data.json";
+const TERMS_URL = "terms.json";
+let data          = null;   // starts as terms, becomes full data
+let fullDataReady = false;
+let pendingGoTo   = null;   // {topicId, entryId} — clicked before full data arrived
+let currentTopic  = null;
+let currentEntry  = null;
 
 async function load(){
-  const res = await fetch(DATA_URL);
-  data = await res.json();
+  // ── שלב א: terms.json (~45 KB) → הסרגל מופיע מיד ──
+  const r1 = await fetch(TERMS_URL);
+  data = await r1.json();
   renderNav();
   if(data.topics.length){
     currentTopic = data.topics[0].id;
@@ -1178,6 +1182,19 @@ async function load(){
     document.querySelector('.topic-head').classList.add('active');
     renderTopicLanding(data.topics[0], 0);
   }
+
+  // ── שלב ב: data.json ברקע ──
+  fetch(DATA_URL)
+    .then(r => r.json())
+    .then(fullData => {
+      data = fullData;
+      fullDataReady = true;
+      if(pendingGoTo){
+        const {topicId, entryId} = pendingGoTo;
+        pendingGoTo = null;
+        goToEntry(topicId, entryId);
+      }
+    });
 }
 
 function renderNav(){
@@ -1214,26 +1231,32 @@ function selectTopic(id){
 }
 
 function goToEntry(topicId, entryId){
-  const ti = data.topics.findIndex(t => t.id === topicId);
-  const topic = data.topics[ti];
-  const ei = topic.entries.findIndex(e => e.id === entryId);
-  const entry = topic.entries[ei];
-
+  // עדכן סרגל (עובד גם עם terms בלבד)
   if(currentTopic !== topicId){
     document.querySelectorAll('.topic').forEach(el => {
       el.classList.toggle('open', el.dataset.topic === topicId);
       el.querySelector('.topic-head').classList.toggle('active', el.dataset.topic === topicId);
     });
   }else{
-    // make sure topic is open
     document.querySelector(`.topic[data-topic="${topicId}"]`).classList.add('open');
   }
   currentTopic = topicId;
   currentEntry = entryId;
-
   document.querySelectorAll('.entry-link').forEach(el => {
     el.classList.toggle('active', el.dataset.entry === entryId);
   });
+
+  // אם data.json עדיין נטען — הצג ספינר ושמור בהמתנה
+  if(!fullDataReady){
+    pendingGoTo = {topicId, entryId};
+    fadeContent(`<div style="text-align:center;padding:80px 0;color:var(--ink-faint);font-size:1.05em;letter-spacing:.05em;">טוען…</div>`);
+    return;
+  }
+
+  const ti = data.topics.findIndex(t => t.id === topicId);
+  const topic = data.topics[ti];
+  const ei = topic.entries.findIndex(e => e.id === entryId);
+  const entry = topic.entries[ei];
   renderEntryPage(topic, ti, entry, ei);
 }
 
@@ -1484,7 +1507,7 @@ function renderBookmarks(){
                 </button>
                 <div class="bookmark-content" onclick="goToEntryByEntryId('${e.id}')">
                   <div class="bookmark-term">${e.term}</div>
-                  <div class="bookmark-preview">${(e.definitions[0]?.text || '').replace(/<[^>]+>/g,'').slice(0, 100)}…</div>
+                  <div class="bookmark-preview">${(e.definitions?.[0]?.text || '').replace(/<[^>]+>/g,'').slice(0, 100)}…</div>
                 </div>
                 <span class="bookmark-arrow">←</span>
               </div>

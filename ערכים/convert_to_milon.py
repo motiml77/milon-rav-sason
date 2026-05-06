@@ -329,6 +329,24 @@ for topic in out["topics"]:
 with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
     json.dump(out, f, ensure_ascii=False, indent=2)
 
+# ---------- terms.json (קל — רק שמות ערכים לסרגל) ----------
+terms = {
+    "title": out["title"],
+    "subtitle": out["subtitle"],
+    "topics": [
+        {
+            "id": t["id"],
+            "title": t["title"],
+            "subtitle": t.get("subtitle", ""),
+            "entries": [{"id": e["id"], "term": e["term"]} for e in t["entries"]]
+        }
+        for t in out["topics"]
+    ]
+}
+TERMS_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "terms.json")
+with open(TERMS_JSON, "w", encoding="utf-8") as f:
+    json.dump(terms, f, ensure_ascii=False, separators=(',', ':'))
+
 print(f"OK: {OUTPUT_JSON}")
 print(f"  Topics: {stats['topics']}")
 print(f"  Entries: {stats['entries']}")
