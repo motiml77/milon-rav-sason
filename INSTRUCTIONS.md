@@ -241,3 +241,38 @@ if (i > 0 && entry.definitions[i-1].source) cls += ' new-block';
 - 361 ציטוטים inline (`"..."` של ≥30 מילים)
 
 אם המספרים יורדים משמעותית אחרי החלפת ה-Word — חקירה לפני שינוי קוד.
+
+---
+
+## 11. פריסה — GitHub + Vercel
+
+**כתובת האתר הפעיל:** https://milon-rav-sason.vercel.app
+
+**ריפו גיטהב:** https://github.com/motiml77/milon-rav-sason
+
+Vercel מחובר לגיטהב ופורס אוטומטית כל push לענף `master`.
+
+### תהליך עדכון (כל פעם שהוורד מתעדכן)
+
+```bash
+# שלב 1 — הרץ את הצינור
+cd 'C:\Users\Moti Levi\Desktop\AI\rav sason\ערכים'
+python -c "
+import os, convert_docx_hierarchical as cdh
+docx_path = os.path.abspath([f for f in os.listdir('.') if f.endswith('.docx')][0])
+data = cdh.convert_docx_to_hierarchical(docx_path)
+cdh.save_to_js(data, 'data.js')
+import convert_to_milon
+"
+
+# שלב 2 — העלה לגיטהב (Vercel יפרוס אוטומטית תוך ~30 שניות)
+cd 'C:\Users\Moti Levi\Desktop\AI\rav sason'
+git add data.json
+git commit -m "עדכון תוכן מהוורד"
+git push
+```
+
+> אם גם `milon.html` השתנה (שינויי עיצוב), יש להוסיפו ל-`git add`:
+> ```bash
+> git add data.json milon.html
+> ```
