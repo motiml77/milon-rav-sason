@@ -133,72 +133,79 @@
     font-weight: 600;
   }
 
+  /* ─── תיבת חיפוש מאוחדת ─── */
   .search-wrap{
     margin: 16px 18px 8px;
     position: relative;
     z-index: 10;
-    display: flex;
-    align-items: stretch;
-    gap: 4px;
   }
   .search{
-    flex: 1;
     display: flex;
     flex-direction: row;
+    align-items: stretch;
+    background: rgba(255,255,255,0.65);
+    border: 1.5px solid var(--gold-deep);
+    border-radius: 5px;
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .search:focus-within{
+    box-shadow: 0 0 0 2px var(--gold-bright);
+    background: rgba(255,255,255,0.85);
+  }
+  .search-icon{
+    flex-shrink: 0;
+    padding: 0 9px;
+    color: var(--ink-faint);
+    display: flex;
     align-items: center;
-    background: rgba(255,255,255,0.6);
-    border: 1px solid var(--gold-deep);
+    pointer-events: none;
   }
   .search input{
     flex: 1;
+    min-width: 0;
     background: transparent;
     border: none;
     color: var(--ink);
-    padding: 9px 12px 9px 6px;
+    padding: 9px 2px 9px 0;
     font-family: inherit;
     font-size: 14px;
     direction: rtl;
     outline: none;
   }
-  .search:focus-within{ box-shadow: 0 0 0 2px var(--gold-bright); }
   .search input::placeholder{ color: var(--ink-faint); }
-  .search-icon{
-    flex-shrink: 0;
-    padding: 0 6px 0 8px;
-    color: var(--ink-faint);
-    display: flex;
-    align-items: center;
-  }
   .search-go-btn{
     flex-shrink: 0;
     background: var(--gold-deep);
-    border: 1px solid var(--gold-deep);
+    border: none;
+    border-right: 1.5px solid var(--gold-deep);
     color: var(--cream);
     cursor: pointer;
-    padding: 0 10px;
+    padding: 0 13px;
     font-family: inherit;
     font-size: 13px;
     font-weight: 700;
+    letter-spacing: 0.03em;
     display: flex;
     align-items: center;
-    justify-content: center;
     transition: background 0.15s;
   }
-  .search-go-btn:hover{ background: var(--wood); }
+  .search-go-btn:hover{ background: var(--wood-dark); }
   .search-settings-btn{
     flex-shrink: 0;
-    background: rgba(255,255,255,0.6);
-    border: 1px solid var(--gold-deep);
+    background: transparent;
+    border: none;
+    border-right: 1px solid rgba(184,137,58,0.35);
     color: var(--ink-faint);
     cursor: pointer;
-    padding: 0 8px;
+    padding: 0 9px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: color 0.15s, background 0.15s;
   }
-  .search-settings-btn:hover{ color: var(--gold-deep); background: rgba(255,255,255,0.85); }
-  .search-settings-btn.active{ color: var(--gold-deep); background: var(--cream-2); }
+  .search-settings-btn:hover{ color: var(--gold-deep); background: rgba(184,137,58,0.08); }
+  .search-settings-btn.active{ color: var(--gold-deep); background: rgba(184,137,58,0.12); }
   .search-popover{
     display: none;
     position: fixed;
@@ -1329,13 +1336,13 @@
 
     <div class="search-wrap">
       <div class="search">
-        <input type="text" id="search" placeholder="חיפוש בערכים…" autocomplete="off" />
         <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="search" placeholder="חיפוש בערכים…" autocomplete="off" />
+        <button class="search-go-btn" type="button" onclick="doSearch()" title="חפש">חפש</button>
+        <button class="search-settings-btn" id="search-settings-btn" type="button" title="הגדרות חיפוש" aria-label="הגדרות חיפוש" onclick="toggleSearchSettings(event)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
       </div>
-      <button class="search-go-btn" type="button" onclick="doSearch()" title="חפש">חפש</button>
-      <button class="search-settings-btn" id="search-settings-btn" type="button" title="הגדרות חיפוש" aria-label="הגדרות חיפוש" onclick="toggleSearchSettings(event)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </button>
       <div class="search-popover" id="search-popover">
         <label class="search-option">
           <input type="radio" name="search-scope" id="opt-scope-all" value="all" checked />
@@ -1378,7 +1385,7 @@
 <script>
 const DATA_URL    = "data.json";
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-08-1217"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-05-08-1226"; // AUTO_VERSION
 let data          = null;   // starts as terms, becomes full data
 let fullDataReady = false;
 let searchIndex   = null;   // ייטען במקביל
