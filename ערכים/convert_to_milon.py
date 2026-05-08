@@ -365,8 +365,8 @@ def normalize_male_chaser(text):
         return w[0] + re.sub(r'[יו]', '', w[1:])
     return HEB_WORD_RE.sub(fix_word, text)
 
-def build_preview(definitions, max_chars=100):
-    """תצוגה מקדימה של 100 תווים מההגדרה הראשונה (טקסט נקי)."""
+def build_preview(definitions, max_chars=300):
+    """תצוגה מקדימה של 300 תווים מההגדרה הראשונה (טקסט נקי)."""
     for d in definitions:
         plain = strip_html(d.get("text", ""))
         plain = re.sub(r'\s+', ' ', plain).strip()
@@ -395,7 +395,7 @@ for topic in out["topics"]:
             "topicTitle":  topic["title"],
             "termN":       term_mc,
             "textN":       text_mc,
-            "preview":     build_preview(entry["definitions"], 100),
+            "preview":     build_preview(entry["definitions"], 300),
         })
 
 SEARCH_INDEX_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "search-index.json")

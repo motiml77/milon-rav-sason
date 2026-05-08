@@ -136,6 +136,7 @@
   .search-wrap{
     margin: 16px 18px 8px;
     position: relative;
+    z-index: 10;
     display: flex;
     align-items: stretch;
     gap: 4px;
@@ -194,7 +195,8 @@
     z-index: 50;
     font-size: 13px;
   }
-  .search-popover[hidden]{ display: none; }
+  .search-popover{ display: none; }
+  .search-popover.open{ display: block; }
   .search-option{
     display: flex;
     align-items: center;
@@ -1303,7 +1305,7 @@
       <button class="search-settings-btn" id="search-settings-btn" type="button" title="הגדרות חיפוש" aria-label="הגדרות חיפוש">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
-      <div class="search-popover" id="search-popover" hidden>
+      <div class="search-popover" id="search-popover">
         <label class="search-option">
           <input type="checkbox" id="opt-also-content" checked />
           <span>חיפוש גם בתוכן הערכים</span>
@@ -1665,9 +1667,13 @@ function searchEntries(rawQuery, alsoContent){
       // התאמה בתוכן (אם המצב מאופשר)
       if(alsoContent){
         if(item.textN.includes(w)){
-          wScore += isWholeWord(item.textN, w) ? 5 : 3;
+          const pos = item.textN.indexOf(w);
+          const posBonus = pos < 100 ? 4 : (pos < 400 ? 1 : 0);
+          wScore += (isWholeWord(item.textN, w) ? 5 : 3) + posBonus;
         }else if(wNH !== w && item.textN.includes(wNH)){
-          wScore += isWholeWord(item.textN, wNH) ? 4 : 2;
+          const pos = item.textN.indexOf(wNH);
+          const posBonus = pos < 100 ? 3 : (pos < 400 ? 1 : 0);
+          wScore += (isWholeWord(item.textN, wNH) ? 4 : 2) + posBonus;
         }
       }
 
@@ -1837,13 +1843,13 @@ const optAlsoCt    = document.getElementById('opt-also-content');
 
 settingsBtn.addEventListener('click', e => {
   e.stopPropagation();
-  const isOpen = !settingsPop.hidden;
-  settingsPop.hidden = isOpen;
+  const isOpen = settingsPop.classList.contains('open');
+  settingsPop.classList.toggle('open', !isOpen);
   settingsBtn.classList.toggle('active', !isOpen);
 });
 document.addEventListener('click', e => {
-  if(!settingsPop.hidden && !settingsPop.contains(e.target) && e.target !== settingsBtn && !settingsBtn.contains(e.target)){
-    settingsPop.hidden = true;
+  if(settingsPop.classList.contains('open') && !settingsPop.contains(e.target) && !settingsBtn.contains(e.target)){
+    settingsPop.classList.remove('open');
     settingsBtn.classList.remove('active');
   }
 });
