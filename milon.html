@@ -184,6 +184,7 @@
   .search-settings-btn:hover{ color: var(--gold-deep); background: rgba(255,255,255,0.85); }
   .search-settings-btn.active{ color: var(--gold-deep); background: var(--cream-2); }
   .search-popover{
+    display: none;
     position: absolute;
     top: calc(100% + 4px);
     left: 0; right: 0;
@@ -195,7 +196,6 @@
     z-index: 50;
     font-size: 13px;
   }
-  .search-popover{ display: none; }
   .search-popover.open{ display: block; }
   .search-option{
     display: flex;
