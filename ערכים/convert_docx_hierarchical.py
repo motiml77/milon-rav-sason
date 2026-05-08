@@ -237,6 +237,13 @@ def convert_docx_to_hierarchical(filename):
     pending_content = ""
     source_attachments = 0  # מונה כמה מקורות חוברו לתוכן קודם
 
+    # מדור לאיסוף ערכים שאינם תחת כותרת Heading 1
+    misc_section = {
+        "id": "s_misc",
+        "name": "שונות",
+        "terms": []
+    }
+
     print(f"🔄 מעבד את {os.path.basename(filename)}...")
     print(f"   (מעבד את כל הפסקאות, ללא דילוג)")
 
@@ -258,7 +265,8 @@ def convert_docx_to_hierarchical(filename):
                         pending_content = ""
                     current_section["terms"].append(current_term)
                     current_term = None
-                data["sections"].append(current_section)
+                if current_section is not misc_section:
+                    data["sections"].append(current_section)
             
             section_counter += 1
             current_section = {
@@ -285,15 +293,10 @@ def convert_docx_to_hierarchical(filename):
                     "definition": []
                 }
             else:
-                # אם אין מדור, ניצור מדור ברירת מחדל
-                section_counter += 1
-                current_section = {
-                    "id": f"s_{section_counter}",
-                    "name": "כללי",
-                    "terms": []
-                }
-                print(f"   📁 מדור ברירת מחדל: כללי")
-                
+                # ערך ללא מדור → אוסף ל"שונות"
+                current_section = misc_section
+                print(f"   ⚠ ערך ללא מדור, נוסף ל'שונות': {raw_text}")
+
                 term_counter += 1
                 current_term = {
                     "id": f"t_{term_counter}",
@@ -353,7 +356,17 @@ def convert_docx_to_hierarchical(filename):
             if pending_content:
                 current_term["definition"].append(pending_content)
             current_section["terms"].append(current_term)
-        data["sections"].append(current_section)
+        if current_section is not misc_section:
+            data["sections"].append(current_section)
+
+    # "שונות" — ערכים יתומים — תמיד בסוף
+    if misc_section["terms"]:
+        section_counter += 1
+        misc_section["id"] = f"s_{section_counter}"
+        # הסר אם כבר נוסף באמצע (ע"י Heading 1 handler)
+        data["sections"] = [s for s in data["sections"] if s is not misc_section]
+        data["sections"].append(misc_section)
+        print(f"   📁 מדור שונות: {len(misc_section['terms'])} ערכים יתומים")
 
     data["metadata"]["source_attachments"] = source_attachments
     print(f"\n   ✓ עובדו {total_paragraphs} פסקאות")
