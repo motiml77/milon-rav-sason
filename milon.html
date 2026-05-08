@@ -1707,6 +1707,11 @@ function renderContact(){
 
 setPage('dictionary');
 load();
+
+// ── רישום Service Worker (שמירת קבצים למחשב המשתמש) ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
 </script>
 </body>
 </html>

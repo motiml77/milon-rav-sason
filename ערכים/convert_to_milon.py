@@ -12,6 +12,7 @@
 import json
 import re
 import os
+from datetime import date
 
 INPUT_JS = os.path.join(os.path.dirname(__file__), "data.js")
 OUTPUT_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data.json")
@@ -346,6 +347,19 @@ terms = {
 TERMS_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "terms.json")
 with open(TERMS_JSON, "w", encoding="utf-8") as f:
     json.dump(terms, f, ensure_ascii=False, separators=(',', ':'))
+
+# ---------- עדכון גרסת Service Worker ----------
+sw_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sw.js')
+if os.path.exists(sw_path):
+    today = date.today().isoformat()
+    with open(sw_path, 'r', encoding='utf-8') as f:
+        sw = f.read()
+    sw_new = re.sub(r"const CACHE_VERSION\s*=\s*'[^']*'",
+                    f"const CACHE_VERSION = '{today}'", sw)
+    if sw_new != sw:
+        with open(sw_path, 'w', encoding='utf-8') as f:
+            f.write(sw_new)
+        print(f"Updated sw.js CACHE_VERSION → {today}")
 
 print(f"OK: {OUTPUT_JSON}")
 print(f"  Topics: {stats['topics']}")
