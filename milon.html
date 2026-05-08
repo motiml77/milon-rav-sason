@@ -282,6 +282,20 @@
     font-weight: 600;
     color: var(--ink);
   }
+  /* מרקר בדף הערך עצמו — בז' עם אנימציית הבהוב */
+  mark.search-hl-mark{
+    background: #fde68a;
+    color: var(--ink);
+    border-radius: 3px;
+    padding: 1px 2px;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px #f59e0b44;
+    animation: hl-pulse 1.4s ease-out 3;
+  }
+  @keyframes hl-pulse{
+    0%,100%{ background:#fde68a; box-shadow:0 0 0 2px #f59e0b44; }
+    50%{ background:#fbbf24; box-shadow:0 0 0 5px #f59e0b55; }
+  }
   .search-no-results{
     text-align: center;
     padding: 80px 0;
@@ -1364,7 +1378,7 @@
 <script>
 const DATA_URL    = "data.json";
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-08-1208"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-05-08-1217"; // AUTO_VERSION
 let data          = null;   // starts as terms, becomes full data
 let fullDataReady = false;
 let searchIndex   = null;   // ייטען במקביל
@@ -1516,6 +1530,60 @@ function renderTopicLanding(topic, ti){
   `);
 }
 
+// ─── הדגשת מילות חיפוש בגוף הערך + גלילה למיקום הראשון ───
+function highlightSearchInPage(query){
+  const content = document.getElementById('content');
+  if(!content || !query) return;
+
+  const q      = normalizeMaleChaser(normalizeForSearch(query));
+  const words  = q.split(/\s+/).filter(w => w.length >= 2);
+  const wordsNoHe = words.map(stripHePrefix);
+  if(!words.length) return;
+
+  // אוסף כל צמתי-טקסט בתוכן
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+  const textNodes = [];
+  let node;
+  while((node = walker.nextNode())){
+    const tag = node.parentElement && node.parentElement.tagName;
+    if(tag === 'SCRIPT' || tag === 'STYLE' || tag === 'MARK') continue;
+    if(node.textContent.trim()) textNodes.push(node);
+  }
+
+  for(const tn of textNodes){
+    const text = tn.textContent;
+    const norm = normalizeMaleChaser(normalizeForSearch(text));
+    const anyMatch = words.some((w, i) => norm.includes(w) || norm.includes(wordsNoHe[i]));
+    if(!anyMatch) continue;
+
+    const frag = document.createDocumentFragment();
+    let last = 0;
+    const re = /[א-ת]+/g;
+    let m;
+    while((m = re.exec(text)) !== null){
+      const w     = m[0];
+      const wNorm = normalizeMaleChaser(normalizeForSearch(w));
+      const hit   = words.some((word, i) => wNorm.includes(word) || (wordsNoHe[i] !== word && wNorm.includes(wordsNoHe[i])));
+      if(hit){
+        if(m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        const mark = document.createElement('mark');
+        mark.className = 'search-hl-mark';
+        mark.textContent = w;
+        frag.appendChild(mark);
+        last = m.index + w.length;
+      }
+    }
+    if(last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    tn.parentNode.replaceChild(frag, tn);
+  }
+
+  // גלילה למיקום הראשון
+  setTimeout(() => {
+    const first = content.querySelector('mark.search-hl-mark');
+    if(first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 120);
+}
+
 function renderEntryPage(topic, ti, entry, ei){
   setBreadcrumb(['אוצר המונחים', topic.title, entry.term]);
   
@@ -1575,6 +1643,11 @@ function renderEntryPage(topic, ti, entry, ei){
       <div class="entry-flourish">❦ ✦ ❦</div>
     </article>
   `);
+
+  // אם הגענו מחיפוש — הדגש את מילות החיפוש וגלול אל ההתאמה הראשונה
+  if(currentSearchQuery){
+    requestAnimationFrame(() => highlightSearchInPage(currentSearchQuery));
+  }
 }
 
 function findEntry(id){
