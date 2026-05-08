@@ -330,6 +330,79 @@ for topic in out["topics"]:
 with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
     json.dump(out, f, ensure_ascii=False, indent=2)
 
+# ====================================================================
+# ---------- search-index.json (אינדקס חיפוש מנורמל) ----------
+# ====================================================================
+
+NIKUD_RE       = re.compile(r'[֑-ׇ]')
+HTML_TAG_RE    = re.compile(r'<[^>]+>')
+NON_LETTER_RE  = re.compile(r'[־\-–—]')   # מקפים → רווח
+PUNCT_RE       = re.compile(r'[^\w\s֐-׿]', re.UNICODE)
+WS_RE          = re.compile(r'\s+')
+HEB_WORD_RE    = re.compile(r'[א-ת]+')
+
+def strip_html(s):
+    return HTML_TAG_RE.sub(' ', s or '')
+
+def normalize_for_search(text):
+    """ניקוי בסיסי: ניקוד, מקפים, פיסוק, רווחים."""
+    if not text:
+        return ""
+    s = NIKUD_RE.sub('', text)
+    s = NON_LETTER_RE.sub(' ', s)
+    s = PUNCT_RE.sub(' ', s)
+    s = WS_RE.sub(' ', s).strip().lower()
+    return s
+
+def normalize_male_chaser(text):
+    """כתיב מלא/חסר: מסיר י/ו באמצע מילה (>3 אותיות)."""
+    if not text:
+        return ""
+    def fix_word(m):
+        w = m.group(0)
+        if len(w) <= 3:
+            return w
+        return w[0] + re.sub(r'[יו]', '', w[1:])
+    return HEB_WORD_RE.sub(fix_word, text)
+
+def build_preview(definitions, max_chars=100):
+    """תצוגה מקדימה של 100 תווים מההגדרה הראשונה (טקסט נקי)."""
+    for d in definitions:
+        plain = strip_html(d.get("text", ""))
+        plain = re.sub(r'\s+', ' ', plain).strip()
+        if plain:
+            if len(plain) > max_chars:
+                return plain[:max_chars].rstrip() + "…"
+            return plain
+    return ""
+
+search_index = []
+for topic in out["topics"]:
+    for entry in topic["entries"]:
+        # טקסט נקי של כל ההגדרות + מקורות (מאוחדים)
+        parts = []
+        for d in entry["definitions"]:
+            parts.append(strip_html(d.get("text", "")))
+            if d.get("source"):
+                parts.append(d["source"])
+        all_text = " ".join(parts)
+        # נורמליזציה + מלא/חסר ישירות (מלא/חסר תמיד פעיל)
+        term_mc = normalize_male_chaser(normalize_for_search(entry["term"]))
+        text_mc = normalize_male_chaser(normalize_for_search(all_text))
+        search_index.append({
+            "id":          entry["id"],
+            "term":        entry["term"],
+            "topicTitle":  topic["title"],
+            "termN":       term_mc,
+            "textN":       text_mc,
+            "preview":     build_preview(entry["definitions"], 100),
+        })
+
+SEARCH_INDEX_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "search-index.json")
+with open(SEARCH_INDEX_JSON, "w", encoding="utf-8") as f:
+    json.dump(search_index, f, ensure_ascii=False, separators=(',', ':'))
+print(f"OK: search-index.json ({len(search_index)} entries)")
+
 # ---------- terms.json (קל — רק שמות ערכים לסרגל) ----------
 terms = {
     "title": out["title"],

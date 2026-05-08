@@ -133,27 +133,168 @@
     font-weight: 600;
   }
 
-  .search{
+  .search-wrap{
     margin: 16px 18px 8px;
     position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
   }
-  .search input{
-    width: 100%;
+  .search{
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     background: rgba(255,255,255,0.6);
     border: 1px solid var(--gold-deep);
-    border-radius: 0;
+  }
+  .search input{
+    flex: 1;
+    background: transparent;
+    border: none;
     color: var(--ink);
-    padding: 9px 14px 9px 32px;
+    padding: 9px 12px 9px 6px;
     font-family: inherit;
     font-size: 14px;
     direction: rtl;
+    outline: none;
   }
+  .search:focus-within{ box-shadow: 0 0 0 2px var(--gold-bright); }
   .search input::placeholder{ color: var(--ink-faint); }
-  .search input:focus{ outline: none; box-shadow: 0 0 0 2px var(--gold-bright); }
   .search-icon{
-    position: absolute;
-    left: 10px; top: 50%; transform: translateY(-50%);
+    flex-shrink: 0;
+    padding: 0 6px 0 8px;
     color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+  }
+  .search-settings-btn{
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--gold-deep);
+    color: var(--ink-faint);
+    cursor: pointer;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, background 0.15s;
+  }
+  .search-settings-btn:hover{ color: var(--gold-deep); background: rgba(255,255,255,0.85); }
+  .search-settings-btn.active{ color: var(--gold-deep); background: var(--cream-2); }
+  .search-popover{
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--cream);
+    border: 1px solid var(--gold-deep);
+    border-radius: 4px;
+    padding: 10px 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 50;
+    font-size: 13px;
+  }
+  .search-popover[hidden]{ display: none; }
+  .search-option{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .search-option input[type="checkbox"]{ accent-color: var(--gold-deep); }
+  .search-option-hint{
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dotted var(--gold);
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  /* ─── עמוד תוצאות חיפוש ─── */
+  .search-results{ padding: 8px 0 32px; }
+  .search-results-meta{
+    font-size: 14px;
+    color: var(--ink-faint);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px dotted var(--gold);
+    letter-spacing: 0.04em;
+  }
+  .search-result{
+    padding: 16px 8px;
+    border-bottom: 1px dotted var(--gold);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .search-result:hover{ background: rgba(184,137,58,0.06); }
+  .search-result-head{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .search-result-term{
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .search-result-topic{
+    font-size: 11px;
+    color: var(--gold-deep);
+    background: var(--cream-2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .search-result-preview{
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    text-align: justify;
+  }
+  .search-hl{
+    background: linear-gradient(180deg, transparent 50%, #f0dfa0 50%);
+    padding: 0 1px;
+    border-radius: 1px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .search-no-results{
+    text-align: center;
+    padding: 80px 0;
+    color: var(--ink-faint);
+    font-size: 16px;
+  }
+  .search-pagination{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px dotted var(--gold);
+  }
+  .search-pg-btn{
+    background: var(--cream-2);
+    border: 1px solid var(--gold-deep);
+    color: var(--ink);
+    width: 32px; height: 32px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .search-pg-btn:hover:not(:disabled){ background: var(--cream-3); }
+  .search-pg-btn:disabled{ opacity: 0.35; cursor: default; }
+  .search-pg-info{
+    color: var(--ink-faint);
+    font-size: 13px;
+    letter-spacing: 0.04em;
   }
 
   .nav{
@@ -1154,9 +1295,21 @@
       <div class="brand-subtitle">פנימיות התורה</div>
     </div>
 
-    <div class="search">
-      <input type="text" id="search" placeholder="חיפוש בערכים…" />
-      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <div class="search-wrap">
+      <div class="search">
+        <input type="text" id="search" placeholder="חיפוש בערכים…" autocomplete="off" />
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+      <button class="search-settings-btn" id="search-settings-btn" type="button" title="הגדרות חיפוש" aria-label="הגדרות חיפוש">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <div class="search-popover" id="search-popover" hidden>
+        <label class="search-option">
+          <input type="checkbox" id="opt-also-content" checked />
+          <span>חיפוש גם בתוכן הערכים</span>
+        </label>
+        <div class="search-option-hint">כתיב מלא/חסר (י/ו) פעיל תמיד</div>
+      </div>
     </div>
 
     <nav class="nav" id="nav"></nav>
@@ -1186,20 +1339,23 @@
 </div>
 
 <script>
-const DATA_URL  = "data.json";
-const TERMS_URL = "terms.json";
+const DATA_URL    = "data.json";
+const TERMS_URL   = "terms.json";
+const SEARCH_URL  = "search-index.json";
 let data          = null;   // starts as terms, becomes full data
 let fullDataReady = false;
+let searchIndex   = null;   // ייטען במקביל
 let pendingGoTo   = null;   // {topicId, entryId} — clicked before full data arrived
 let currentTopic  = null;
 let currentEntry  = null;
 
 async function load(){
-  // ── שני הקבצים נטענים במקביל ──
-  const termsP = fetch(TERMS_URL).then(r => r.json());
-  const dataP  = fetch(DATA_URL).then(r => r.json());
+  // ── שלושת הקבצים מתחילים יחד במקביל ──
+  const termsP  = fetch(TERMS_URL).then(r => r.json());
+  const idxP    = fetch(SEARCH_URL).then(r => r.json());
+  const dataP   = fetch(DATA_URL).then(r => r.json());
 
-  // terms.json (~45 KB) מגיע ראשון → סרגל מיד
+  // terms.json (~45 KB) — ראשון → סרגל מיד
   const terms = await termsP;
   data = terms;
   renderNav();
@@ -1210,7 +1366,15 @@ async function load(){
     renderTopicLanding(data.topics[0], 0);
   }
 
-  // data.json — ממשיך ברקע (כבר התחיל במקביל)
+  // search-index.json — מנוע החיפוש מוכן ברגע שמגיע
+  idxP.then(idx => {
+    searchIndex = idx;
+    // אם המשתמש כבר הקליד משהו לפני שהאינדקס הגיע — הרץ חיפוש עכשיו
+    const q = document.getElementById('search').value.trim();
+    if(q) runSearch(q);
+  }).catch(err => console.error('search-index.json load failed:', err));
+
+  // data.json — תוכן מלא ברקע
   dataP.then(fullData => {
     data = fullData;
     fullDataReady = true;
@@ -1402,13 +1566,302 @@ function goToEntryByEntryId(eid){
   if(found) goToEntry(found.topic.id, found.entry.id);
 }
 
-document.getElementById('search').addEventListener('input', (e) => {
+// ════════════════════════════════════════════════════════════════
+//  ─── מנוע חיפוש (כתיב מלא/חסר תמיד פעיל) ───
+// ════════════════════════════════════════════════════════════════
+const SEARCH_PAGE_SIZE = 20;
+const MAX_WORD_DISTANCE = 4;
+let   searchOptAlsoContent = true;   // ברירת מחדל: גם בתוכן
+let   currentSearchQuery   = "";
+let   currentSearchResults = [];
+let   currentSearchPage    = 1;
+
+// ─── פונקציות נורמליזציה (port מ-mion_update_final) ───
+function stripNikud(s){ return (s || '').replace(/[֑-ׇ]/g, ''); }
+function normalizeForSearch(s){
+  let r = stripNikud(s);
+  r = r.replace(/[־\-–—]/g, ' ');
+  r = r.replace(/[^\p{L}\p{N}\s]/gu, ' ');
+  r = r.replace(/\s+/g, ' ').trim().toLowerCase();
+  return r;
+}
+function normalizeMaleChaser(s){
+  return (s || '').replace(/[א-ת]+/g, w => {
+    if(w.length <= 3) return w;
+    return w[0] + w.slice(1).replace(/[יו]/g, '');
+  });
+}
+function stripHePrefix(w){
+  return (w.length >= 3 && w[0] === 'ה') ? w.slice(1) : w;
+}
+const _wholeWordCache = new Map();
+function isWholeWord(text, word){
+  let re = _wholeWordCache.get(word);
+  if(!re){
+    const esc = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    re = new RegExp(`(?:^|[^\\u0590-\\u05FF])${esc}(?:$|[^\\u0590-\\u05FF])`);
+    _wholeWordCache.set(word, re);
+  }
+  return re.test(text);
+}
+// בדיקת קרבה: כל המילים חייבות להופיע בסדר, במרחק מקסימלי MAX_WORD_DISTANCE
+function checkProximity(text, words, wordsNoHe){
+  if(words.length <= 1) return true;
+  const tokens = text.split(/[^א-ת]+/).filter(Boolean);
+  if(!tokens.length) return false;
+  const positions = [];
+  for(let wi = 0; wi < words.length; wi++){
+    const w = words[wi], wNH = wordsNoHe[wi];
+    const pos = [];
+    for(let ti = 0; ti < tokens.length; ti++){
+      const t = tokens[ti];
+      if(t.includes(w) || (wNH !== w && t.includes(wNH))) pos.push(ti);
+    }
+    if(!pos.length) return false;
+    positions.push(pos);
+  }
+  for(const start of positions[0]){
+    let prev = start, ok = true;
+    for(let wi = 1; wi < positions.length; wi++){
+      let found = -1;
+      for(const p of positions[wi]){
+        if(p > prev && p - prev <= MAX_WORD_DISTANCE){ found = p; break; }
+      }
+      if(found === -1){ ok = false; break; }
+      prev = found;
+    }
+    if(ok) return true;
+  }
+  return false;
+}
+
+// ─── חיפוש ראשי ───
+function searchEntries(rawQuery, alsoContent){
+  if(!searchIndex) return null;          // עדיין לא נטען
+  const q = normalizeMaleChaser(normalizeForSearch(rawQuery));
+  if(!q) return [];
+  const words = q.split(/\s+/).filter(w => w.length > 0).slice(0, 10);
+  if(!words.length) return [];
+  const wordsNoHe = words.map(stripHePrefix);
+
+  const results = [];
+  for(const item of searchIndex){
+    let titleScore = 0, contentScore = 0;
+    let allMatched = true;
+
+    for(let i = 0; i < words.length; i++){
+      const w = words[i], wNH = wordsNoHe[i];
+      let wScore = 0, foundInTitle = false;
+
+      // התאמה בכותרת (ניקוד גבוה)
+      if(item.termN.includes(w)){
+        wScore += isWholeWord(item.termN, w) ? 15 : 10;
+        foundInTitle = true;
+      }else if(wNH !== w && item.termN.includes(wNH)){
+        wScore += isWholeWord(item.termN, wNH) ? 14 : 9;
+        foundInTitle = true;
+      }
+
+      // התאמה בתוכן (אם המצב מאופשר)
+      if(alsoContent){
+        if(item.textN.includes(w)){
+          wScore += isWholeWord(item.textN, w) ? 5 : 3;
+        }else if(wNH !== w && item.textN.includes(wNH)){
+          wScore += isWholeWord(item.textN, wNH) ? 4 : 2;
+        }
+      }
+
+      if(wScore === 0){ allMatched = false; break; }
+      if(foundInTitle) titleScore += wScore;
+      else             contentScore += wScore;
+    }
+
+    if(!allMatched) continue;
+
+    // קרבה רב-מילים
+    if(words.length > 1){
+      const inTitle = checkProximity(item.termN, words, wordsNoHe);
+      let inText = false;
+      if(alsoContent && !inTitle){
+        inText = checkProximity(item.textN, words, wordsNoHe)
+              || checkProximity(item.termN + ' ' + item.textN, words, wordsNoHe);
+      }
+      if(!inTitle && !inText) continue;
+    }
+
+    results.push({
+      ...item,
+      titleScore,
+      contentScore,
+      hasTitle: titleScore > 0
+    });
+  }
+
+  // מיון: התאמות בכותרת קודם, אחר כך לפי ניקוד
+  results.sort((a, b) => {
+    if(a.hasTitle !== b.hasTitle) return a.hasTitle ? -1 : 1;
+    return (b.titleScore + b.contentScore) - (a.titleScore + a.contentScore);
+  });
+  return results;
+}
+
+// ─── הדגשת מילים תואמות בטקסט מקדים ───
+function highlightMatches(text, words, wordsNoHe){
+  if(!text || !words.length) return text;
+  // בנה regex אחד שמתאים לכל המילים (כולל גרסאות ה-)
+  const allTerms = new Set();
+  words.forEach(w => allTerms.add(w));
+  wordsNoHe.forEach(w => allTerms.add(w));
+  const sorted = [...allTerms].filter(t => t.length >= 2).sort((a, b) => b.length - a.length);
+  if(!sorted.length) return text;
+  // נורמליזציה של הטקסט לחיפוש (אבל שמירת המקור להצגה)
+  // נפעיל regex על הטקסט המנורמל ונסמן מיקומים → אחר כך נמפה לטקסט המקורי
+  const norm = normalizeMaleChaser(normalizeForSearch(text));
+  const esc = sorted.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const re = new RegExp(`(${esc.join('|')})`, 'gi');
+  // מאחר שהמיפוי טקסט-מקורי↔מנורמל מורכב, נשתמש בגישה פשוטה:
+  // נחלק לפי מילים בטקסט המקורי ונבדוק כל אחת
+  return text.replace(/[א-ת]+/g, w => {
+    const wn = normalizeMaleChaser(normalizeForSearch(w));
+    for(const term of sorted){
+      if(wn.includes(term) || normalizeMaleChaser(stripHePrefix(wn)).includes(term)){
+        return `<span class="search-hl">${w}</span>`;
+      }
+    }
+    return w;
+  });
+}
+
+// ─── רינדור עמוד תוצאות ───
+function renderSearchResults(){
+  const total = currentSearchResults.length;
+  const totalPages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
+  if(currentSearchPage > totalPages) currentSearchPage = totalPages;
+  if(currentSearchPage < 1) currentSearchPage = 1;
+  setBreadcrumb(['חיפוש', `"${currentSearchQuery}"`]);
+
+  if(searchIndex === null){
+    fadeContent(`<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-text">מכין חיפוש…</div></div>`);
+    return;
+  }
+  if(total === 0){
+    fadeContent(`<div class="search-no-results">לא נמצאו תוצאות עבור "<strong>${escapeHtml(currentSearchQuery)}</strong>"</div>`);
+    return;
+  }
+
+  const q = normalizeMaleChaser(normalizeForSearch(currentSearchQuery));
+  const words     = q.split(/\s+/).filter(Boolean);
+  const wordsNoHe = words.map(stripHePrefix);
+
+  const start = (currentSearchPage - 1) * SEARCH_PAGE_SIZE;
+  const slice = currentSearchResults.slice(start, start + SEARCH_PAGE_SIZE);
+
+  const items = slice.map(r => `
+    <div class="search-result" onclick="goToEntryByEntryId('${r.id}')">
+      <div class="search-result-head">
+        <div class="search-result-term">${highlightMatches(r.term, words, wordsNoHe)}</div>
+        <div class="search-result-topic">${r.topicTitle}</div>
+      </div>
+      <div class="search-result-preview">${highlightMatches(r.preview, words, wordsNoHe)}</div>
+    </div>
+  `).join('');
+
+  const pagination = totalPages > 1 ? `
+    <div class="search-pagination">
+      <button class="search-pg-btn" onclick="searchPagePrev()" ${currentSearchPage === 1 ? 'disabled' : ''} title="עמוד קודם">›</button>
+      <span class="search-pg-info">עמוד ${currentSearchPage} מתוך ${totalPages}</span>
+      <button class="search-pg-btn" onclick="searchPageNext()" ${currentSearchPage === totalPages ? 'disabled' : ''} title="עמוד הבא">‹</button>
+    </div>` : '';
+
+  fadeContent(`
+    <div class="search-results">
+      <div class="search-results-meta">${total} תוצאות עבור "<strong>${escapeHtml(currentSearchQuery)}</strong>"</div>
+      ${items}
+      ${pagination}
+    </div>
+  `);
+}
+
+function searchPagePrev(){ if(currentSearchPage > 1){ currentSearchPage--; renderSearchResults(); window.scrollTo(0,0); } }
+function searchPageNext(){
+  const tp = Math.ceil(currentSearchResults.length / SEARCH_PAGE_SIZE);
+  if(currentSearchPage < tp){ currentSearchPage++; renderSearchResults(); window.scrollTo(0,0); }
+}
+
+function escapeHtml(s){
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ─── הרצת חיפוש (debounced) ───
+function runSearch(query){
+  currentSearchQuery = query;
+  currentSearchPage  = 1;
+  if(searchIndex === null){
+    renderSearchResults(); // יציג ספינר
+    return;
+  }
+  currentSearchResults = searchEntries(query, searchOptAlsoContent) || [];
+  renderSearchResults();
+}
+
+let searchDebounceTimer = null;
+const searchInputEl = document.getElementById('search');
+searchInputEl.addEventListener('input', e => {
   const q = e.target.value.trim();
+  // סינון הסרגל (פידבק מיידי)
   document.querySelectorAll('.entry-link').forEach(el => {
     el.style.display = !q || el.textContent.includes(q) ? 'flex' : 'none';
   });
   if(q) document.querySelectorAll('.topic').forEach(el => el.classList.add('open'));
+
+  // חיפוש המסך הראשי (debounced)
+  clearTimeout(searchDebounceTimer);
+  if(!q){
+    // ריק → חזור למסך הקודם
+    currentSearchQuery = "";
+    if(currentEntry){
+      goToEntryByEntryId(currentEntry);
+    }else if(currentTopic && data && data.topics){
+      const t = data.topics.find(x => x.id === currentTopic);
+      if(t) renderTopicLanding(t, data.topics.indexOf(t));
+    }
+    return;
+  }
+  searchDebounceTimer = setTimeout(() => runSearch(q), 250);
 });
+
+// ─── כפתור הגדרות + פופאובר ───
+const settingsBtn  = document.getElementById('search-settings-btn');
+const settingsPop  = document.getElementById('search-popover');
+const optAlsoCt    = document.getElementById('opt-also-content');
+
+settingsBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const isOpen = !settingsPop.hidden;
+  settingsPop.hidden = isOpen;
+  settingsBtn.classList.toggle('active', !isOpen);
+});
+document.addEventListener('click', e => {
+  if(!settingsPop.hidden && !settingsPop.contains(e.target) && e.target !== settingsBtn && !settingsBtn.contains(e.target)){
+    settingsPop.hidden = true;
+    settingsBtn.classList.remove('active');
+  }
+});
+optAlsoCt.addEventListener('change', () => {
+  searchOptAlsoContent = optAlsoCt.checked;
+  // שמור בlocalStorage
+  try{ localStorage.setItem('milon_search_alsoContent', optAlsoCt.checked ? '1' : '0'); }catch(e){}
+  // הרץ מחדש אם יש חיפוש פעיל
+  if(currentSearchQuery) runSearch(currentSearchQuery);
+});
+// טעינת העדפה מ-localStorage
+try{
+  const saved = localStorage.getItem('milon_search_alsoContent');
+  if(saved !== null){
+    searchOptAlsoContent = saved === '1';
+    optAlsoCt.checked = searchOptAlsoContent;
+  }
+}catch(e){}
 
 const sizes = ['md','lg','xl'];
 let sizeIdx = 0;
