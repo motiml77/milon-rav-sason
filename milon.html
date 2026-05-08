@@ -1385,7 +1385,7 @@
 <script>
 const DATA_URL    = "data.json";
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-08-1226"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-05-08-1301"; // AUTO_VERSION
 let data          = null;   // starts as terms, becomes full data
 let fullDataReady = false;
 let searchIndex   = null;   // ייטען במקביל
@@ -1412,6 +1412,14 @@ async function load(){
 
   // search-index.json — מנוע החיפוש מוכן ברגע שמגיע
   idxP.then(idx => {
+    // post-process: בונה textN מ-defsN (חיסכון בגודל הקובץ ~50%)
+    for(const item of idx){
+      if(item.defsN && Array.isArray(item.defsN)){
+        item.textN = item.defsN.join(' ');
+      }else if(!item.textN){
+        item.textN = '';
+      }
+    }
     searchIndex = idx;
     // אם המשתמש כבר הקליד משהו לפני שהאינדקס הגיע — הרץ חיפוש עכשיו
     const q = document.getElementById('search').value.trim();
@@ -1673,7 +1681,7 @@ function goToEntryByEntryId(eid){
 //  ─── מנוע חיפוש (כתיב מלא/חסר תמיד פעיל) ───
 // ════════════════════════════════════════════════════════════════
 const SEARCH_PAGE_SIZE = 20;
-const MAX_WORD_DISTANCE = 4;
+const MAX_WORD_DISTANCE = 10;   // הוגדל מ-4 — היה מסנן יותר מדי מילים שכן צריכות להיכלל
 let   searchOptAlsoContent = true;   // ברירת מחדל: גם בתוכן
 let   currentSearchQuery   = "";
 let   currentSearchResults = [];
@@ -1707,7 +1715,8 @@ function isWholeWord(text, word){
   }
   return re.test(text);
 }
-// בדיקת קרבה: כל המילים חייבות להופיע בסדר, במרחק מקסימלי MAX_WORD_DISTANCE
+// בדיקת קרבה: כל המילים חייבות להופיע במרחק מקסימלי MAX_WORD_DISTANCE
+// (סדר לא נדרש — חישוב לפי טווח טוקנים מינימלי שכולל את כולן)
 function checkProximity(text, words, wordsNoHe){
   if(words.length <= 1) return true;
   const tokens = text.split(/[^א-ת]+/).filter(Boolean);
@@ -1723,19 +1732,36 @@ function checkProximity(text, words, wordsNoHe){
     if(!pos.length) return false;
     positions.push(pos);
   }
-  for(const start of positions[0]){
-    let prev = start, ok = true;
-    for(let wi = 1; wi < positions.length; wi++){
-      let found = -1;
-      for(const p of positions[wi]){
-        if(p > prev && p - prev <= MAX_WORD_DISTANCE){ found = p; break; }
-      }
-      if(found === -1){ ok = false; break; }
-      prev = found;
+  // אלגוריתם "חלון מינימלי": בודק האם קיים טווח שמכיל לפחות הופעה אחת מכל מילה
+  // ושאורכו <= MAX_WORD_DISTANCE
+  const N = words.length;
+  const ptrs = new Array(N).fill(0);
+  while(true){
+    let minVal = Infinity, minIdx = -1, maxVal = -Infinity;
+    for(let i = 0; i < N; i++){
+      const v = positions[i][ptrs[i]];
+      if(v < minVal){ minVal = v; minIdx = i; }
+      if(v > maxVal) maxVal = v;
     }
-    if(ok) return true;
+    if(maxVal - minVal <= MAX_WORD_DISTANCE) return true;
+    ptrs[minIdx]++;
+    if(ptrs[minIdx] >= positions[minIdx].length) return false;
   }
-  return false;
+}
+
+// בדיקת קרבה פר-הגדרה: עובר על כל הגדרה בנפרד ומחזיר true אם המילים קרובות
+// בתוך הגדרה אחת (במקום הטקסט המאוחד שכולל מספר הגדרות)
+function checkProximityPerDef(item, words, wordsNoHe){
+  if(words.length <= 1) return true;
+  // אם יש defsN — בדוק כל הגדרה בנפרד
+  if(item.defsN && Array.isArray(item.defsN)){
+    for(const defText of item.defsN){
+      if(checkProximity(defText, words, wordsNoHe)) return true;
+    }
+    return false;
+  }
+  // תאימות לאחור — אם אין defsN, השתמש ב-textN המאוחד
+  return checkProximity(item.textN, words, wordsNoHe);
 }
 
 // ─── חיפוש ראשי ───
@@ -1785,13 +1811,13 @@ function searchEntries(rawQuery, alsoContent){
 
     if(!allMatched) continue;
 
-    // קרבה רב-מילים
+    // קרבה רב-מילים — חייבות להופיע באותה כותרת או באותה הגדרה
     if(words.length > 1){
       const inTitle = checkProximity(item.termN, words, wordsNoHe);
       let inText = false;
       if(alsoContent && !inTitle){
-        inText = checkProximity(item.textN, words, wordsNoHe)
-              || checkProximity(item.termN + ' ' + item.textN, words, wordsNoHe);
+        // ← חדש: בדיקת קרבה פר-הגדרה (לא חוצה הגדרות)
+        inText = checkProximityPerDef(item, words, wordsNoHe);
       }
       if(!inTitle && !inText) continue;
     }
@@ -2033,34 +2059,53 @@ window.onToggleBookmark = function(eid, btn){
   });
 };
 
+// ─── איפוס מצב חיפוש (לפני מעבר עמוד) ───
+function resetSearchState(){
+  const inp = document.getElementById('search');
+  if(inp) inp.value = '';
+  clearTimeout(searchDebounceTimer);
+  currentSearchQuery   = '';
+  currentSearchResults = [];
+  currentSearchPage    = 1;
+  // החזר את הסרגל למצב מלא (אם הוא סונן)
+  document.querySelectorAll('.entry-link').forEach(el => { el.style.display = ''; });
+  // סגור פופאובר הגדרות אם פתוח
+  const pop = document.getElementById('search-popover');
+  const btn = document.getElementById('search-settings-btn');
+  if(pop) pop.classList.remove('open');
+  if(btn) btn.classList.remove('active');
+}
+
 // Page switching (about/contact)
 let currentPage = 'dictionary';
 function setPage(p){
   currentPage = p;
+  resetSearchState();   // ← תמיד מאפס חיפוש במעבר עמוד
   document.querySelectorAll('.page-btn').forEach(b => b.classList.toggle('active', b.dataset.page === p));
   if(p === 'about'){
     setBreadcrumb(['אוצר המונחים', 'אודות']);
-    
     fadeContent(renderAbout());
   }else if(p === 'contact'){
     setBreadcrumb(['אוצר המונחים', 'צור קשר']);
-    
     fadeContent(renderContact());
   }else if(p === 'bookmarks'){
     setBreadcrumb(['אוצר המונחים', 'סימניות']);
-    
     fadeContent(renderBookmarks());
   }else{
-    // back to dictionary — restore current entry/topic
-    if(currentEntry){
-      const t = data.topics.find(t => t.entries.some(e => e.id === currentEntry));
-      if(t){
-        const e = t.entries.find(x => x.id === currentEntry);
-        renderEntryPage(t, data.topics.indexOf(t), e, t.entries.indexOf(e));
-      }
-    }else if(currentTopic){
-      const t = data.topics.find(x => x.id === currentTopic);
-      renderTopicLanding(t, data.topics.indexOf(t));
+    // ─── חזרה לעמוד הראשי של המילון: איפוס מלא + הצגת המדור הראשון ───
+    currentEntry = null;
+    if(data && data.topics && data.topics.length){
+      const t = data.topics[0];
+      currentTopic = t.id;
+      // סגור את כל המדורים, פתח רק את הראשון
+      document.querySelectorAll('.topic').forEach(el => {
+        el.classList.toggle('open', el.dataset.topic === t.id);
+        const head = el.querySelector('.topic-head');
+        if(head) head.classList.toggle('active', el.dataset.topic === t.id);
+      });
+      // הסר סימון של ערך פעיל
+      document.querySelectorAll('.entry-link').forEach(el => el.classList.remove('active'));
+      renderTopicLanding(t, 0);
     }
   }
 }

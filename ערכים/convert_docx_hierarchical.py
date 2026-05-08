@@ -240,7 +240,7 @@ def convert_docx_to_hierarchical(filename):
     # מדור לאיסוף ערכים שאינם תחת כותרת Heading 1
     misc_section = {
         "id": "s_misc",
-        "name": "שונות",
+        "name": "ערכים כלליים",
         "terms": []
     }
 

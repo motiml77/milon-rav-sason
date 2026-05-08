@@ -277,9 +277,13 @@ stats = {"topics": 0, "entries": 0, "definitions": 0, "with_source": 0,
 term_index = {}
 
 for section in raw["sections"]:
+    # שינוי שם המדור הכללי (גם תאימות לאחור עם data.js ישן)
+    section_name = section["name"]
+    if section_name == "שונות":
+        section_name = "ערכים כלליים"
     topic = {
         "id": section["id"],
-        "title": section["name"],
+        "title": section_name,
         "subtitle": "",
         "entries": []
     }
@@ -379,22 +383,25 @@ def build_preview(definitions, max_chars=300):
 search_index = []
 for topic in out["topics"]:
     for entry in topic["entries"]:
-        # טקסט נקי של כל ההגדרות + מקורות (מאוחדים)
-        parts = []
+        # ─── טקסט נקי פר-הגדרה (לקרבה רב-מילים בתוך הגדרה אחת) ───
+        defs_texts = []
         for d in entry["definitions"]:
-            parts.append(strip_html(d.get("text", "")))
+            txt = strip_html(d.get("text", ""))
             if d.get("source"):
-                parts.append(d["source"])
-        all_text = " ".join(parts)
-        # נורמליזציה + מלא/חסר ישירות (מלא/חסר תמיד פעיל)
-        term_mc = normalize_male_chaser(normalize_for_search(entry["term"]))
-        text_mc = normalize_male_chaser(normalize_for_search(all_text))
+                txt = txt + " " + d["source"]
+            defs_texts.append(txt)
+
+        # נורמליזציה + כתיב מלא/חסר (תמיד פעיל)
+        term_mc  = normalize_male_chaser(normalize_for_search(entry["term"]))
+        defs_mc  = [normalize_male_chaser(normalize_for_search(t)) for t in defs_texts]
+        # textN לא נשמר ל-JSON — JS בונה אותו בזמן טעינה מ-defsN (חיסכון של ~50%)
+
         search_index.append({
             "id":          entry["id"],
             "term":        entry["term"],
             "topicTitle":  topic["title"],
             "termN":       term_mc,
-            "textN":       text_mc,
+            "defsN":       defs_mc,    # ← מערך מנורמל פר-הגדרה (textN נבנה מזה ב-JS)
             "preview":     build_preview(entry["definitions"], 300),
         })
 
