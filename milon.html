@@ -169,6 +169,22 @@
     display: flex;
     align-items: center;
   }
+  .search-go-btn{
+    flex-shrink: 0;
+    background: var(--gold-deep);
+    border: 1px solid var(--gold-deep);
+    color: var(--cream);
+    cursor: pointer;
+    padding: 0 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .search-go-btn:hover{ background: var(--wood); }
   .search-settings-btn{
     flex-shrink: 0;
     background: rgba(255,255,255,0.6);
@@ -1302,6 +1318,7 @@
         <input type="text" id="search" placeholder="חיפוש בערכים…" autocomplete="off" />
         <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       </div>
+      <button class="search-go-btn" type="button" onclick="doSearch()" title="חפש">חפש</button>
       <button class="search-settings-btn" id="search-settings-btn" type="button" title="הגדרות חיפוש" aria-label="הגדרות חיפוש" onclick="toggleSearchSettings(event)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
@@ -1347,7 +1364,7 @@
 <script>
 const DATA_URL    = "data.json";
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json";
+const SEARCH_URL  = "search-index.json?v=2026-05-08-1208"; // AUTO_VERSION
 let data          = null;   // starts as terms, becomes full data
 let fullDataReady = false;
 let searchIndex   = null;   // ייטען במקביל
@@ -1813,6 +1830,15 @@ function runSearch(query){
   currentSearchResults = searchEntries(query, searchOptAlsoContent) || [];
   renderSearchResults();
 }
+
+// ─── כפתור "חפש" וקיצור Enter ───
+function doSearch(){
+  const q = document.getElementById('search').value.trim();
+  if(q){ clearTimeout(searchDebounceTimer); runSearch(q); }
+}
+document.getElementById('search').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); doSearch(); }
+});
 
 let searchDebounceTimer = null;
 const searchInputEl = document.getElementById('search');

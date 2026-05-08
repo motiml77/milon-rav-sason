@@ -421,18 +421,31 @@ TERMS_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "terms.jso
 with open(TERMS_JSON, "w", encoding="utf-8") as f:
     json.dump(terms, f, ensure_ascii=False, separators=(',', ':'))
 
-# ---------- עדכון גרסת Service Worker ----------
+# ---------- עדכון גרסת Service Worker + SEARCH_URL ----------
+from datetime import datetime as _dt
+_ts = _dt.now().strftime('%Y-%m-%d-%H%M')  # גרסה ייחודית לכל הרצה
+
 sw_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sw.js')
 if os.path.exists(sw_path):
-    today = date.today().isoformat()
     with open(sw_path, 'r', encoding='utf-8') as f:
         sw = f.read()
     sw_new = re.sub(r"const CACHE_VERSION\s*=\s*'[^']*'",
-                    f"const CACHE_VERSION = '{today}'", sw)
+                    f"const CACHE_VERSION = '{_ts}'", sw)
     if sw_new != sw:
         with open(sw_path, 'w', encoding='utf-8') as f:
             f.write(sw_new)
-        print(f"Updated sw.js CACHE_VERSION → {today}")
+        print(f"Updated sw.js CACHE_VERSION: {_ts}")
+
+milon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'milon.html')
+if os.path.exists(milon_path):
+    with open(milon_path, 'r', encoding='utf-8') as f:
+        milon = f.read()
+    milon_new = re.sub(r'(search-index\.json\?v=)[^"]*',
+                       f'\\g<1>{_ts}', milon)
+    if milon_new != milon:
+        with open(milon_path, 'w', encoding='utf-8') as f:
+            f.write(milon_new)
+        print(f"Updated milon.html SEARCH_URL: ?v={_ts}")
 
 print(f"OK: {OUTPUT_JSON}")
 print(f"  Topics: {stats['topics']}")
