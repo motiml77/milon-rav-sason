@@ -185,16 +185,15 @@
   .search-settings-btn.active{ color: var(--gold-deep); background: var(--cream-2); }
   .search-popover{
     display: none;
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0; right: 0;
+    position: fixed;
     background: var(--cream);
     border: 1px solid var(--gold-deep);
-    border-radius: 4px;
-    padding: 10px 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 50;
+    border-radius: 6px;
+    padding: 10px 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    z-index: 9999;
     font-size: 13px;
+    min-width: 180px;
   }
   .search-popover.open{ display: block; }
   .search-option{
@@ -203,8 +202,9 @@
     gap: 8px;
     cursor: pointer;
     color: var(--ink);
+    padding: 4px 0;
   }
-  .search-option input[type="checkbox"]{ accent-color: var(--gold-deep); }
+  .search-option input[type="radio"]{ accent-color: var(--gold-deep); }
   .search-option-hint{
     margin-top: 8px;
     padding-top: 8px;
@@ -1302,13 +1302,17 @@
         <input type="text" id="search" placeholder="חיפוש בערכים…" autocomplete="off" />
         <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       </div>
-      <button class="search-settings-btn" id="search-settings-btn" type="button" title="הגדרות חיפוש" aria-label="הגדרות חיפוש">
+      <button class="search-settings-btn" id="search-settings-btn" type="button" title="הגדרות חיפוש" aria-label="הגדרות חיפוש" onclick="toggleSearchSettings(event)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
       <div class="search-popover" id="search-popover">
         <label class="search-option">
-          <input type="checkbox" id="opt-also-content" checked />
-          <span>חיפוש גם בתוכן הערכים</span>
+          <input type="radio" name="search-scope" id="opt-scope-all" value="all" checked />
+          <span>כותרות + תוכן</span>
+        </label>
+        <label class="search-option">
+          <input type="radio" name="search-scope" id="opt-scope-title" value="title" />
+          <span>כותרות בלבד</span>
         </label>
         <div class="search-option-hint">כתיב מלא/חסר (י/ו) פעיל תמיד</div>
       </div>
@@ -1836,36 +1840,48 @@ searchInputEl.addEventListener('input', e => {
   searchDebounceTimer = setTimeout(() => runSearch(q), 250);
 });
 
-// ─── כפתור הגדרות + פופאובר ───
+// ─── כפתור הגדרות + פופאובר (position:fixed — מעל כל שכבה) ───
 const settingsBtn  = document.getElementById('search-settings-btn');
 const settingsPop  = document.getElementById('search-popover');
-const optAlsoCt    = document.getElementById('opt-also-content');
 
-settingsBtn.addEventListener('click', e => {
+window.toggleSearchSettings = function(e){
   e.stopPropagation();
-  const isOpen = settingsPop.classList.contains('open');
-  settingsPop.classList.toggle('open', !isOpen);
-  settingsBtn.classList.toggle('active', !isOpen);
-});
+  if(settingsPop.classList.contains('open')){
+    settingsPop.classList.remove('open');
+    settingsBtn.classList.remove('active');
+    return;
+  }
+  // מיקום: מתחת לכפתור
+  const rect = settingsBtn.getBoundingClientRect();
+  settingsPop.style.top  = (rect.bottom + 6) + 'px';
+  settingsPop.style.right = (window.innerWidth - rect.right) + 'px';
+  settingsPop.style.left  = 'auto';
+  settingsPop.classList.add('open');
+  settingsBtn.classList.add('active');
+};
+
 document.addEventListener('click', e => {
   if(settingsPop.classList.contains('open') && !settingsPop.contains(e.target) && !settingsBtn.contains(e.target)){
     settingsPop.classList.remove('open');
     settingsBtn.classList.remove('active');
   }
 });
-optAlsoCt.addEventListener('change', () => {
-  searchOptAlsoContent = optAlsoCt.checked;
-  // שמור בlocalStorage
-  try{ localStorage.setItem('milon_search_alsoContent', optAlsoCt.checked ? '1' : '0'); }catch(e){}
-  // הרץ מחדש אם יש חיפוש פעיל
-  if(currentSearchQuery) runSearch(currentSearchQuery);
+
+// ─── בחירת טווח חיפוש ───
+document.querySelectorAll('input[name="search-scope"]').forEach(r => {
+  r.addEventListener('change', () => {
+    searchOptAlsoContent = (r.value === 'all');
+    try{ localStorage.setItem('milon_search_scope', r.value); }catch(e){}
+    if(currentSearchQuery) runSearch(currentSearchQuery);
+  });
 });
 // טעינת העדפה מ-localStorage
 try{
-  const saved = localStorage.getItem('milon_search_alsoContent');
-  if(saved !== null){
-    searchOptAlsoContent = saved === '1';
-    optAlsoCt.checked = searchOptAlsoContent;
+  const saved = localStorage.getItem('milon_search_scope');
+  if(saved){
+    searchOptAlsoContent = (saved === 'all');
+    const el = document.querySelector(`input[name="search-scope"][value="${saved}"]`);
+    if(el) el.checked = true;
   }
 }catch(e){}
 
