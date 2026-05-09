@@ -410,6 +410,36 @@ with open(SEARCH_INDEX_JSON, "w", encoding="utf-8") as f:
     json.dump(search_index, f, ensure_ascii=False, separators=(',', ':'))
 print(f"OK: search-index.json ({len(search_index)} entries)")
 
+# ---------- entries/<id>.json (Lazy loading — קובץ קטן לכל ערך) ----------
+ENTRIES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'entries')
+os.makedirs(ENTRIES_DIR, exist_ok=True)
+
+# נקה קבצי entries ישנים (במקרה שערך נמחק מהוורד)
+for _f in os.listdir(ENTRIES_DIR):
+    if _f.endswith('.json'):
+        try:
+            os.remove(os.path.join(ENTRIES_DIR, _f))
+        except OSError:
+            pass
+
+# כתוב קובץ נפרד לכל ערך
+_entry_count = 0
+for topic in out["topics"]:
+    for entry in topic["entries"]:
+        entry_data = {
+            "id":         entry["id"],
+            "term":       entry["term"],
+            "topicId":    topic["id"],
+            "topicTitle": topic["title"],
+            "definitions": entry["definitions"],
+            "related":    entry.get("related", []),
+        }
+        path = os.path.join(ENTRIES_DIR, f"{entry['id']}.json")
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(entry_data, f, ensure_ascii=False, separators=(',', ':'))
+        _entry_count += 1
+print(f"OK: entries/*.json ({_entry_count} files)")
+
 # ---------- terms.json (קל — רק שמות ערכים לסרגל) ----------
 terms = {
     "title": out["title"],
