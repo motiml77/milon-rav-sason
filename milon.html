@@ -1384,7 +1384,7 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-09-2217"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-05-09-2234"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 // data = מבנה הסרגל בלבד (id+term per entry). תוכן מלא נטען לפי דרישה.
 let data            = null;
@@ -1731,7 +1731,7 @@ function goToEntryByEntryId(eid){
 //  ─── מנוע חיפוש (כתיב מלא/חסר תמיד פעיל) ───
 // ════════════════════════════════════════════════════════════════
 const SEARCH_PAGE_SIZE = 20;
-const MAX_WORD_DISTANCE = 10;   // הוגדל מ-4 — היה מסנן יותר מדי מילים שכן צריכות להיכלל
+const MAX_WORDS_BETWEEN = 3;    // מקסימום מילים בין שתי מילות חיפוש עוקבות
 let   searchOptAlsoContent = true;   // ברירת מחדל: גם בתוכן
 let   currentSearchQuery   = "";
 let   currentSearchResults = [];
@@ -1765,53 +1765,62 @@ function isWholeWord(text, word){
   }
   return re.test(text);
 }
-// בדיקת קרבה: כל המילים חייבות להופיע במרחק מקסימלי MAX_WORD_DISTANCE
-// (סדר לא נדרש — חישוב לפי טווח טוקנים מינימלי שכולל את כולן)
-function checkProximity(text, words, wordsNoHe){
-  if(words.length <= 1) return true;
+// ─── התאמה קפדנית: כל המילים, באותו סדר, מקסימום 3 מילים בין כל זוג עוקבות ───
+// "יונתן הלך לגן" יימצא ב"יונתן [הקטן] הלך [גם הוא] לגן" — אבל לא ב"לגן הלך יונתן" (סדר הפוך)
+function orderedNearMatch(text, words, wordsNoHe){
+  if(!text) return false;
+  if(words.length === 0) return true;
+  // מילה אחת — מספיק שתופיע במשהו
+  if(words.length === 1){
+    const w = words[0], wNH = wordsNoHe[0];
+    return text.includes(w) || (wNH !== w && text.includes(wNH));
+  }
+
   const tokens = text.split(/[^א-ת]+/).filter(Boolean);
-  if(!tokens.length) return false;
+  if(tokens.length < words.length) return false;
+
+  // איסוף מיקומי כל מילה ברצף הטוקנים
   const positions = [];
-  for(let wi = 0; wi < words.length; wi++){
-    const w = words[wi], wNH = wordsNoHe[wi];
+  for(let i = 0; i < words.length; i++){
+    const w = words[i], wNH = wordsNoHe[i];
     const pos = [];
     for(let ti = 0; ti < tokens.length; ti++){
       const t = tokens[ti];
       if(t.includes(w) || (wNH !== w && t.includes(wNH))) pos.push(ti);
     }
-    if(!pos.length) return false;
+    if(!pos.length) return false;   // מילה חסרה — אין התאמה
     positions.push(pos);
   }
-  // אלגוריתם "חלון מינימלי": בודק האם קיים טווח שמכיל לפחות הופעה אחת מכל מילה
-  // ושאורכו <= MAX_WORD_DISTANCE
-  const N = words.length;
-  const ptrs = new Array(N).fill(0);
-  while(true){
-    let minVal = Infinity, minIdx = -1, maxVal = -Infinity;
-    for(let i = 0; i < N; i++){
-      const v = positions[i][ptrs[i]];
-      if(v < minVal){ minVal = v; minIdx = i; }
-      if(v > maxVal) maxVal = v;
+
+  // ניסיון לבנות שרשרת: מילה i+1 חייבת לבוא אחרי i, במרחק עד MAX_WORDS_BETWEEN+1
+  // (אם בין pos[i] ל-pos[i+1] יש N טוקנים אז יש N-1 מילים ביניהם → דורש pos[i+1]-pos[i] ≤ MAX_WORDS_BETWEEN+1)
+  const MAX_GAP = MAX_WORDS_BETWEEN + 1;
+  for(const start of positions[0]){
+    let prev = start, ok = true;
+    for(let wi = 1; wi < words.length; wi++){
+      let found = -1;
+      for(const p of positions[wi]){
+        if(p > prev && p - prev <= MAX_GAP){ found = p; break; }
+      }
+      if(found === -1){ ok = false; break; }
+      prev = found;
     }
-    if(maxVal - minVal <= MAX_WORD_DISTANCE) return true;
-    ptrs[minIdx]++;
-    if(ptrs[minIdx] >= positions[minIdx].length) return false;
+    if(ok) return true;
   }
+  return false;
 }
 
-// בדיקת קרבה פר-הגדרה: עובר על כל הגדרה בנפרד ומחזיר true אם המילים קרובות
-// בתוך הגדרה אחת (במקום הטקסט המאוחד שכולל מספר הגדרות)
-function checkProximityPerDef(item, words, wordsNoHe){
-  if(words.length <= 1) return true;
-  // אם יש defsN — בדוק כל הגדרה בנפרד
-  if(item.defsN && Array.isArray(item.defsN)){
+// בודק האם קיימת לפחות כותרת או הגדרה אחת עם כל המילים בסדר הנכון ובמרחק המותר
+function strictMultiWordMatch(item, words, wordsNoHe, alsoContent){
+  // 1. כותרת בלבד
+  if(orderedNearMatch(item.termN, words, wordsNoHe)) return true;
+  // 2. כל הגדרה בנפרד
+  if(alsoContent && item.defsN && Array.isArray(item.defsN)){
     for(const defText of item.defsN){
-      if(checkProximity(defText, words, wordsNoHe)) return true;
+      if(orderedNearMatch(defText, words, wordsNoHe)) return true;
     }
-    return false;
   }
-  // תאימות לאחור — אם אין defsN, השתמש ב-textN המאוחד
-  return checkProximity(item.textN, words, wordsNoHe);
+  return false;
 }
 
 // ─── חיפוש ראשי ───
@@ -1861,15 +1870,9 @@ function searchEntries(rawQuery, alsoContent){
 
     if(!allMatched) continue;
 
-    // קרבה רב-מילים — חייבות להופיע באותה כותרת או באותה הגדרה
+    // STRICT: רב-מילים — כל המילים, באותו סדר, מקסימום 3 מילים בין כל זוג, באותה כותרת או באותה הגדרה
     if(words.length > 1){
-      const inTitle = checkProximity(item.termN, words, wordsNoHe);
-      let inText = false;
-      if(alsoContent && !inTitle){
-        // ← חדש: בדיקת קרבה פר-הגדרה (לא חוצה הגדרות)
-        inText = checkProximityPerDef(item, words, wordsNoHe);
-      }
-      if(!inTitle && !inText) continue;
+      if(!strictMultiWordMatch(item, words, wordsNoHe, alsoContent)) continue;
     }
 
     results.push({
