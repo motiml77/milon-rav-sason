@@ -1384,7 +1384,7 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-09-2143"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-05-09-2217"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 // data = מבנה הסרגל בלבד (id+term per entry). תוכן מלא נטען לפי דרישה.
 let data            = null;
@@ -1457,7 +1457,7 @@ function renderNav(){
       </div>
       <div class="entries">
         ${t.entries.map((e, i) => `
-          <div class="entry-link ${isBookmarked(e.id) ? 'bookmarked' : ''}" data-entry="${e.id}" data-num="${i+1}." onclick="event.stopPropagation(); goToEntry('${t.id}','${e.id}')">${e.term}</div>
+          <div class="entry-link ${isBookmarked(e.id) ? 'bookmarked' : ''}" data-entry="${e.id}" data-num="${i+1}." onclick="event.stopPropagation(); goToEntry('${t.id}','${e.id}')" onmouseenter="prefetchEntry('${e.id}')" onfocus="prefetchEntry('${e.id}')">${e.term}</div>
         `).join('')}
       </div>
     </div>
@@ -1478,6 +1478,29 @@ function selectTopic(id){
   renderTopicLanding(topic, ti);
 }
 
+// ─── Prefetch בלי להציג; משמש ל-hover/related/neighbors ───
+window.prefetchEntry = function(id){
+  if(!id || entryCache.has(id)) return;
+  loadEntry(id).catch(() => {});  // שתיקה — אם נכשל, ייטען בלחיצה
+};
+
+// קדם-טען את הערכים הסמוכים (לפני/אחרי) ואת הקשורים
+function prefetchNeighbors(topicId, ei){
+  const topic = data.topics.find(t => t.id === topicId);
+  if(!topic) return;
+  // הקודם והבא ברשימה
+  if(ei > 0) prefetchEntry(topic.entries[ei-1].id);
+  if(ei < topic.entries.length-1) prefetchEntry(topic.entries[ei+1].id);
+  // קשורים — נטענים בעצלתיים מהערך עצמו אם ה-DOM כבר נבנה
+  requestIdleCallback ? requestIdleCallback(prefetchRelatedFromDom, {timeout: 2000})
+                      : setTimeout(prefetchRelatedFromDom, 500);
+}
+function prefetchRelatedFromDom(){
+  document.querySelectorAll('.related-link[data-entry]').forEach(el => {
+    prefetchEntry(el.dataset.entry);
+  });
+}
+
 async function goToEntry(topicId, entryId){
   // עדכן סרגל
   if(currentTopic !== topicId){
@@ -1494,21 +1517,36 @@ async function goToEntry(topicId, entryId){
     el.classList.toggle('active', el.dataset.entry === entryId);
   });
 
-  // טעינה מיידית אם בקאש; אחרת ספינר קצר
-  const cached = entryCache.has(entryId);
-  if(!cached){
-    fadeContent(`<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-text">טוען…</div></div>`);
+  // טעינה אופטימית: אם הערך בקאש → רינדור מיידי בלי ספינר ובלי fade-in
+  if(entryCache.has(entryId)){
+    const entry = entryCache.get(entryId);
+    const ti = data.topics.findIndex(t => t.id === topicId);
+    const topic = data.topics[ti];
+    const ei = topic.entries.findIndex(e => e.id === entryId);
+    renderEntryPage(topic, ti, entry, ei);
+    prefetchNeighbors(topicId, ei);
+    return;
   }
+
+  // ספינר מתעכב — אם הטעינה מהירה, לא יוצג כלל (מונע פליק)
+  let spinnerShown = false;
+  const spinnerTimer = setTimeout(() => {
+    if(currentEntry !== entryId) return;
+    spinnerShown = true;
+    fadeContent(`<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-text">טוען…</div></div>`);
+  }, 90);
 
   try{
     const entry = await loadEntry(entryId);
-    // ייתכן שהמשתמש ניווט בינתיים לערך אחר — אם כן, אל תרנדר
+    clearTimeout(spinnerTimer);
     if(currentEntry !== entryId) return;
     const ti = data.topics.findIndex(t => t.id === topicId);
     const topic = data.topics[ti];
     const ei = topic.entries.findIndex(e => e.id === entryId);
     renderEntryPage(topic, ti, entry, ei);
+    prefetchNeighbors(topicId, ei);   // קדם-טען את הסמוכים
   }catch(err){
+    clearTimeout(spinnerTimer);
     console.error('Failed to load entry:', err);
     if(currentEntry === entryId){
       fadeContent(`<div class="info-page"><h1 class="info-title">שגיאה בטעינת הערך</h1><p style="color:var(--ink-faint);">${err.message}</p></div>`);
@@ -1547,7 +1585,7 @@ function renderTopicLanding(topic, ti){
       <div class="topic-landing-hint">בחר ערך מן הרשימה</div>
       <div class="entry-grid">
         ${topic.entries.map((e, i) => `
-          <div class="entry-card" onclick="goToEntry('${topic.id}','${e.id}')">
+          <div class="entry-card" onclick="goToEntry('${topic.id}','${e.id}')" onmouseenter="prefetchEntry('${e.id}')">
             <div class="entry-card-num">ערך ${HEB_NUM[i] || (i+1)}</div>
             <div class="entry-card-term">${e.term}</div>
           </div>
@@ -1619,7 +1657,7 @@ function renderEntryPage(topic, ti, entry, ei){
     const r = findEntry(rid);
     if(!r) return '';
     return `
-      <div class="related-link" onclick="goToEntryByEntryId('${rid}')">
+      <div class="related-link" data-entry="${rid}" onclick="goToEntryByEntryId('${rid}')" onmouseenter="prefetchEntry('${rid}')">
         <span class="related-link-arrow">←</span>
         <span class="related-link-text">
           <span>${r.entry.term}</span>
@@ -1902,7 +1940,7 @@ function renderSearchResults(){
   const slice = currentSearchResults.slice(start, start + SEARCH_PAGE_SIZE);
 
   const items = slice.map(r => `
-    <div class="search-result" onclick="goToEntryByEntryId('${r.id}')">
+    <div class="search-result" onclick="goToEntryByEntryId('${r.id}')" onmouseenter="prefetchEntry('${r.id}')">
       <div class="search-result-head">
         <div class="search-result-term">${highlightMatches(r.term, words, wordsNoHe)}</div>
         <div class="search-result-topic">${r.topicTitle}</div>
