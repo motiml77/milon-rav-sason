@@ -276,6 +276,18 @@
     letter-spacing: 0.04em;
     flex-shrink: 0;
   }
+  .search-result-deflabel{
+    display: inline-block;
+    font-size: 11px;
+    color: var(--gold-deep);
+    background: rgba(184,137,58,0.1);
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
+  }
   .search-result-preview{
     font-size: 14px;
     color: var(--ink-soft);
@@ -1384,7 +1396,7 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-09-2234"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-05-09-2300"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 // data = מבנה הסרגל בלבד (id+term per entry). תוכן מלא נטען לפי דרישה.
 let data            = null;
@@ -1811,16 +1823,30 @@ function orderedNearMatch(text, words, wordsNoHe){
 }
 
 // בודק האם קיימת לפחות כותרת או הגדרה אחת עם כל המילים בסדר הנכון ובמרחק המותר
+// מחזיר אינדקס ההגדרה (0+) שהותאמה, או -1 אם בכותרת בלבד, או -2 אם אין התאמה
 function strictMultiWordMatch(item, words, wordsNoHe, alsoContent){
   // 1. כותרת בלבד
-  if(orderedNearMatch(item.termN, words, wordsNoHe)) return true;
+  if(orderedNearMatch(item.termN, words, wordsNoHe)) return -1;
   // 2. כל הגדרה בנפרד
   if(alsoContent && item.defsN && Array.isArray(item.defsN)){
-    for(const defText of item.defsN){
-      if(orderedNearMatch(defText, words, wordsNoHe)) return true;
+    for(let i = 0; i < item.defsN.length; i++){
+      if(orderedNearMatch(item.defsN[i], words, wordsNoHe)) return i;
     }
   }
-  return false;
+  return -2;
+}
+
+// עבור חיפוש מילה אחת — איתור ההגדרה הראשונה שמכילה את המילה
+function findFirstMatchingDef(item, words, wordsNoHe){
+  if(!item.defsN || !Array.isArray(item.defsN)) return -1;
+  for(let i = 0; i < item.defsN.length; i++){
+    const d = item.defsN[i];
+    for(let wi = 0; wi < words.length; wi++){
+      const w = words[wi], wNH = wordsNoHe[wi];
+      if(d.includes(w) || (wNH !== w && d.includes(wNH))) return i;
+    }
+  }
+  return -1;
 }
 
 // ─── חיפוש ראשי ───
@@ -1871,12 +1897,20 @@ function searchEntries(rawQuery, alsoContent){
     if(!allMatched) continue;
 
     // STRICT: רב-מילים — כל המילים, באותו סדר, מקסימום 3 מילים בין כל זוג, באותה כותרת או באותה הגדרה
+    let matchedDefIdx = -1;   // -1=title only, 0+=def index, -2=none
     if(words.length > 1){
-      if(!strictMultiWordMatch(item, words, wordsNoHe, alsoContent)) continue;
+      matchedDefIdx = strictMultiWordMatch(item, words, wordsNoHe, alsoContent);
+      if(matchedDefIdx === -2) continue;
+    }else{
+      // מילה אחת — איתור ההגדרה הראשונה המכילה אותה (אם לא בכותרת)
+      if(titleScore === 0){
+        matchedDefIdx = findFirstMatchingDef(item, words, wordsNoHe);
+      }
     }
 
     results.push({
       ...item,
+      matchedDefIdx,
       titleScore,
       contentScore,
       hasTitle: titleScore > 0
@@ -1942,15 +1976,32 @@ function renderSearchResults(){
   const start = (currentSearchPage - 1) * SEARCH_PAGE_SIZE;
   const slice = currentSearchResults.slice(start, start + SEARCH_PAGE_SIZE);
 
-  const items = slice.map(r => `
+  // ─── בחירת תצוגה מקדימה ממוקדת התאמה ───
+  // matchedDefIdx>=0 → defsP[i] (ההגדרה שהותאמה); -1 → כותרת בלבד, נשתמש בהגדרה הראשונה; אחר → preview
+  function pickPreview(r){
+    if(r.matchedDefIdx >= 0 && r.defsP && r.defsP[r.matchedDefIdx]){
+      return r.defsP[r.matchedDefIdx];
+    }
+    if(r.defsP && r.defsP.length > 0 && r.defsP[0]){
+      return r.defsP[0];
+    }
+    return r.preview || '';
+  }
+
+  const items = slice.map(r => {
+    const previewText = pickPreview(r);
+    const defLabel = (r.matchedDefIdx >= 0 && r.defsP && r.defsP.length > 1)
+      ? `<span class="search-result-deflabel">הגדרה ${r.matchedDefIdx + 1}/${r.defsP.length}</span>`
+      : '';
+    return `
     <div class="search-result" onclick="goToEntryByEntryId('${r.id}')" onmouseenter="prefetchEntry('${r.id}')">
       <div class="search-result-head">
         <div class="search-result-term">${highlightMatches(r.term, words, wordsNoHe)}</div>
         <div class="search-result-topic">${r.topicTitle}</div>
       </div>
-      <div class="search-result-preview">${highlightMatches(r.preview, words, wordsNoHe)}</div>
+      <div class="search-result-preview">${defLabel}${highlightMatches(previewText, words, wordsNoHe)}</div>
     </div>
-  `).join('');
+  `;}).join('');
 
   const pagination = totalPages > 1 ? `
     <div class="search-pagination">

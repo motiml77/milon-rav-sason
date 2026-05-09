@@ -330,9 +330,8 @@ for topic in out["topics"]:
             stats["entries_with_refs"] += 1
             stats["refs_found"] += len(refs)
 
-# ---------- כתיבה ----------
-with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
-    json.dump(out, f, ensure_ascii=False, indent=2)
+# הערה: data.json הוסר ב-Phase 1 (lazy loading). הערכים נשמרים ב-entries/<id>.json
+# (in-memory הדאטה ב-`out` עדיין משמש להלן ליצירת terms.json + search-index.json + entries/*)
 
 # ====================================================================
 # ---------- search-index.json (אינדקס חיפוש מנורמל) ----------
@@ -370,7 +369,7 @@ def normalize_male_chaser(text):
     return HEB_WORD_RE.sub(fix_word, text)
 
 def build_preview(definitions, max_chars=300):
-    """תצוגה מקדימה של 300 תווים מההגדרה הראשונה (טקסט נקי)."""
+    """תצוגה מקדימה של 300 תווים מההגדרה הראשונה (טקסט נקי) — fallback."""
     for d in definitions:
         plain = strip_html(d.get("text", ""))
         plain = re.sub(r'\s+', ' ', plain).strip()
@@ -379,6 +378,20 @@ def build_preview(definitions, max_chars=300):
                 return plain[:max_chars].rstrip() + "…"
             return plain
     return ""
+
+def build_def_previews(definitions, max_chars_per_def=350):
+    """מערך של תצוגות מקדימות פר-הגדרה (טקסט נקי, לא מנורמל) — לחיפוש חכם."""
+    out = []
+    for d in definitions:
+        plain = strip_html(d.get("text", ""))
+        plain = re.sub(r'\s+', ' ', plain).strip()
+        if not plain:
+            out.append("")
+            continue
+        if len(plain) > max_chars_per_def:
+            plain = plain[:max_chars_per_def].rstrip() + "…"
+        out.append(plain)
+    return out
 
 search_index = []
 for topic in out["topics"]:
@@ -401,8 +414,9 @@ for topic in out["topics"]:
             "term":        entry["term"],
             "topicTitle":  topic["title"],
             "termN":       term_mc,
-            "defsN":       defs_mc,    # ← מערך מנורמל פר-הגדרה (textN נבנה מזה ב-JS)
-            "preview":     build_preview(entry["definitions"], 300),
+            "defsN":       defs_mc,    # מנורמל פר-הגדרה (textN נבנה מזה ב-JS)
+            "defsP":       build_def_previews(entry["definitions"], 350),  # תצוגה מקדימה פר-הגדרה (לא מנורמל)
+            "preview":     build_preview(entry["definitions"], 300),       # fallback להגדרה הראשונה
         })
 
 SEARCH_INDEX_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "search-index.json")
@@ -484,7 +498,7 @@ if os.path.exists(milon_path):
             f.write(milon_new)
         print(f"Updated milon.html SEARCH_URL: ?v={_ts}")
 
-print(f"OK: {OUTPUT_JSON}")
+print(f"OK: terms.json + entries/ ({_entry_count} files)")
 print(f"  Topics: {stats['topics']}")
 print(f"  Entries: {stats['entries']}")
 print(f"  Definitions: {stats['definitions']}")
