@@ -1396,7 +1396,7 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-09-2300"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-05-09-2315"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 // data = מבנה הסרגל בלבד (id+term per entry). תוכן מלא נטען לפי דרישה.
 let data            = null;
@@ -1419,13 +1419,37 @@ async function loadEntry(id){
   return entry;
 }
 
-async function load(){
-  // ── רק שני קבצים בטעינה הראשונית: terms (סרגל) + search-index (חיפוש) ──
-  const termsP = fetch(TERMS_URL).then(r => r.json());
-  const idxP   = fetch(SEARCH_URL).then(r => r.json());
+// ─── טעינה חכמה של אינדקס חיפוש: ב-idle, או מיידית עם first-intent ───
+let searchIndexPromise = null;
+function ensureSearchIndex(){
+  if(searchIndex || searchIndexPromise) return searchIndexPromise;
+  searchIndexPromise = fetch(SEARCH_URL).then(r => r.json()).then(idx => {
+    // post-process: בונה textN מ-defsN (לשימוש פנימי בחיפוש)
+    for(const item of idx){
+      if(item.defsN && Array.isArray(item.defsN)){
+        item.textN = item.defsN.join(' ');
+      }else if(!item.textN){
+        item.textN = '';
+      }
+    }
+    searchIndex = idx;
+    searchIndexById = {};
+    for(const item of idx) searchIndexById[item.id] = item;
+    // אם המשתמש כבר הקליד משהו לפני שהאינדקס הגיע — הרץ עכשיו
+    const q = document.getElementById('search').value.trim();
+    if(q) runSearch(q);
+    return idx;
+  }).catch(err => {
+    console.error('search-index.json load failed:', err);
+    searchIndexPromise = null;  // אפשר retry
+    throw err;
+  });
+  return searchIndexPromise;
+}
 
-  // terms.json (~12KB compressed) — ראשון → סרגל מיד
-  const terms = await termsP;
+async function load(){
+  // ── טעינה ראשונית מינימלית: רק terms.json (12KB) — סרגל + נחיתה ──
+  const terms = await fetch(TERMS_URL).then(r => r.json());
   data = terms;
   renderNav();
   if(data.topics.length){
@@ -1435,26 +1459,13 @@ async function load(){
     renderTopicLanding(data.topics[0], 0);
   }
 
-  // search-index.json — מנוע החיפוש + previews לסימניות
-  idxP.then(idx => {
-    // post-process: בונה textN מ-defsN
-    for(const item of idx){
-      if(item.defsN && Array.isArray(item.defsN)){
-        item.textN = item.defsN.join(' ');
-      }else if(!item.textN){
-        item.textN = '';
-      }
-    }
-    searchIndex = idx;
-    // map עזר לחיפוש מהיר לפי id (לסימניות, related)
-    searchIndexById = {};
-    for(const item of idx){
-      searchIndexById[item.id] = item;
-    }
-    // אם המשתמש כבר הקליד משהו לפני שהאינדקס הגיע — הרץ חיפוש עכשיו
-    const q = document.getElementById('search').value.trim();
-    if(q) runSearch(q);
-  }).catch(err => console.error('search-index.json load failed:', err));
+  // ── אינדקס חיפוש: ב-idle (אחרי שהדפדפן פנוי) ──
+  // משתמש שגולש — לא חוסם. משתמש שלוחץ על חיפוש — מאיץ דרך ensureSearchIndex
+  if(window.requestIdleCallback){
+    requestIdleCallback(() => ensureSearchIndex(), { timeout: 2500 });
+  }else{
+    setTimeout(() => ensureSearchIndex(), 600);
+  }
 }
 
 function renderNav(){
@@ -2034,7 +2045,8 @@ function runSearch(query){
   currentSearchQuery = query;
   currentSearchPage  = 1;
   if(searchIndex === null){
-    renderSearchResults(); // יציג ספינר
+    ensureSearchIndex();   // האץ טעינה אם עדיין לא התחיל
+    renderSearchResults();  // יציג ספינר; ייפתח אוטומטית כשהאינדקס יגיע
     return;
   }
   currentSearchResults = searchEntries(query, searchOptAlsoContent) || [];
@@ -2052,6 +2064,8 @@ document.getElementById('search').addEventListener('keydown', e => {
 
 let searchDebounceTimer = null;
 const searchInputEl = document.getElementById('search');
+// האצה: ברגע שהמשתמש לוחץ/ממקד את שדה החיפוש — מתחילים לטעון את האינדקס
+searchInputEl.addEventListener('focus', () => ensureSearchIndex(), { once: true });
 searchInputEl.addEventListener('input', e => {
   const q = e.target.value.trim();
   // סינון הסרגל (פידבק מיידי)
