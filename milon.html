@@ -1396,7 +1396,7 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-09-2315"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-05-10-0807"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 // data = מבנה הסרגל בלבד (id+term per entry). תוכן מלא נטען לפי דרישה.
 let data            = null;
@@ -1788,12 +1788,11 @@ function isWholeWord(text, word){
   }
   return re.test(text);
 }
-// ─── התאמה קפדנית: כל המילים, באותו סדר, מקסימום 3 מילים בין כל זוג עוקבות ───
-// "יונתן הלך לגן" יימצא ב"יונתן [הקטן] הלך [גם הוא] לגן" — אבל לא ב"לגן הלך יונתן" (סדר הפוך)
-function orderedNearMatch(text, words, wordsNoHe){
+// ─── התאמה קפדנית: כל המילים, באותו סדר, במרחק מקסימלי maxBetween ───
+// "יונתן הלך לגן" יימצא ב"יונתן [הקטן] הלך [גם הוא] לגן" — אבל לא ב"לגן הלך יונתן"
+function orderedNearMatch(text, words, wordsNoHe, maxBetween){
   if(!text) return false;
   if(words.length === 0) return true;
-  // מילה אחת — מספיק שתופיע במשהו
   if(words.length === 1){
     const w = words[0], wNH = wordsNoHe[0];
     return text.includes(w) || (wNH !== w && text.includes(wNH));
@@ -1802,7 +1801,6 @@ function orderedNearMatch(text, words, wordsNoHe){
   const tokens = text.split(/[^א-ת]+/).filter(Boolean);
   if(tokens.length < words.length) return false;
 
-  // איסוף מיקומי כל מילה ברצף הטוקנים
   const positions = [];
   for(let i = 0; i < words.length; i++){
     const w = words[i], wNH = wordsNoHe[i];
@@ -1811,13 +1809,11 @@ function orderedNearMatch(text, words, wordsNoHe){
       const t = tokens[ti];
       if(t.includes(w) || (wNH !== w && t.includes(wNH))) pos.push(ti);
     }
-    if(!pos.length) return false;   // מילה חסרה — אין התאמה
+    if(!pos.length) return false;
     positions.push(pos);
   }
 
-  // ניסיון לבנות שרשרת: מילה i+1 חייבת לבוא אחרי i, במרחק עד MAX_WORDS_BETWEEN+1
-  // (אם בין pos[i] ל-pos[i+1] יש N טוקנים אז יש N-1 מילים ביניהם → דורש pos[i+1]-pos[i] ≤ MAX_WORDS_BETWEEN+1)
-  const MAX_GAP = MAX_WORDS_BETWEEN + 1;
+  const MAX_GAP = maxBetween + 1;
   for(const start of positions[0]){
     let prev = start, ok = true;
     for(let wi = 1; wi < words.length; wi++){
@@ -1833,18 +1829,28 @@ function orderedNearMatch(text, words, wordsNoHe){
   return false;
 }
 
-// בודק האם קיימת לפחות כותרת או הגדרה אחת עם כל המילים בסדר הנכון ובמרחק המותר
-// מחזיר אינדקס ההגדרה (0+) שהותאמה, או -1 אם בכותרת בלבד, או -2 אם אין התאמה
+// בדיקה רב-שלבית: מחזירה את אינדקס ההגדרה + tier (1=קפדני, 2=מרגיע)
+// tier 1: עד STRICT_GAP מילים בין מילות חיפוש  → נבחר ראשון בתוצאות
+// tier 2: עד RELAXED_GAP מילים בין             → נבחר שני
+// -2 = אין התאמה כלל
+const STRICT_GAP  = 3;     // המקור — בקשת המשתמש
+const RELAXED_GAP = 15;    // גיבוי — מתאים לעברית עם מילות-קישור רבות
 function strictMultiWordMatch(item, words, wordsNoHe, alsoContent){
-  // 1. כותרת בלבד
-  if(orderedNearMatch(item.termN, words, wordsNoHe)) return -1;
-  // 2. כל הגדרה בנפרד
+  // ניסיון 1 — קפדני
+  if(orderedNearMatch(item.termN, words, wordsNoHe, STRICT_GAP)) return { defIdx: -1, tier: 1 };
   if(alsoContent && item.defsN && Array.isArray(item.defsN)){
     for(let i = 0; i < item.defsN.length; i++){
-      if(orderedNearMatch(item.defsN[i], words, wordsNoHe)) return i;
+      if(orderedNearMatch(item.defsN[i], words, wordsNoHe, STRICT_GAP)) return { defIdx: i, tier: 1 };
     }
   }
-  return -2;
+  // ניסיון 2 — מרגיע (אם הקפדני לא מצא)
+  if(orderedNearMatch(item.termN, words, wordsNoHe, RELAXED_GAP)) return { defIdx: -1, tier: 2 };
+  if(alsoContent && item.defsN && Array.isArray(item.defsN)){
+    for(let i = 0; i < item.defsN.length; i++){
+      if(orderedNearMatch(item.defsN[i], words, wordsNoHe, RELAXED_GAP)) return { defIdx: i, tier: 2 };
+    }
+  }
+  return { defIdx: -2, tier: 0 };
 }
 
 // עבור חיפוש מילה אחת — איתור ההגדרה הראשונה שמכילה את המילה
@@ -1907,11 +1913,14 @@ function searchEntries(rawQuery, alsoContent){
 
     if(!allMatched) continue;
 
-    // STRICT: רב-מילים — כל המילים, באותו סדר, מקסימום 3 מילים בין כל זוג, באותה כותרת או באותה הגדרה
-    let matchedDefIdx = -1;   // -1=title only, 0+=def index, -2=none
+    // STRICT: רב-מילים — שני שלבים: ראשית קפדני (≤3), אחר כך מרגיע (≤15)
+    let matchedDefIdx = -1;
+    let matchTier = 1;        // 1=קפדני (preferred), 2=מרגיע
     if(words.length > 1){
-      matchedDefIdx = strictMultiWordMatch(item, words, wordsNoHe, alsoContent);
-      if(matchedDefIdx === -2) continue;
+      const m = strictMultiWordMatch(item, words, wordsNoHe, alsoContent);
+      if(m.defIdx === -2) continue;
+      matchedDefIdx = m.defIdx;
+      matchTier     = m.tier;
     }else{
       // מילה אחת — איתור ההגדרה הראשונה המכילה אותה (אם לא בכותרת)
       if(titleScore === 0){
@@ -1922,14 +1931,16 @@ function searchEntries(rawQuery, alsoContent){
     results.push({
       ...item,
       matchedDefIdx,
+      matchTier,
       titleScore,
       contentScore,
       hasTitle: titleScore > 0
     });
   }
 
-  // מיון: התאמות בכותרת קודם, אחר כך לפי ניקוד
+  // מיון: tier 1 (קפדני) קודם, אחר כך tier 2; בכל tier — כותרות קודם, ואז ניקוד
   results.sort((a, b) => {
+    if(a.matchTier !== b.matchTier) return a.matchTier - b.matchTier;
     if(a.hasTitle !== b.hasTitle) return a.hasTitle ? -1 : 1;
     return (b.titleScore + b.contentScore) - (a.titleScore + a.contentScore);
   });
