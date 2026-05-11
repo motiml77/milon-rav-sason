@@ -1788,6 +1788,18 @@ function isWholeWord(text, word){
   }
   return re.test(text);
 }
+// ─── התאמת טוקן עברי: מילת חיפוש מול טוקן בטקסט ───
+// מאפשר: התאמה מדויקת, סיומות (רבים וכד'), תחיליות ידועות (ב/ל/ה/ו/מ/ש/כ)
+const _HEB_PRE1 = new Set(['ב','ל','ה','ו','מ','ש','כ']);
+const _HEB_PRE2 = new Set(['וב','ול','וה','ומ','וש','וכ','מה','שה','כש']);
+function tokenMatchesWord(token, word){
+  if(token === word) return true;
+  if(token.startsWith(word)) return true;           // פגם→פגמים, עולם→עולמות
+  const diff = token.length - word.length;
+  if(diff === 1 && _HEB_PRE1.has(token[0]) && token.endsWith(word)) return true;
+  if(diff === 2 && _HEB_PRE2.has(token.slice(0,2)) && token.endsWith(word)) return true;
+  return false;
+}
 // ─── התאמה קפדנית: כל המילים, באותו סדר, במרחק מקסימלי maxBetween ───
 // "יונתן הלך לגן" יימצא ב"יונתן [הקטן] הלך [גם הוא] לגן" — אבל לא ב"לגן הלך יונתן"
 function orderedNearMatch(text, words, wordsNoHe, maxBetween){
@@ -1795,7 +1807,12 @@ function orderedNearMatch(text, words, wordsNoHe, maxBetween){
   if(words.length === 0) return true;
   if(words.length === 1){
     const w = words[0], wNH = wordsNoHe[0];
-    return text.includes(w) || (wNH !== w && text.includes(wNH));
+    // מילה אחת — בדיקה מבוססת טוקנים (לא substring)
+    const toks = text.split(/[^א-ת]+/).filter(Boolean);
+    for(const t of toks){
+      if(tokenMatchesWord(t, w) || (wNH !== w && tokenMatchesWord(t, wNH))) return true;
+    }
+    return false;
   }
 
   const tokens = text.split(/[^א-ת]+/).filter(Boolean);
@@ -1807,7 +1824,7 @@ function orderedNearMatch(text, words, wordsNoHe, maxBetween){
     const pos = [];
     for(let ti = 0; ti < tokens.length; ti++){
       const t = tokens[ti];
-      if(t.includes(w) || (wNH !== w && t.includes(wNH))) pos.push(ti);
+      if(tokenMatchesWord(t, w) || (wNH !== w && tokenMatchesWord(t, wNH))) pos.push(ti);
     }
     if(!pos.length) return false;
     positions.push(pos);
@@ -1857,10 +1874,12 @@ function strictMultiWordMatch(item, words, wordsNoHe, alsoContent){
 function findFirstMatchingDef(item, words, wordsNoHe){
   if(!item.defsN || !Array.isArray(item.defsN)) return -1;
   for(let i = 0; i < item.defsN.length; i++){
-    const d = item.defsN[i];
+    const toks = item.defsN[i].split(/[^א-ת]+/).filter(Boolean);
     for(let wi = 0; wi < words.length; wi++){
       const w = words[wi], wNH = wordsNoHe[wi];
-      if(d.includes(w) || (wNH !== w && d.includes(wNH))) return i;
+      for(const t of toks){
+        if(tokenMatchesWord(t, w) || (wNH !== w && tokenMatchesWord(t, wNH))) return i;
+      }
     }
   }
   return -1;
