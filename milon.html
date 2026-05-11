@@ -1469,32 +1469,91 @@ function searchTitlesOnly(rawQuery){
   return results;
 }
 
+// ─── IndexedDB: שמירת אינדקס מעובד — חוסך JSON.parse + post-processing בביקורים חוזרים ───
+const IDB_NAME = 'milon-cache';
+const IDB_STORE = 'data';
+const IDB_KEY = 'search-index';
+const SEARCH_VERSION = SEARCH_URL.split('?v=')[1] || '';
+
+function idbOpen(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function idbGet(db, key){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function idbPut(db, key, val){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(val, key);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
 // ─── טעינה חכמה של אינדקס חיפוש מלא ───
 let searchIndexPromise = null;
 function ensureSearchIndex(){
   if(searchIndex || searchIndexPromise) return searchIndexPromise;
-  searchIndexPromise = fetch(SEARCH_URL).then(r => r.json()).then(idx => {
-    // post-process: בונה textN מ-defsN (לשימוש פנימי בחיפוש)
-    for(const item of idx){
-      if(item.defsN && Array.isArray(item.defsN)){
-        item.textN = item.defsN.join(' ');
-      }else if(!item.textN){
-        item.textN = '';
+  searchIndexPromise = (async () => {
+    // ── ניסיון 1: IndexedDB (מיידי, ללא רשת) ──
+    try{
+      const db = await idbOpen();
+      const cached = await idbGet(db, IDB_KEY);
+      if(cached && cached.v === SEARCH_VERSION){
+        applySearchIndex(cached.idx);
+        return cached.idx;
+      }
+      // ── ניסיון 2: רשת (או SW cache) ──
+      const idx = await fetch(SEARCH_URL).then(r => r.json());
+      postProcessIndex(idx);
+      applySearchIndex(idx);
+      // שמור ב-IndexedDB לביקור הבא
+      idbPut(db, IDB_KEY, { v: SEARCH_VERSION, idx }).catch(() => {});
+      return idx;
+    }catch(e){
+      // fallback: רשת בלבד (אם IndexedDB לא זמין)
+      try{
+        const idx = await fetch(SEARCH_URL).then(r => r.json());
+        postProcessIndex(idx);
+        applySearchIndex(idx);
+        return idx;
+      }catch(err){
+        console.error('search-index load failed:', err);
+        searchIndexPromise = null;
+        throw err;
       }
     }
-    searchIndex = idx;
-    searchIndexById = {};
-    for(const item of idx) searchIndexById[item.id] = item;
-    // אם המשתמש כבר הקליד משהו — עדכן תוצאות עם אינדקס מלא
-    const q = document.getElementById('search').value.trim();
-    if(q) runSearch(q);
-    return idx;
-  }).catch(err => {
-    console.error('search-index.json load failed:', err);
-    searchIndexPromise = null;  // אפשר retry
-    throw err;
-  });
+  })();
   return searchIndexPromise;
+}
+
+function postProcessIndex(idx){
+  for(const item of idx){
+    if(item.defsN && Array.isArray(item.defsN)){
+      item.textN = item.defsN.join(' ');
+    }else if(!item.textN){
+      item.textN = '';
+    }
+  }
+}
+
+function applySearchIndex(idx){
+  searchIndex = idx;
+  searchIndexById = {};
+  for(const item of idx) searchIndexById[item.id] = item;
+  // אם המשתמש כבר הקליד משהו — עדכן תוצאות עם אינדקס מלא
+  const q = document.getElementById('search').value.trim();
+  if(q) runSearch(q);
 }
 
 async function load(){
