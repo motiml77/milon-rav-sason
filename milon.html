@@ -1851,7 +1851,7 @@ function orderedNearMatch(text, words, wordsNoHe, maxBetween){
 // tier 2: עד RELAXED_GAP מילים בין             → נבחר שני
 // -2 = אין התאמה כלל
 const STRICT_GAP  = 3;     // המקור — בקשת המשתמש
-const RELAXED_GAP = 15;    // גיבוי — מתאים לעברית עם מילות-קישור רבות
+const RELAXED_GAP = 6;     // גיבוי — מרחק סביר לעברית
 function strictMultiWordMatch(item, words, wordsNoHe, alsoContent){
   // ניסיון 1 — קפדני
   if(orderedNearMatch(item.termN, words, wordsNoHe, STRICT_GAP)) return { defIdx: -1, tier: 1 };
