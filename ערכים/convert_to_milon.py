@@ -463,7 +463,7 @@ terms = {
             "id": t["id"],
             "title": t["title"],
             "subtitle": t.get("subtitle", ""),
-            "entries": [{"id": e["id"], "term": e["term"]} for e in t["entries"]]
+            "entries": [{"id": e["id"], "term": e["term"], "termN": normalize_male_chaser(normalize_for_search(e["term"]))} for e in t["entries"]]
         }
         for t in out["topics"]
     ]

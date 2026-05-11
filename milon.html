@@ -1396,7 +1396,7 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-10-0807"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-05-11-1602"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 // data = מבנה הסרגל בלבד (id+term per entry). תוכן מלא נטען לפי דרישה.
 let data            = null;
@@ -1419,7 +1419,57 @@ async function loadEntry(id){
   return entry;
 }
 
-// ─── טעינה חכמה של אינדקס חיפוש: ב-idle, או מיידית עם first-intent ───
+// ─── אינדקס כותרות מהיר (מבוסס terms.json — זמין מיד) ───
+let titleIndex = null;   // [{id, term, termN, topicTitle}] — נבנה מ-terms.json
+function buildTitleIndex(){
+  if(titleIndex || !data) return;
+  titleIndex = [];
+  for(const t of data.topics){
+    for(const e of t.entries){
+      titleIndex.push({ id: e.id, term: e.term, termN: e.termN || '', topicTitle: t.title });
+    }
+  }
+}
+
+// חיפוש כותרות בלבד — עובד מיד, בלי search-index.json
+function searchTitlesOnly(rawQuery){
+  if(!titleIndex) return [];
+  const q = normalizeMaleChaser(normalizeForSearch(rawQuery));
+  if(!q) return [];
+  const words = q.split(/\s+/).filter(w => w.length > 0).slice(0, 10);
+  if(!words.length) return [];
+  const wordsNoHe = words.map(stripHePrefix);
+
+  const results = [];
+  for(const item of titleIndex){
+    let matched = true;
+    for(let i = 0; i < words.length; i++){
+      const w = words[i], wNH = wordsNoHe[i];
+      if(!item.termN.includes(w) && !(wNH !== w && item.termN.includes(wNH))){
+        matched = false; break;
+      }
+    }
+    if(!matched) continue;
+    // בדיקת סדר + קרבה למולטי-מילים
+    if(words.length > 1){
+      if(!orderedNearMatch(item.termN, words, wordsNoHe, STRICT_GAP) &&
+         !orderedNearMatch(item.termN, words, wordsNoHe, RELAXED_GAP)) continue;
+    }
+    results.push({
+      ...item,
+      matchedDefIdx: -1,
+      matchTier: 1,
+      titleScore: 10,
+      contentScore: 0,
+      hasTitle: true,
+      preview: '',
+      defsP: [],
+    });
+  }
+  return results;
+}
+
+// ─── טעינה חכמה של אינדקס חיפוש מלא ───
 let searchIndexPromise = null;
 function ensureSearchIndex(){
   if(searchIndex || searchIndexPromise) return searchIndexPromise;
@@ -1435,7 +1485,7 @@ function ensureSearchIndex(){
     searchIndex = idx;
     searchIndexById = {};
     for(const item of idx) searchIndexById[item.id] = item;
-    // אם המשתמש כבר הקליד משהו לפני שהאינדקס הגיע — הרץ עכשיו
+    // אם המשתמש כבר הקליד משהו — עדכן תוצאות עם אינדקס מלא
     const q = document.getElementById('search').value.trim();
     if(q) runSearch(q);
     return idx;
@@ -1448,10 +1498,12 @@ function ensureSearchIndex(){
 }
 
 async function load(){
-  // ── טעינה ראשונית מינימלית: רק terms.json (12KB) — סרגל + נחיתה ──
+  // ── טעינה ראשונית מינימלית: רק terms.json (~12KB) — סרגל + נחיתה ──
   const terms = await fetch(TERMS_URL).then(r => r.json());
   data = terms;
   renderNav();
+  buildTitleIndex();  // אינדקס כותרות מיידי — חיפוש עובד כבר!
+
   if(data.topics.length){
     currentTopic = data.topics[0].id;
     document.querySelector('.topic').classList.add('open');
@@ -1459,13 +1511,8 @@ async function load(){
     renderTopicLanding(data.topics[0], 0);
   }
 
-  // ── אינדקס חיפוש: ב-idle (אחרי שהדפדפן פנוי) ──
-  // משתמש שגולש — לא חוסם. משתמש שלוחץ על חיפוש — מאיץ דרך ensureSearchIndex
-  if(window.requestIdleCallback){
-    requestIdleCallback(() => ensureSearchIndex(), { timeout: 2500 });
-  }else{
-    setTimeout(() => ensureSearchIndex(), 600);
-  }
+  // ── אינדקס חיפוש מלא: מתחיל לרדת מיד (לא ממתין ל-idle) ──
+  ensureSearchIndex();
 }
 
 function renderNav(){
@@ -1994,19 +2041,20 @@ function highlightMatches(text, words, wordsNoHe){
 }
 
 // ─── רינדור עמוד תוצאות ───
-function renderSearchResults(){
+function renderSearchResults(titleOnly){
   const total = currentSearchResults.length;
   const totalPages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
   if(currentSearchPage > totalPages) currentSearchPage = totalPages;
   if(currentSearchPage < 1) currentSearchPage = 1;
   setBreadcrumb(['חיפוש', `"${currentSearchQuery}"`]);
-
-  if(searchIndex === null){
-    fadeContent(`<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-text">מכין חיפוש…</div></div>`);
+  if(total === 0 && !titleOnly){
+    fadeContent(`<div class="search-no-results">לא נמצאו תוצאות עבור "<strong>${escapeHtml(currentSearchQuery)}</strong>"</div>`);
     return;
   }
-  if(total === 0){
-    fadeContent(`<div class="search-no-results">לא נמצאו תוצאות עבור "<strong>${escapeHtml(currentSearchQuery)}</strong>"</div>`);
+  if(total === 0 && titleOnly){
+    fadeContent(`<div class="search-no-results">
+      <div class="spinner" style="margin:0 auto 12px;width:28px;height:28px"></div>
+      מחפש בתוכן ההגדרות…</div>`);
     return;
   }
 
@@ -2053,7 +2101,7 @@ function renderSearchResults(){
 
   fadeContent(`
     <div class="search-results">
-      <div class="search-results-meta">${total} תוצאות עבור "<strong>${escapeHtml(currentSearchQuery)}</strong>"</div>
+      <div class="search-results-meta">${total} תוצאות עבור "<strong>${escapeHtml(currentSearchQuery)}</strong>"${titleOnly ? ' <span style="color:var(--gold);font-size:0.85em">(טוען חיפוש מלא…)</span>' : ''}</div>
       ${items}
       ${pagination}
     </div>
@@ -2075,8 +2123,10 @@ function runSearch(query){
   currentSearchQuery = query;
   currentSearchPage  = 1;
   if(searchIndex === null){
-    ensureSearchIndex();   // האץ טעינה אם עדיין לא התחיל
-    renderSearchResults();  // יציג ספינר; ייפתח אוטומטית כשהאינדקס יגיע
+    // אינדקס מלא עדיין לא נטען — חיפוש כותרות מיידי!
+    ensureSearchIndex();
+    currentSearchResults = searchTitlesOnly(query);
+    renderSearchResults(/* titleOnly */ true);
     return;
   }
   currentSearchResults = searchEntries(query, searchOptAlsoContent) || [];
