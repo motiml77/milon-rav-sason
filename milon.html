@@ -1908,15 +1908,20 @@ function tokenMatchesWord(token, word){
 }
 // ─── התאמה קפדנית: כל המילים, באותו סדר, במרחק מקסימלי maxBetween ───
 // "יונתן הלך לגן" יימצא ב"יונתן [הקטן] הלך [גם הוא] לגן" — אבל לא ב"לגן הלך יונתן"
-function orderedNearMatch(text, words, wordsNoHe, maxBetween){
+// loose=false: tokenMatchesWord (מדויק/תחיליות ידועות)
+// loose=true:  t.includes(w) (הטיות מורפולוגיות — פגם←להיפגם)
+function orderedNearMatch(text, words, wordsNoHe, maxBetween, loose){
   if(!text) return false;
   if(words.length === 0) return true;
+  const match = loose
+    ? (t, w) => t.includes(w)
+    : (t, w) => tokenMatchesWord(t, w);
+
   if(words.length === 1){
     const w = words[0], wNH = wordsNoHe[0];
-    // מילה אחת — בדיקה מבוססת טוקנים (לא substring)
     const toks = text.split(/[^א-ת]+/).filter(Boolean);
     for(const t of toks){
-      if(tokenMatchesWord(t, w) || (wNH !== w && tokenMatchesWord(t, wNH))) return true;
+      if(match(t, w) || (wNH !== w && match(t, wNH))) return true;
     }
     return false;
   }
@@ -1930,7 +1935,7 @@ function orderedNearMatch(text, words, wordsNoHe, maxBetween){
     const pos = [];
     for(let ti = 0; ti < tokens.length; ti++){
       const t = tokens[ti];
-      if(tokenMatchesWord(t, w) || (wNH !== w && tokenMatchesWord(t, wNH))) pos.push(ti);
+      if(match(t, w) || (wNH !== w && match(t, wNH))) pos.push(ti);
     }
     if(!pos.length) return false;
     positions.push(pos);
@@ -1952,39 +1957,50 @@ function orderedNearMatch(text, words, wordsNoHe, maxBetween){
   return false;
 }
 
-// בדיקה רב-שלבית: מחזירה את אינדקס ההגדרה + tier (1=קפדני, 2=מרגיע)
-// tier 1: עד STRICT_GAP מילים בין מילות חיפוש  → נבחר ראשון בתוצאות
-// tier 2: עד RELAXED_GAP מילים בין             → נבחר שני
+// בדיקה רב-שלבית: מחזירה את אינדקס ההגדרה + tier
+// tier 1: התאמה מדויקת, מרחק ≤3
+// tier 2: התאמה מדויקת, מרחק ≤6
+// tier 3: הטיות מורפולוגיות (substring), מרחק ≤3
 // -2 = אין התאמה כלל
-const STRICT_GAP  = 3;     // המקור — בקשת המשתמש
-const RELAXED_GAP = 6;     // גיבוי — מרחק סביר לעברית
+const STRICT_GAP  = 3;     // מרחק צמוד — בקשת המשתמש
+const RELAXED_GAP = 6;     // מרחק מרוחק סביר לעברית
 function strictMultiWordMatch(item, words, wordsNoHe, alsoContent){
-  // ניסיון 1 — קפדני
+  // ── Tier 1 — התאמה מדויקת + מרחק צמוד ──
   if(orderedNearMatch(item.termN, words, wordsNoHe, STRICT_GAP)) return { defIdx: -1, tier: 1 };
   if(alsoContent && item.defsN && Array.isArray(item.defsN)){
     for(let i = 0; i < item.defsN.length; i++){
       if(orderedNearMatch(item.defsN[i], words, wordsNoHe, STRICT_GAP)) return { defIdx: i, tier: 1 };
     }
   }
-  // ניסיון 2 — מרגיע (אם הקפדני לא מצא)
+  // ── Tier 2 — התאמה מדויקת + מרחק מרוחק ──
   if(orderedNearMatch(item.termN, words, wordsNoHe, RELAXED_GAP)) return { defIdx: -1, tier: 2 };
   if(alsoContent && item.defsN && Array.isArray(item.defsN)){
     for(let i = 0; i < item.defsN.length; i++){
       if(orderedNearMatch(item.defsN[i], words, wordsNoHe, RELAXED_GAP)) return { defIdx: i, tier: 2 };
     }
   }
+  // ── Tier 3 — הטיות מורפולוגיות (substring) + מרחק צמוד ──
+  // תופס: פגם←להיפגם, עולם←עולמות, ברא←נבראו וכד'
+  if(orderedNearMatch(item.termN, words, wordsNoHe, STRICT_GAP, true)) return { defIdx: -1, tier: 3 };
+  if(alsoContent && item.defsN && Array.isArray(item.defsN)){
+    for(let i = 0; i < item.defsN.length; i++){
+      if(orderedNearMatch(item.defsN[i], words, wordsNoHe, STRICT_GAP, true)) return { defIdx: i, tier: 3 };
+    }
+  }
   return { defIdx: -2, tier: 0 };
 }
 
 // עבור חיפוש מילה אחת — איתור ההגדרה הראשונה שמכילה את המילה
-function findFirstMatchingDef(item, words, wordsNoHe){
+// loose=true: גם הטיות מורפולוגיות (substring)
+function findFirstMatchingDef(item, words, wordsNoHe, loose){
   if(!item.defsN || !Array.isArray(item.defsN)) return -1;
+  const match = loose ? (t, w) => t.includes(w) : (t, w) => tokenMatchesWord(t, w);
   for(let i = 0; i < item.defsN.length; i++){
     const toks = item.defsN[i].split(/[^א-ת]+/).filter(Boolean);
     for(let wi = 0; wi < words.length; wi++){
       const w = words[wi], wNH = wordsNoHe[wi];
       for(const t of toks){
-        if(tokenMatchesWord(t, w) || (wNH !== w && tokenMatchesWord(t, wNH))) return i;
+        if(match(t, w) || (wNH !== w && match(t, wNH))) return i;
       }
     }
   }
@@ -2038,19 +2054,52 @@ function searchEntries(rawQuery, alsoContent){
 
     if(!allMatched) continue;
 
-    // STRICT: רב-מילים — שני שלבים: ראשית קפדני (≤3), אחר כך מרגיע (≤15)
+    // ── קביעת tier + הגדרה תואמת ──
     let matchedDefIdx = -1;
-    let matchTier = 1;        // 1=קפדני (preferred), 2=מרגיע
+    let matchTier = 1;
     if(words.length > 1){
       const m = strictMultiWordMatch(item, words, wordsNoHe, alsoContent);
       if(m.defIdx === -2) continue;
       matchedDefIdx = m.defIdx;
       matchTier     = m.tier;
     }else{
-      // מילה אחת — איתור ההגדרה הראשונה המכילה אותה (אם לא בכותרת)
-      if(titleScore === 0){
-        matchedDefIdx = findFirstMatchingDef(item, words, wordsNoHe);
+      // ── מילה אחת: tier 1 (מדויק) או tier 3 (הטיה מורפולוגית) ──
+      const w = words[0], wNH = wordsNoHe[0];
+      const titleToks = item.termN.split(/[^א-ת]+/).filter(Boolean);
+      const exactTitle = titleToks.some(t => tokenMatchesWord(t, w) || (wNH !== w && tokenMatchesWord(t, wNH)));
+      if(exactTitle){
+        matchTier = 1;
+      }else if(alsoContent){
+        const exactDef = findFirstMatchingDef(item, words, wordsNoHe, false);
+        if(exactDef >= 0){ matchTier = 1; matchedDefIdx = exactDef; }
+        else{ matchTier = 3; matchedDefIdx = findFirstMatchingDef(item, words, wordsNoHe, true); }
+      }else{
+        matchTier = 3;  // substring בכותרת
       }
+      // אם נמצא בכותרת אבל צריך למצוא הגדרה להצגה
+      if(matchedDefIdx < 0 && titleScore === 0){
+        matchedDefIdx = findFirstMatchingDef(item, words, wordsNoHe, true);
+      }
+    }
+
+    // ── חישוב דיוק ההתאמה (exactness) ──
+    // התאמה מלאה בכותרת (שם הערך ≈ מילות חיפוש) → ניקוד מקסימלי
+    let exactness = 0;
+    const termWords = item.termN.split(/\s+/).filter(Boolean);
+    const allWordsInTitle = words.every(w => {
+      const wNH = stripHePrefix(w);
+      return item.termN.includes(w) || (wNH !== w && item.termN.includes(wNH));
+    });
+    if(allWordsInTitle){
+      // כותרת קצרה שמכילה את כל מילות החיפוש = מאוד רלוונטי
+      exactness += 100;
+      // בונוס אם הכותרת קצרה (יותר ממוקד)
+      if(termWords.length <= words.length + 2) exactness += 50;
+      if(termWords.length <= words.length) exactness += 50;
+    }
+    // בונוס להתאמת מילה שלמה (לא substring)
+    for(const w of words){
+      if(isWholeWord(item.termN, w)) exactness += 20;
     }
 
     results.push({
@@ -2059,14 +2108,20 @@ function searchEntries(rawQuery, alsoContent){
       matchTier,
       titleScore,
       contentScore,
+      exactness,
       hasTitle: titleScore > 0
     });
   }
 
-  // מיון: tier 1 (קפדני) קודם, אחר כך tier 2; בכל tier — כותרות קודם, ואז ניקוד
+  // ── מיון היררכי: tier → כותרת → דיוק → ניקוד ──
   results.sort((a, b) => {
+    // 1. Tier: מדויק (1) → מרוחק (2) → הטיות (3)
     if(a.matchTier !== b.matchTier) return a.matchTier - b.matchTier;
+    // 2. כותרת קודם לתוכן
     if(a.hasTitle !== b.hasTitle) return a.hasTitle ? -1 : 1;
+    // 3. דיוק ההתאמה (כל מילות החיפוש בכותרת, כותרת קצרה, מילים שלמות)
+    if(a.exactness !== b.exactness) return b.exactness - a.exactness;
+    // 4. ניקוד כולל
     return (b.titleScore + b.contentScore) - (a.titleScore + a.contentScore);
   });
   return results;
