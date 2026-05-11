@@ -483,6 +483,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    min-width: 0;           /* מאפשר כיווץ בתוך grid */
   }
   .main::before{
     content: "";
@@ -513,6 +514,7 @@
     padding: 0 36px;
     position: relative;
     z-index: 2;
+    overflow: hidden;          /* מונע גלישת טקסט מהסרגל */
   }
   .breadcrumb{
     color: var(--ink-soft);
@@ -521,6 +523,10 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
   .breadcrumb-current{ color: var(--ink); font-weight: 700; }
   .breadcrumb-sep{ color: var(--gold-deep); }
@@ -566,6 +572,7 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    flex-shrink: 0;
   }
   .tool-btn{
     background: rgba(255,255,255,0.5);
@@ -621,6 +628,11 @@
     padding: 50px 60px 80px;
     position: relative;
     min-height: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+  @media (max-width: 900px){
+    .content{ padding: 30px 24px 60px; }
   }
 
   /* ─── Spinner (טעינת ערך) ─── */
@@ -779,7 +791,7 @@
     opacity: 0.5;
   }
   .entry-term{
-    font-size: 56px;
+    font-size: clamp(28px, 5vw, 56px);
     font-weight: 900;
     color: var(--ink);
     letter-spacing: 0.01em;
@@ -788,6 +800,8 @@
     display: flex;
     align-items: center;
     gap: 18px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
   .entry-bookmark{
     background: transparent;
@@ -1191,12 +1205,13 @@
     text-align: center;
   }
   .info-title{
-    font-size: 56px;
+    font-size: clamp(28px, 5vw, 56px);
     font-weight: 900;
     color: var(--ink);
     text-align: center;
     line-height: 1.05;
     margin-bottom: 8px;
+    overflow-wrap: break-word;
   }
   .info-subtitle{
     font-size: 16px;
