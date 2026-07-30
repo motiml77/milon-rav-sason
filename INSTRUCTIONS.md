@@ -8,16 +8,25 @@
 
 ```
 rav sason/
-├── milon.html              ← האתר (לפתוח עם שרת, לא מ-file://)
-├── data.json               ← פלט סופי שה-HTML טוען
-├── data.js                 ← פלט ביניים (JS variant של data.json)
+├── milon.html              ← האתר כולו (CSS+JS inline). לפתוח עם שרת, לא מ-file://
+├── terms.json              ← רשימת הערכים לסרגל (קל, נטען ראשון)
+├── search-index.json       ← טקסט נקי לכל הגדרה, לחיפוש ולקטעי תצוגה (~5MB)
+├── entries/t_*.json        ← תוכן מלא לכל ערך, נטען לפי דרישה (lazy)
+├── sw.js                   ← Service Worker
 ├── assets/                 ← לוגו ותמונות
 └── ערכים/
     ├── מושגים לאתר - עפ''י טללי חיים.docx   ← קלט המקור
     ├── convert_docx_hierarchical.py         ← Step 1: docx → data.js
-    ├── convert_to_milon.py                  ← Step 2: data.js → data.json (פורמט milon)
+    ├── convert_to_milon.py                  ← Step 2: data.js → כל פלטי האתר
+    ├── build_search_index.py                ← מודול משותף: פורמט search-index/terms
+    ├── rebuild_index_from_entries.py        ← בונה מחדש אינדקס מ-entries/ בלי ה-docx
+    ├── eval/                                ← מדידת איכות החיפוש (golden set + scorer)
     ├── data.js                              ← פלט ביניים בתיקייה זו
     └── analyze_*.py / find_*.py / debug_*.py ← סקריפטי דיבוג עזר (לא חלק מהזרימה)
+
+> **`data.json` הוסר.** ה-HTML לא טוען אותו יותר — הוא טוען `terms.json`
+> ואז `entries/<id>.json` לפי דרישה. `ערכים/data.json` שנשאר בריפו הוא
+> שארית ביניים ואינו בשימוש.
 ```
 
 ---
@@ -31,7 +40,7 @@ cd 'C:\Users\Moti Levi\Desktop\AI\rav sason\ערכים'
 python -c "
 import os
 import convert_docx_hierarchical as cdh
-docx_path = os.path.abspath([f for f in os.listdir('.') if f.endswith('.docx')][0])
+docx_path = os.path.abspath([f for f in os.listdir('.') if f.endswith('.docx') and not f.startswith('~$')][0])
 data = cdh.convert_docx_to_hierarchical(docx_path)
 cdh.save_to_js(data, 'data.js')
 import convert_to_milon
@@ -40,7 +49,10 @@ import convert_to_milon
 
 זה עושה את כל השלבים:
 1. **Step 1 — `convert_docx_hierarchical.py`**: קורא את ה-`.docx`, מפיק `ערכים/data.js`
-2. **Step 2 — `convert_to_milon.py`**: קורא את `ערכים/data.js`, מפיק `data.json` בשורש (טעון על ידי milon.html)
+2. **Step 2 — `convert_to_milon.py`**: קורא את `ערכים/data.js`, ומפיק:
+   `search-index.json`, `terms.json`, `entries/*.json`, ומעדכן את מספר הגרסה
+   ב-`sw.js` וב-`milon.html`. הפורמט נקבע ב-`build_search_index.py` (מודול משותף) —
+   **אל תשכפל את הלוגיקה הזאת**, אחרת האינדקס ייפרד לשני פורמטים והחיפוש יישבר.
 
 ### הפעלת השרת לבדיקה
 
@@ -185,36 +197,46 @@ if (i > 0 && entry.definitions[i-1].source) cls += ' new-block';
 
 ---
 
-## 8. מבנה data.json הסופי
+## 8. מבנה הפלטים
 
+### `search-index.json` — לחיפוש
 ```json
 {
-  "title": "מילון מונחים בפנימיות התורה",
-  "subtitle": "על פי תורת הרב ראובן ששון שליט\"א",
-  "topics": [
-    {
-      "id": "s_1",
-      "title": "שמות קודש",
-      "subtitle": "",
-      "entries": [
-        {
-          "id": "t_1",
-          "term": "נרנח\"י",
-          "definitions": [
-            {
-              "text": "<HTML עם strong/u/span class=\"text-small\"/span class=\"quote\">",
-              "source": "פרשת תזריע מצורע, שצד-שצה"
-            }
-          ],
-          "related": ["t_524", "t_255"]
-        }
-      ]
-    }
+  "v": "2026-07-29-205241",
+  "topics": ["ערכים כלליים"],
+  "entries": [
+    { "i": "t_1", "t": "נרנח\"י", "p": 0,
+      "d": ["טקסט נקי מלא של ההגדרה הראשונה ✦ המקור", "הגדרה שנייה …"] }
   ]
 }
 ```
+`d` = טקסט נקי (בלי HTML), הגדרה אחת לכל פריט, כולל ציון המקור אחרי `✦`.
+**כל הנרמול והטוקניזציה לחיפוש קורים ב-JS בלבד** — מקור אמת יחיד. בעבר הם
+שוכפלו ל-Python (`termN`/`defsN`) וכל פער בין השניים יצר באגים שקטים.
+
+### `entries/t_<n>.json` — תוכן מלא לערך
+```json
+{ "id": "t_1", "term": "נרנח\"י", "topicId": "s_1", "topicTitle": "ערכים כלליים",
+  "definitions": [{ "text": "<HTML …>", "source": "פרשת תזריע מצורע, שצד-שצה" }],
+  "related": ["t_524", "t_255"] }
+```
+
+### `terms.json` — לסרגל הצדדי
+רק `{id, term}` לכל ערך, בתוך `topics`.
 
 ---
+
+## 8א. מדידת איכות החיפוש
+
+```bash
+node "ערכים/eval/run-eval.mjs"                 # ציון נוכחי
+node "ערכים/eval/run-eval.mjs" --verbose        # דירוג לכל שאילתה
+node "ערכים/eval/run-eval.mjs" --save myname    # שמור מצב להשוואה
+node "ערכים/eval/run-eval.mjs" --diff myname    # מה שופר / נסוג
+```
+מריץ את המנוע האמיתי מתוך `milon.html` (ב-Node, בלי דפדפן) מול
+`ערכים/eval/golden.json`. **כל שינוי בדירוג החיפוש חייב לעבור כאן לפני push** —
+אחרת אין דרך לדעת אם הוא שיפר או הרס.
 
 ## 9. בעיות נפוצות ותיקונים
 
@@ -231,9 +253,9 @@ if (i > 0 && entry.definitions[i-1].source) cls += ' new-block';
 ## 10. סטטיסטיקת התוצאה הנוכחית (להשוואה)
 
 נכון לרגע כתיבת המסמך:
-- 5 מדורים
-- 590 ערכים
-- 4,205 הגדרות
+- 1 מדור
+- 653 ערכים
+- 4,578 הגדרות
 - 2,941 (69%) עם מקור
 - 246 ערכים עם הפניות (`related`)
 - 406 הפניות סה"כ
@@ -259,7 +281,7 @@ Vercel מחובר לגיטהב ופורס אוטומטית כל push לענף `m
 cd 'C:\Users\Moti Levi\Desktop\AI\rav sason\ערכים'
 python -c "
 import os, convert_docx_hierarchical as cdh
-docx_path = os.path.abspath([f for f in os.listdir('.') if f.endswith('.docx')][0])
+docx_path = os.path.abspath([f for f in os.listdir('.') if f.endswith('.docx') and not f.startswith('~$')][0])
 data = cdh.convert_docx_to_hierarchical(docx_path)
 cdh.save_to_js(data, 'data.js')
 import convert_to_milon
@@ -267,12 +289,10 @@ import convert_to_milon
 
 # שלב 2 — העלה לגיטהב (Vercel יפרוס אוטומטית תוך ~30 שניות)
 cd 'C:\Users\Moti Levi\Desktop\AI\rav sason'
-git add data.json
+git add search-index.json terms.json entries/ sw.js milon.html
 git commit -m "עדכון תוכן מהוורד"
 git push
 ```
 
-> אם גם `milon.html` השתנה (שינויי עיצוב), יש להוסיפו ל-`git add`:
-> ```bash
-> git add data.json milon.html
-> ```
+> `sw.js` ו-`milon.html` נכללים כי הצינור מעדכן בהם את מספר הגרסה
+> (בלעדיו הדפדפן יגיש למשתמשים חוזרים אינדקס ישן).

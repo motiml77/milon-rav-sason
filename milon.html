@@ -2,10 +2,14 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#4a2f17" />
 <title>מילון פנימיות התורה</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500&display=swap"></noscript>
 <style>
   :root{
     --wood-dark: #4a2f17;
@@ -38,9 +42,14 @@
   .page{
     display: grid;
     grid-template-columns: var(--sidebar-width, 340px) 6px 1fr;
-    height: 100vh;
+    height: 100vh;              /* fallback לדפדפנים ישנים */
+    height: 100dvh;             /* גובה חלון דינמי — לא נחתך כשסרגל הכתובת במובייל מוצג */
     padding: 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    padding-left:  max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
     gap: 0;
+    min-height: 0;
   }
 
   /* ─── Splitter (גרירה לשינוי פרופורציה בין סרגל וחלון) ─── */
@@ -65,6 +74,8 @@
     transition: opacity 0.15s, background 0.15s;
   }
   .splitter:hover::before{ opacity: 1; background: var(--gold-bright); }
+  .splitter:focus-visible{ outline: none; }
+  .splitter:focus-visible::before{ opacity: 1; background: var(--crimson); height: 120px; }
   .splitter.dragging::before{ opacity: 1; background: var(--crimson); }
   body.resizing{ cursor: col-resize; user-select: none; }
   body.resizing iframe, body.resizing *{ pointer-events: none; }
@@ -75,7 +86,7 @@
     position: relative;
     background:
       linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
-    border-radius: 8px 0 0 8px;
+    border-radius: 0 8px 8px 0;   /* RTL: הסרגל בימין — הפינות המעוגלות בחוץ */
     box-shadow:
       0 12px 40px rgba(0,0,0,0.5),
       inset 0 0 0 1px rgba(184, 137, 58, 0.3);
@@ -92,10 +103,6 @@
         rgba(120,80,30,0.03) 2px, rgba(120,80,30,0.03) 3px);
     pointer-events: none;
   }
-  .sidebar::after{
-    content: none;
-  }
-
   .brand{
     padding: 13px 12px 9px;
     text-align: center;
@@ -127,10 +134,6 @@
     font-weight: 700;
     font-style: italic;
     opacity: 0.75;
-  }
-    margin-top: 6px;
-    letter-spacing: 0.2em;
-    font-weight: 600;
   }
 
   /* ─── תיבת חיפוש מאוחדת ─── */
@@ -423,11 +426,11 @@
   .entries{
     overflow: hidden;
     max-height: 0;
-    transition: max-height 0.3s ease;
+    /* אין transition: הרשימה בגובה ~30,000px, אנימציה על max-height רק גורמת לקפיצה */
     padding: 0 8px;
   }
   /* גובה מספיק גדול שיכיל גם מדורים עם מאות ערכים — הגלילה נשארת ב-.nav */
-  .topic.open .entries{ max-height: 50000px; padding-top: 6px; padding-bottom: 6px;}
+  .topic.open .entries{ max-height: none; padding-top: 6px; padding-bottom: 6px;}
 
   .entry-link{
     display: flex;
@@ -476,7 +479,7 @@
     position: relative;
     background:
       linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
-    border-radius: 0 8px 8px 0;
+    border-radius: 8px 0 0 8px;   /* RTL: התוכן בשמאל */
     box-shadow:
       0 12px 40px rgba(0,0,0,0.5),
       inset 0 0 0 1px rgba(184, 137, 58, 0.3);
@@ -528,7 +531,9 @@
     text-overflow: ellipsis;
     min-width: 0;
   }
-  .breadcrumb-current{ color: var(--ink); font-weight: 700; }
+  .breadcrumb > span{ min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .breadcrumb-sep{ flex: 0 0 auto; }
+  .breadcrumb-current{ color: var(--ink); font-weight: 700; flex: 1 1 auto; }
   .breadcrumb-sep{ color: var(--gold-deep); }
 
   .sidebar-pages{
@@ -603,13 +608,6 @@
     box-shadow: 0 2px 6px rgba(139,46,28, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
   }
   .tool-btn svg{ display: block; }
-  .tool-divider{
-    width: 1px;
-    height: 22px;
-    background: var(--gold);
-    opacity: 0.5;
-    margin: 0 2px;
-  }
 
   .scroll-area{
     flex: 1;
@@ -852,15 +850,6 @@
     padding-top: 24px;
     border-top: 1px dotted var(--gold);
   }
-  .definition-num{
-    position: absolute;
-    right: -2px; top: 0;
-    color: var(--gold);
-    font-size: 32px;
-    font-weight: 300;
-    line-height: 1;
-    font-family: 'Frank Ruhl Libre', serif;
-  }
   .definition.first .definition-text::first-letter{
     float: right;
     font-size: 64px;
@@ -1026,17 +1015,6 @@
     opacity: 0.7;
   }
 
-  .folio{
-    position: absolute;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--gold-deep);
-    font-size: 12px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    z-index: 4;
-  }
 
   /* Rabbi card */
   .rabbi-card{
@@ -1343,12 +1321,118 @@
   }
   body[data-font="lg"] .definition-text .quote{ font-size: 0.94em; }
   body[data-font="xl"] .definition-text .quote{ font-size: 0.95em; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     מובייל / מסך צר — הסרגל הופך למגירה נשלפת
+     ═══════════════════════════════════════════════════════════════ */
+  .sr-only{
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .nav-toggle{ display: none; }
+  .nav-backdrop{ display: none; }
+
+  @media (max-width: 860px){
+    .page{
+      grid-template-columns: 1fr;
+      padding: 0;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .splitter{ display: none; }
+
+    .sidebar{
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: min(88vw, 380px);
+      border-radius: 0;
+      z-index: 60;
+      transform: translateX(101%);
+      /* visibility מוציא את המגירה הסגורה מסדר ה-Tab ומעץ הנגישות */
+      visibility: hidden;
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1), visibility 0.28s;
+      box-shadow: -14px 0 40px rgba(0,0,0,0.45);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    /* מצב פתוח מסומן ישירות על האלמנט — לא תלוי בסלקטור-צאצא מ-body */
+    .sidebar.open{ transform: translateX(0); visibility: visible; }
+
+    .nav-backdrop{
+      display: block;
+      position: fixed; inset: 0;
+      background: rgba(20,12,4,0.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s;
+      z-index: 55;
+      border: none;
+    }
+    .nav-backdrop.open{ opacity: 1; pointer-events: auto; }
+
+    .main{ border-radius: 0; }
+    .main::before{ display: none; }
+    .topbar{ height: 52px; padding: 0 10px; gap: 6px; }
+    .breadcrumb{ font-size: 12px; gap: 5px; }
+    .nav-toggle{ display: inline-flex; }
+
+    .content{ padding: 22px 16px 56px; }
+    .topic-landing{ padding-top: 10px; }
+    .topic-landing-title{ font-size: clamp(30px, 8.5vw, 52px); }
+    /* justify במסך צר יוצר "נהרות" של רווחים — עדיף יישור לימין */
+    .definition-text{ font-size: 17px; line-height: 1.85; text-align: right; }
+    body[data-font="lg"] .definition-text{ font-size: 19px; }
+    body[data-font="xl"] .definition-text{ font-size: 21px; }
+    .entry-term{ font-size: clamp(26px, 7.5vw, 40px); }
+    .search-result{ padding: 14px 14px; }
+    /* iOS מזמזם פנימה כשגודל גופן של קלט קטן מ-16px */
+    .search input{ font-size: 16px; }
+  }
+
+  /* ניווט מגירה — כפתור ההמבורגר */
+  .nav-toggle{
+    background: rgba(255,255,255,0.5);
+    border: 1px solid var(--gold);
+    color: var(--gold-deep);
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-toggle:hover{ background: var(--gold); color: var(--cream); }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ transition-duration: 0.01ms !important; }
+    .sidebar, .nav-backdrop{ transition: none; }
+    .fade-stage{ animation: none !important; }
+    mark.search-hl-mark{ animation: none !important; }
+    html{ scroll-behavior: auto !important; }
+  }
+
+  /* ═══ הדפסה: בלי הסרגל, בלי חיתוך לגובה מסך אחד ═══ */
+  @media print{
+    html, body{ height: auto !important; overflow: visible !important; background: #fff !important; }
+    .page{ display: block !important; height: auto !important; padding: 0 !important; }
+    .sidebar, .splitter, .topbar, .nav-backdrop, .nav-toggle, .entry-bookmark, .search-pagination{ display: none !important; }
+    .main{ box-shadow: none !important; border-radius: 0 !important; background: #fff !important; overflow: visible !important; }
+    .scroll-area{ overflow: visible !important; height: auto !important; }
+    .content{ padding: 0 !important; overflow: visible !important; }
+    .definition-text{ font-size: 12pt; line-height: 1.6; color: #000; }
+    .definition{ break-inside: avoid; }
+    .entry-term{ font-size: 22pt; }
+    a{ color: #000; text-decoration: none; }
+  }
 </style>
 </head>
 <body data-font="md">
 
 <div class="page">
-  <aside class="sidebar">
+  <div class="nav-backdrop" id="nav-backdrop"></div>
+  <div id="a11y-status" role="status" aria-live="polite" class="sr-only"></div>
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-pages" id="sidebar-pages">
       <button class="page-btn" data-page="dictionary" title="חזרה למילון">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -1364,7 +1448,7 @@
       </button>
     </div>
     <div class="brand">
-      <img class="brand-emblem" src="assets/logo-mlh.png" alt="מלאה הארץ דעה - בראשות הרב ראובן ששון"/>
+      <img class="brand-emblem" src="assets/logo-mlh.png" width="626" height="841" decoding="async" alt="מלאה הארץ דעה - בראשות הרב ראובן ששון"/>
       <div class="brand-title">מילון מונחים</div>
       <div class="brand-subtitle">פנימיות התורה</div>
     </div>
@@ -1394,10 +1478,13 @@
     <nav class="nav" id="nav"></nav>
   </aside>
 
-  <div class="splitter" id="splitter" title="גרור כדי לשנות פרופורציה" role="separator" aria-orientation="vertical"></div>
+  <div class="splitter" id="splitter" title="גרור, או השתמש בחיצים, כדי לשנות פרופורציה" role="separator" aria-orientation="vertical" tabindex="0" aria-label="שינוי רוחב הסרגל"></div>
 
   <main class="main">
     <div class="topbar">
+      <button class="nav-toggle" id="nav-toggle" type="button" title="רשימת הערכים" aria-label="פתח את רשימת הערכים" aria-controls="sidebar" aria-expanded="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
       <div class="breadcrumb" id="breadcrumb">
         <span>אוצר המונחים</span>
       </div>
@@ -1419,214 +1506,681 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-05-11-1602"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-07-29-205241"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
-// data = מבנה הסרגל בלבד (id+term per entry). תוכן מלא נטען לפי דרישה.
-let data            = null;
-let searchIndex     = null;             // ייטען במקביל
-let searchIndexById = null;             // map: id → searchIndex item (לתצוגות מהירות)
-const entryCache    = new Map();        // id → entry data (lazy-loaded)
-let currentTopic    = null;
-let currentEntry    = null;
+const DATA_VERSION = SEARCH_URL.split('?v=')[1] || '';
+// גרסת הקוד — יש להעלות אותה כששינוי בקוד משנה את מבנה האינדקס הבנוי בזיכרון,
+// אחרת משתמש חוזר יטען מ-IndexedDB מבנה שנבנה ע"י גרסה ישנה.
+const INDEX_CODE_VERSION = 'v4-abbrev-fuzzy';
 
-// ─── Lazy load של ערך בודד (עם cache) ───
+let data          = null;   // terms.json — הסרגל הצדדי
+let searchData    = null;   // search-index.json — { topics, entries }
+let searchIx      = null;   // האינדקס ההפוך הבנוי בזיכרון
+let searchById    = null;   // id → { entry, idx }
+let currentTopic  = null;
+let currentEntry  = null;
+const entryCache    = new Map();
+const entryInflight = new Map();   // מונע סופת בקשות בריחוף על רשימת 653 הערכים
+
+// ─── אחסון מקומי בטוח ───
+// localStorage זורק SecurityError בגלישה פרטית / כשחסומים נתוני אתר.
+// לפני התיקון, קריאה לא-מוגנת ב-setupSplitter הפילה את כל הסקריפט לפני load().
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+// ─── טעינת ערך בודד (עם cache + מיזוג בקשות במעוף) ───
 async function loadEntry(id){
   if(entryCache.has(id)) return entryCache.get(id);
-  // משתמש באותה גרסה כמו SEARCH_URL כדי לפסול cache ישן באוטומציה
-  const v = SEARCH_URL.split('?v=')[1] || '';
-  const url = `${ENTRY_URL_PREFIX}${id}.json${v ? '?v='+v : ''}`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error(`טעינת ערך ${id} נכשלה (${res.status})`);
-  const entry = await res.json();
-  entryCache.set(id, entry);
-  return entry;
+  const pending = entryInflight.get(id);
+  if(pending) return pending;
+  const url = ENTRY_URL_PREFIX + id + '.json' + (DATA_VERSION ? '?v=' + DATA_VERSION : '');
+  const p = fetch(url)
+    .then(res => { if(!res.ok) throw new Error('טעינת ערך ' + id + ' נכשלה (' + res.status + ')'); return res.json(); })
+    .then(entry => { entryCache.set(id, entry); entryInflight.delete(id); return entry; })
+    .catch(err => { entryInflight.delete(id); throw err; });
+  entryInflight.set(id, p);
+  return p;
 }
 
-// ─── אינדקס כותרות מהיר (מבוסס terms.json — זמין מיד) ───
-let titleIndex = null;   // [{id, term, termN, topicTitle}] — נבנה מ-terms.json
-function buildTitleIndex(){
-  if(titleIndex || !data) return;
-  titleIndex = [];
-  for(const t of data.topics){
-    for(const e of t.entries){
-      titleIndex.push({ id: e.id, term: e.term, termN: e.termN || '', topicTitle: t.title });
-    }
-  }
+// ════════════════════════════════════════════════════════════════════
+//  מנוע חיפוש עברי — טוקניזציה, אינדקס הפוך, דירוג
+//  כל הנרמול קורה כאן בלבד. Python מספק טקסט נקי בלבד, כך שאין יותר
+//  שתי מימושי-נרמול שיכולים להיפרד זה מזה.
+// ════════════════════════════════════════════════════════════════════
+const SOF_MAP = { 'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ' };
+const SOF_RE  = /[ךםןףץ]/g;
+const NIKUD_RE = /[֑-ׇ]/;
+const NIKUD_ALL = /[֑-ׇ]/g;
+
+function isWordCode(c){
+  return (c >= 0x5d0 && c <= 0x5ea) || (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122);
 }
+function isSofitCode(c){ return c===0x5da||c===0x5dd||c===0x5df||c===0x5e3||c===0x5e5; }
+function isHebCode(c){ return c >= 0x5d0 && c <= 0x5ea; }
+// גרשיים בתוך מילה עברית = קיצור (נרנח"י, א"א, בי"ע), לא גבול מילה.
+function isGershCode(c){ return c === 0x22 || c === 0x5f4; }   // רק גרשיים מסמן קיצור
+const GERSH_RE = /["״]/g;   // גרש בודד (') הוא מרכאות בקורפוס הזה, לא קיצור
 
-// חיפוש כותרות בלבד — עובד מיד, בלי search-index.json
-function searchTitlesOnly(rawQuery){
-  if(!titleIndex) return [];
-  const q = normalizeMaleChaser(normalizeForSearch(rawQuery));
-  if(!q) return [];
-  const words = q.split(/\s+/).filter(w => w.length > 0).slice(0, 10);
-  if(!words.length) return [];
-  const wordsNoHe = words.map(stripHePrefix);
-
-  const results = [];
-  for(const item of titleIndex){
-    let matched = true;
-    for(let i = 0; i < words.length; i++){
-      const w = words[i], wNH = wordsNoHe[i];
-      if(!item.termN.includes(w) && !(wNH !== w && item.termN.includes(wNH))){
-        matched = false; break;
+// סריקה אחת: מסיר ניקוד, מקפל אותיות סופיות (ם→מ, ן→נ …), מפריד על תו לא-מילה.
+// קיפול אותיות סופיות הוא התיקון שגורם ל"תיקון" למצוא את "תיקונים".
+function tokenize(s, flags){
+  const out = [];
+  if(!s) return out;
+  if(NIKUD_RE.test(s)) s = s.replace(NIKUD_ALL, '');
+  const n = s.length;
+  let i = 0;
+  while(i < n){
+    const c = s.charCodeAt(i);
+    if(!isWordCode(c)){ i++; continue; }
+    let j = i + 1, sof = isSofitCode(c), up = c >= 65 && c <= 90, gersh = false;
+    while(j < n){
+      const d = s.charCodeAt(j);
+      if(isGershCode(d)){
+        // שמור את הגרשיים בתוך המילה רק אם הוא חסום משני צדיו באות עברית
+        if(isHebCode(s.charCodeAt(j - 1)) && isHebCode(s.charCodeAt(j + 1))){ gersh = true; j++; continue; }
+        break;
       }
+      if(!isWordCode(d)) break;
+      if(isSofitCode(d)) sof = true;
+      if(d >= 65 && d <= 90) up = true;
+      j++;
     }
-    if(!matched) continue;
-    // בדיקת סדר + קרבה למולטי-מילים
-    if(words.length > 1){
-      if(!orderedNearMatch(item.termN, words, wordsNoHe, STRICT_GAP) &&
-         !orderedNearMatch(item.termN, words, wordsNoHe, RELAXED_GAP)) continue;
+    let t = s.slice(i, j);
+    if(gersh) t = t.replace(GERSH_RE, '');
+    if(sof) t = t.replace(SOF_RE, ch => SOF_MAP[ch]);
+    if(up)  t = t.toLowerCase();
+    out.push(t);
+    if(flags) flags.push(gersh);
+    i = j;
+  }
+  return out;
+}
+
+// כתיב מלא/חסר: משמיט י/ו אחרי האות הראשונה. משמש רק כשכבת התאמה חלשה,
+// לעולם לא כבסיס להשוואת תחיליות (שם הוא היה יוצר התאמות שווא: אור↔ארון).
+function skeleton(w){
+  if(w.length <= 2) return w;
+  let r = w[0];
+  for(let i = 1; i < w.length; i++){ const ch = w[i]; if(ch !== 'י' && ch !== 'ו') r += ch; }
+  return r;
+}
+
+// קבוצה סגורה של סיומות עבריות — הרחבת תחיליות מותרת רק אם השארית היא סיומת
+// לגיטימית. זה מה שמונע "תפילה"→"תפילין" ו"סוד"→"סדר".
+const SUFFIXES = new Set([
+  '','ה','ת','י','ו','כ','נ','מ',
+  'ימ','ות','יות','ינ','אות','תא','אי','אה',
+  'ני','נו','נה','נמ','כמ','כנ','המ','הנ','יו','יה','יכ','ינו','יני',
+  'תי','תמ','תנ','תו','תה','תכ','ית','יתא',
+  'ותי','ותיו','ותיה','ותינו','ותיכמ','יהמ','יהנ','ותמ','ותנ'
+]);
+const PREFIXES = ['ו','ב','ל','ה','מ','ש','כ','וב','ול','וה','ומ','וש','וכ','מה','שה','כש','לה','בה','כה','מש','שב','ומה','וכש','ולה','שכ','לכש'];
+// ─── קיצורים מקובלים בפנימיות התורה: קיצור (בלי גרשיים) → הצורה המלאה ───
+// מאפשר שגם "א\"א" וגם "אריך אנפין" יובילו לאותו ערך.
+const ABBREV_EXPAND = {
+  'אא': 'אריך אנפין',        'זא': 'זעיר אנפין',
+  'עק': 'עתיק יומין',        'זון': 'זעיר אנפין ונוקבא',
+  'ביע': 'בריאה יצירה עשייה', 'אק': 'אדם קדמון',
+  'אס': 'אין סוף',           'אאס': 'אור אין סוף',
+  'עח': 'עץ חיים',           'נרנחי': 'נפש רוח נשמה חיה יחידה',
+  'נרנ': 'נפש רוח נשמה',      'נשי': 'נשמה חיה יחידה',
+  'תושבכ': 'תורה שבכתב',      'תושבע': 'תורה שבעל פה',
+  'אנכ': 'אורות ניצוצות כלים', 'חבד': 'חכמה בינה דעת',
+  'חגת': 'חסד גבורה תפארת',   'מן': 'מוחין דנוקבא',
+  'נהי': 'נצח הוד יסוד',      'קבה': 'הקדוש ברוך הוא',
+  'עמי': 'עם ישראל',          'כנסי': 'כנסת ישראל',
+  'עוהז': 'עולם הזה',         'עוהב': 'עולם הבא',
+  'מת': 'מתן תורה',           'אדהר': 'אדם הראשון'
+};
+
+const STOPWORDS = new Set(['של','את','הוא','היא','זה','זו','על','אל','כי','אמ','לא','גמ','או','כמו','אשר','עמ','אבל','רק','כל','יש']);
+
+const Q_EXACT=1.00, Q_SUFFIX=0.88, Q_PREFIXED=0.80, Q_PRE_SUF=0.72, Q_STEMCUT=0.60, Q_SKEL=0.52;
+const STRONG_MATCH = 0.72;   // מכאן ומעלה נחשב "התאמה חזקה" לצורך דירוג
+const PROX_TOPK = 120;       // כמה מועמדים מקבלים ניתוח קרבה מלא
+
+// ─── בניית אינדקס (ניתנת לפיצול למנות כדי לא לתקוע את הדפדפן) ───
+function createIndexBuilder(items){
+  const abbrev = new Set();   // טוקנים שמקורם בקיצור עם גרשיים
+  const vocab = new Map(), vocabList = [], docs = [];
+  let at = 0;
+  function intern(tok){
+    let id = vocab.get(tok);
+    if(id === undefined){ id = vocabList.length; vocab.set(tok, id); vocabList.push(tok); }
+    return id;
+  }
+  return {
+    total: items.length,
+    get position(){ return at; },
+    step(count){
+      const end = Math.min(items.length, at + count);
+      for(; at < end; at++){
+        const e = items[at];
+        const tf = [];
+        const titleToks = tokenize(e.t, tf);
+        const title = titleToks.map(intern);
+        for(let k = 0; k < titleToks.length; k++) if(tf[k]) abbrev.add(titleToks[k]);
+        const defs = (e.d || []).map(txt => {
+          const df = [];
+          const dt = tokenize(txt, df);
+          for(let k = 0; k < dt.length; k++) if(df[k]) abbrev.add(dt[k]);
+          return dt.map(intern);
+        });
+        let len = title.length;
+        for(const ds of defs) len += ds.length;
+        docs.push({ title: title, defs: defs, len: len || 1, titleLen: title.length || 1 });
+      }
+      return at >= items.length;
+    },
+    finish(){
+      const nV = vocabList.length, nD = docs.length;
+      const tfTitle = new Array(nV), tfBody = new Array(nV);
+      for(let i = 0; i < nV; i++){ tfTitle[i] = []; tfBody[i] = []; }
+      // טכניקת "המסמך האחרון שנראה" — חוסכת הקצאת Map לכל מסמך
+      const lastT = new Int32Array(nV).fill(-1), lastB = new Int32Array(nV).fill(-1);
+      for(let d = 0; d < nD; d++){
+        const doc = docs[d];
+        for(const id of doc.title){
+          const arr = tfTitle[id];
+          if(lastT[id] !== d){ lastT[id] = d; arr.push(d, 1); } else arr[arr.length-1]++;
+        }
+        for(const ds of doc.defs) for(const id of ds){
+          const arr = tfBody[id];
+          if(lastB[id] !== d){ lastB[id] = d; arr.push(d, 1); } else arr[arr.length-1]++;
+        }
+      }
+      const skelMap = new Map();
+      for(let id = 0; id < nV; id++){
+        const sk = skeleton(vocabList[id]);
+        let a = skelMap.get(sk); if(!a) skelMap.set(sk, a = []); a.push(id);
+      }
+      const sortedIds = vocabList.map((_, i) => i)
+        .sort((a, b) => vocabList[a] < vocabList[b] ? -1 : vocabList[a] > vocabList[b] ? 1 : 0);
+      const sortedTokens = sortedIds.map(i => vocabList[i]);
+      let sum = 0; for(const d of docs) sum += d.len;
+      return { vocab, vocabList, skelMap, tfTitle, tfBody, docs, sortedTokens, sortedIds,
+               abbrev: abbrev, avgLen: sum / (nD || 1), nDocs: nD };
     }
-    results.push({
-      ...item,
-      matchedDefIdx: -1,
-      matchTier: 1,
-      titleScore: 10,
-      contentScore: 0,
-      hasTitle: true,
-      preview: '',
-      defsP: [],
+  };
+}
+function buildIndexSync(items){
+  const b = createIndexBuilder(items);
+  while(!b.step(2000));
+  return b.finish();
+}
+
+function prefixRange(ix, w, cb){
+  const st = ix.sortedTokens, si = ix.sortedIds;
+  let lo = 0, hi = st.length;
+  while(lo < hi){ const m = (lo + hi) >> 1; if(st[m] < w) lo = m + 1; else hi = m; }
+  for(let i = lo; i < st.length && st[i].startsWith(w); i++) cb(si[i], st[i]);
+}
+
+// מילת חיפוש → Map(tokenId → איכות ההתאמה 0..1)
+function resolveWord(ix, w, exactOnly){
+  const q = new Map();
+  function bump(id, v){ const c = q.get(id); if(c === undefined || c < v) q.set(id, v); }
+  const ex = ix.vocab.get(w);
+  if(ex !== undefined) bump(ex, Q_EXACT);
+  if(w.length < 2) return q;                      // אות בודדת: התאמה מדויקת בלבד
+  // המשתמש הקליד גרשיים => זה קיצור. הרחבה מורפולוגית על גזע של 2-3 אותיות
+  // הייתה גורפת חצי מהמילון, ולכן קיצור מותאם בדיוק בלבד.
+  // הדגל בא מהשאילתה ולא מאוצר-המילים: "אור" מופיע גם כקיצור בקורפוס,
+  // ואסור שזה ימנע ממנו למצוא "אורות".
+  if(exactOnly && w.length <= 4) return q;
+  prefixRange(ix, w, (id, tok) => { if(tok !== w && SUFFIXES.has(tok.slice(w.length))) bump(id, Q_SUFFIX); });
+  for(const p of PREFIXES){
+    const pw = p + w;
+    prefixRange(ix, pw, (id, tok) => {
+      const rest = tok.slice(pw.length);
+      if(SUFFIXES.has(rest)) bump(id, rest ? Q_PRE_SUF : Q_PREFIXED);
     });
   }
-  return results;
+  if(w.length >= 4 && (w.endsWith('ה') || w.endsWith('ת') || w.endsWith('י'))){
+    const stem = w.slice(0, -1);
+    prefixRange(ix, stem, (id, tok) => { if(SUFFIXES.has(tok.slice(stem.length))) bump(id, Q_STEMCUT); });
+  }
+  if(w.length >= 3){
+    const ids = ix.skelMap.get(skeleton(w));
+    if(ids) for(const id of ids) bump(id, Q_SKEL);
+  }
+  return q;
 }
 
-// ─── IndexedDB: שמירת אינדקס מעובד — חוסך JSON.parse + post-processing בביקורים חוזרים ───
+// ─── תיקון שגיאת כתיב: מחזיר את מילת האוצר הקרובה ביותר במרחק עריכה 1 ───
+// עלות: ~28*len בדיקות Map. רץ רק כשאין תוצאות בכלל.
+const HEB_LETTERS = 'אבגדהוזחטיכלמנסעפצקרשת';
+function fuzzyFix(ix, w){
+  if(w.length < 3) return w;
+  if(ix.vocab.has(w)) return w;
+  let best = null, bestDf = 0;
+  const consider = cand => {
+    if(cand === w || cand.length < 2) return;
+    const id = ix.vocab.get(cand);
+    if(id === undefined) return;
+    // העדף את המילה הנפוצה יותר — סביר יותר שזו הכוונה
+    const df = (ix.tfTitle[id].length >> 1) * 8 + (ix.tfBody[id].length >> 1);
+    if(df > bestDf){ bestDf = df; best = cand; }
+  };
+  for(let i = 0; i < w.length; i++) consider(w.slice(0, i) + w.slice(i + 1));          // מחיקה
+  for(let i = 0; i < w.length; i++)
+    for(const ch of HEB_LETTERS) if(ch !== w[i]) consider(w.slice(0, i) + ch + w.slice(i + 1));  // החלפה
+  for(let i = 1; i <= w.length; i++)
+    for(const ch of HEB_LETTERS) consider(w.slice(0, i) + ch + w.slice(i));            // הוספה
+  for(let i = 0; i + 1 < w.length; i++)                                                // החלפת סדר
+    consider(w.slice(0, i) + w[i+1] + w[i] + w.slice(i + 2));
+  return best || w;
+}
+
+function orderedSpan(lists){
+  const n = lists.length;
+  if(n === 1) return lists[0].length ? 0 : -1;
+  let best = Infinity;
+  for(const start of lists[0]){
+    let prev = start, ok = true;
+    for(let w = 1; w < n; w++){
+      const arr = lists[w]; let found = -1;
+      for(let k = 0; k < arr.length; k++) if(arr[k] > prev){ found = arr[k]; break; }
+      if(found === -1){ ok = false; break; }
+      prev = found;
+    }
+    if(ok && prev - start < best) best = prev - start;
+  }
+  return best === Infinity ? -1 : best;
+}
+function posIn(stream, qmap){
+  const p = [];
+  for(let i = 0; i < stream.length; i++) if(qmap.has(stream[i])) p.push(i);
+  return p;
+}
+
+function runSearchPass(ix, resolved, titleOnly){
+  const N = resolved.length, nD = ix.nDocs;
+  const tQ = new Float64Array(nD), bQ = new Float64Array(nD);
+  const tMin = new Float64Array(nD).fill(1), bMin = new Float64Array(nD).fill(1);
+  const tCov = new Uint8Array(nD), bCov = new Uint8Array(nD);
+  const touched = new Set();
+  for(let wi = 0; wi < N; wi++){
+    const qmap = resolved[wi].qmap;
+    const bt = new Map(), bb = new Map();
+    for(const pair of qmap){
+      const id = pair[0], qv = pair[1];
+      const pt = ix.tfTitle[id];
+      for(let k = 0; k < pt.length; k += 2){
+        const d = pt[k], sc = qv * (1 + Math.log(1 + pt[k+1]) * 0.3);
+        const cur = bt.get(d);
+        if(cur === undefined) bt.set(d, [qv, sc]);
+        else { if(cur[0] < qv) cur[0] = qv; if(cur[1] < sc) cur[1] = sc; }
+      }
+      if(!titleOnly){
+        const pb = ix.tfBody[id];
+        for(let k = 0; k < pb.length; k += 2){
+          const d = pb[k], sc = qv * (1 + Math.log(1 + pb[k+1]) * 0.3);
+          const cur = bb.get(d);
+          if(cur === undefined) bb.set(d, [qv, sc]);
+          else { if(cur[0] < qv) cur[0] = qv; if(cur[1] < sc) cur[1] = sc; }
+        }
+      }
+    }
+    for(const kv of bt){ const d = kv[0], v = kv[1]; tCov[d]++; tQ[d] += v[1]; if(v[0] < tMin[d]) tMin[d] = v[0]; touched.add(d); }
+    for(const kv of bb){ const d = kv[0], v = kv[1]; bCov[d]++; bQ[d] += v[1]; if(v[0] < bMin[d]) bMin[d] = v[0]; touched.add(d); }
+  }
+  const pre = [];
+  for(const d of touched){
+    const tFull = tCov[d] === N, bFull = bCov[d] === N;
+    if(!tFull && !bFull) continue;
+    const doc = ix.docs[d];
+    const focus = tFull ? (N / doc.titleLen) * tMin[d] : 0;
+    const lenNorm = 1 / (1 + Math.log(1 + doc.len / ix.avgLen));
+    pre.push({ d: d, tFull: tFull, bFull: bFull,
+               tMin: tFull ? tMin[d] : 0, bMin: bFull ? bMin[d] : 0,
+               base: tQ[d] * 14 + focus * 45 + (bFull ? bQ[d] * 1.5 * lenNorm : 0) });
+  }
+  pre.sort((a, b) => b.base - a.base);
+  const limit = N > 1 ? Math.min(pre.length, PROX_TOPK) : 0;
+  const out = [];
+  for(let i = 0; i < pre.length; i++){
+    const p = pre[i], doc = ix.docs[p.d];
+    let tSpan = p.tFull ? 0 : -1, bSpan = p.bFull ? 0 : -1;
+    if(i < limit){
+      tSpan = p.tFull ? orderedSpan(resolved.map(r => posIn(doc.title, r.qmap))) : -1;
+      if(p.bFull){
+        bSpan = -1;
+        for(let di = 0; di < doc.defs.length; di++){
+          const lists = resolved.map(r => posIn(doc.defs[di], r.qmap));
+          let ok = true;
+          for(const l of lists) if(!l.length){ ok = false; break; }
+          if(!ok) continue;
+          const s = orderedSpan(lists);
+          if(s >= 0 && (bSpan < 0 || s < bSpan)) bSpan = s;
+        }
+      }
+    }
+    const tStrong = p.tMin >= STRONG_MATCH, bStrong = p.bMin >= STRONG_MATCH;
+    let tier;
+    if(p.tFull && tStrong && tSpan === N-1)      tier = 0;   // כל המילים בכותרת, צמודות
+    else if(p.tFull && tStrong && tSpan >= 0)    tier = 1;   // בכותרת, לפי הסדר
+    else if(p.tFull && tStrong)                  tier = 2;   // בכותרת
+    else if(p.tFull)                             tier = 3;   // בכותרת אך התאמה חלשה
+    else if(p.bFull && bStrong && bSpan === N-1) tier = 4;   // צמודות בהגדרה אחת
+    else if(p.bFull && bStrong && bSpan >= 0)    tier = 5;   // לפי הסדר בהגדרה אחת
+    else if(p.bFull && bStrong)                  tier = 6;   // בגוף הערך
+    else                                         tier = 7;
+    const prox = (tSpan >= 0 ? (N-1)/(1+tSpan) : 0) * 12 + (bSpan >= 0 ? (N-1)/(1+bSpan) : 0) * 4;
+    out.push({ ei: p.d, tier: tier, score: p.base + prox });
+  }
+  return out;
+}
+
+// חיפוש ראשי. מחזיר { results:[{ei,tier,score}], words, resolved, note }
+function runEngine(ix, rawQuery, alsoContent){
+  const qFlags = [];
+  const all = tokenize(rawQuery, qFlags);
+  // מילים שהוקלדו עם גרשיים — יטופלו כקיצור (התאמה מדויקת)
+  const typedAbbrev = new Set();
+  for(let i = 0; i < all.length; i++) if(qFlags[i]) typedAbbrev.add(all[i]);
+  if(!all.length) return { results: [], words: [], resolved: [], note: null };
+  let words = all.filter(w => !STOPWORDS.has(w));
+  if(!words.length) words = all;
+  words = words.slice(0, 8);
+  const titleOnly = !alsoContent || words.every(w => w.length < 2);
+
+  // ניסוחים חלופיים: איחוד מילים סמוכות ("אין סוף" → "אינסוף")
+  const variants = [words];
+  if(words.length > 1 && words.length <= 5){
+    for(let i = 0; i < words.length - 1; i++){
+      if(ix.vocab.has(words[i] + words[i+1])){
+        variants.push(words.slice(0, i).concat(words[i] + words[i+1], words.slice(i+2)));
+      }
+    }
+    if(words.length > 2 && ix.vocab.has(words.join(''))) variants.push([words.join('')]);
+  }
+  // קיצור → צורה מלאה, ולהיפך. "א\"א" יביא גם את "אריך אנפין".
+  for(const w of words){
+    const full = ABBREV_EXPAND[w];
+    if(!full) continue;
+    const fullToks = tokenize(full);
+    if(!fullToks.length) continue;
+    variants.push(words.length === 1 ? fullToks
+                                    : words.map(x => x === w ? fullToks : [x]).flat());
+  }
+
+  const merged = new Map();
+  let firstResolved = null, missing = [];
+  for(const wl of variants.slice(0, 4)){
+    const resolved = [], miss = [];
+    for(const w of wl){
+      const qmap = resolveWord(ix, w, typedAbbrev.has(w));
+      if(qmap.size) resolved.push({ w: w, qmap: qmap }); else miss.push(w);
+    }
+    if(!resolved.length) continue;
+    if(!firstResolved){ firstResolved = resolved; missing = miss; }
+    for(const r of runSearchPass(ix, resolved, titleOnly)){
+      const cur = merged.get(r.ei);
+      if(!cur || r.tier < cur.tier || (r.tier === cur.tier && r.score > cur.score)) merged.set(r.ei, r);
+    }
+  }
+  // ── מפלט אחרון: תיקון שגיאת כתיב במרחק עריכה 1 ──
+  // רץ *רק* כששום דבר לא נמצא, כדי שלא יפגע בדיוק של חיפוש תקין.
+  if(!merged.size){
+    const fixed = words.map(w => fuzzyFix(ix, w));
+    if(fixed.some((f, i) => f !== words[i])){
+      const resolved = [];
+      for(const w of fixed){
+        const qmap = resolveWord(ix, w, typedAbbrev.has(w));
+        if(qmap.size) resolved.push({ w: w, qmap: qmap });
+      }
+      if(resolved.length){
+        for(const r of runSearchPass(ix, resolved, titleOnly)) merged.set(r.ei, r);
+        if(merged.size){
+          const res = Array.from(merged.values())
+            .sort((a, b) => a.tier !== b.tier ? a.tier - b.tier : b.score - a.score);
+          return { results: res, words: fixed, resolved: resolved,
+                   note: 'didyoumean:' + fixed.join(' ') };
+        }
+      }
+    }
+  }
+  if(!merged.size) return { results: [], words: words, resolved: firstResolved || [], note: 'none' };
+  const results = Array.from(merged.values())
+    .sort((a, b) => a.tier !== b.tier ? a.tier - b.tier : b.score - a.score);
+  return { results: results, words: words, resolved: firstResolved,
+           note: missing.length ? 'missing' : null };
+}
+
+// איזו הגדרה התאימה + היכן — מחושב רק עבור התוצאות המוצגות בפועל
+function bestDefinitionFor(ix, ei, resolved){
+  const doc = ix.docs[ei];
+  let best = -1, bestScore = 0, bestPos = 0;
+  for(let di = 0; di < doc.defs.length; di++){
+    const stream = doc.defs[di];
+    let cov = 0, q = 0, first = -1;
+    for(const r of resolved){
+      let hit = 0, p = -1;
+      for(let i = 0; i < stream.length; i++){
+        const v = r.qmap.get(stream[i]);
+        if(v !== undefined){ if(v > hit) hit = v; if(p < 0) p = i; }
+      }
+      if(hit > 0){ cov++; q += hit; if(first < 0 || (p >= 0 && p < first)) first = p; }
+    }
+    if(!cov) continue;
+    const s = q * cov;
+    if(s > bestScore){ bestScore = s; best = di; bestPos = first < 0 ? 0 : first; }
+  }
+  return { defIdx: best, tokenPos: bestPos };
+}
+
+// ─── אינדקס כותרות מיידי (זמין מיד מ-terms.json, לפני שהאינדקס המלא ירד) ───
+let titleIx = null, titleList = null;
+function buildTitleIndex(){
+  if(titleIx || !data) return;
+  titleList = [];
+  for(const t of data.topics){
+    for(const e of t.entries) titleList.push({ id: e.id, t: e.term, topicTitle: t.title, d: [] });
+  }
+  titleIx = buildIndexSync(titleList);
+}
+function searchTitlesOnly(rawQuery){
+  if(!titleIx) return [];
+  const r = runEngine(titleIx, rawQuery, false);
+  return r.results.map(x => ({
+    id: titleList[x.ei].id, term: titleList[x.ei].t,
+    topicTitle: titleList[x.ei].topicTitle, tier: x.tier, matchedDefIdx: -1
+  }));
+}
+
+// ─── IndexedDB: שמירת ה-JSON המפוענח, כדי לחסוך הורדה + פענוח בביקור חוזר ───
 const IDB_NAME = 'milon-cache';
 const IDB_STORE = 'data';
-const IDB_KEY = 'search-index';
-const SEARCH_VERSION = SEARCH_URL.split('?v=')[1] || '';
+const IDB_KEY = 'search-payload';
+const CACHE_STAMP = DATA_VERSION + '|' + INDEX_CODE_VERSION;
 
 function idbOpen(){
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    let req;
+    try{ req = indexedDB.open(IDB_NAME, 1); }catch(e){ reject(e); return; }
+    req.onupgradeneeded = () => { try{ req.result.createObjectStore(IDB_STORE); }catch(e){} };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
+    req.onblocked = () => reject(new Error('idb blocked'));
   });
 }
 function idbGet(db, key){
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(IDB_STORE, 'readonly');
-    const req = tx.objectStore(IDB_STORE).get(key);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    try{
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const req = tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    }catch(e){ reject(e); }
   });
 }
 function idbPut(db, key, val){
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(IDB_STORE, 'readwrite');
-    const req = tx.objectStore(IDB_STORE).put(val, key);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
+    try{
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const req = tx.objectStore(IDB_STORE).put(val, key);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    }catch(e){ reject(e); }
   });
 }
 
-// ─── טעינה חכמה של אינדקס חיפוש מלא ───
+// ─── טעינה + בנייה של האינדקס המלא ───
 let searchIndexPromise = null;
+let searchIndexFailed  = false;
+
 function ensureSearchIndex(){
-  if(searchIndex || searchIndexPromise) return searchIndexPromise;
+  if(searchIx) return Promise.resolve(searchIx);
+  if(searchIndexPromise) return searchIndexPromise;
   searchIndexPromise = (async () => {
-    // ── ניסיון 1: IndexedDB (מיידי, ללא רשת) ──
-    try{
-      const db = await idbOpen();
-      const cached = await idbGet(db, IDB_KEY);
-      if(cached && cached.v === SEARCH_VERSION){
-        applySearchIndex(cached.idx);
-        return cached.idx;
-      }
-      // ── ניסיון 2: רשת (או SW cache) ──
-      const idx = await fetch(SEARCH_URL).then(r => r.json());
-      postProcessIndex(idx);
-      applySearchIndex(idx);
-      // שמור ב-IndexedDB לביקור הבא
-      idbPut(db, IDB_KEY, { v: SEARCH_VERSION, idx }).catch(() => {});
-      return idx;
-    }catch(e){
-      // fallback: רשת בלבד (אם IndexedDB לא זמין)
+    let payload = null;
+    let db = null;
+    try{ db = await idbOpen(); }catch(e){ db = null; }
+    if(db){
       try{
-        const idx = await fetch(SEARCH_URL).then(r => r.json());
-        postProcessIndex(idx);
-        applySearchIndex(idx);
-        return idx;
-      }catch(err){
-        console.error('search-index load failed:', err);
-        searchIndexPromise = null;
-        throw err;
-      }
+        const cached = await idbGet(db, IDB_KEY);
+        if(cached && cached.stamp === CACHE_STAMP && cached.payload) payload = cached.payload;
+      }catch(e){ /* קאש פגום — נמשיך לרשת */ }
     }
-  })();
+    if(!payload){
+      const res = await fetch(SEARCH_URL);
+      if(!res.ok) throw new Error('טעינת אינדקס החיפוש נכשלה (' + res.status + ')');
+      payload = await res.json();
+      if(db) idbPut(db, IDB_KEY, { stamp: CACHE_STAMP, payload: payload }).catch(() => {});
+    }
+    searchData = payload;
+    searchById = {};
+    payload.entries.forEach((e, i) => { searchById[e.i] = { entry: e, idx: i }; });
+    await buildIndexInSlices(payload.entries);
+    return searchIx;
+  })().catch(err => {
+    console.error('search index failed:', err);
+    searchIndexFailed = true;
+    searchIndexPromise = null;
+    onSearchIndexFailed(err);
+    throw err;
+  });
   return searchIndexPromise;
 }
 
-function postProcessIndex(idx){
-  for(const item of idx){
-    if(item.defsN && Array.isArray(item.defsN)){
-      item.textN = item.defsN.join(' ');
-    }else if(!item.textN){
-      item.textN = '';
+// בונה את האינדקס במנות קטנות כדי שהדפדפן לא ייתקע בזמן הבנייה
+function buildIndexInSlices(items){
+  return new Promise(resolve => {
+    const builder = createIndexBuilder(items);
+    const schedule = (typeof window.requestIdleCallback === 'function')
+      ? (fn => window.requestIdleCallback(fn, { timeout: 250 }))
+      : (fn => setTimeout(fn, 0));
+    function pump(){
+      const t0 = performance.now();
+      let done = false;
+      // מנות של 25 ערכים עד שנצברו ~8ms — שומר על פריימים חלקים
+      while(!done && performance.now() - t0 < 8) done = builder.step(25);
+      if(done){
+        searchIx = builder.finish();
+        resolve(searchIx);
+        onSearchIndexReady();
+      }else{
+        schedule(pump);
+      }
     }
-  }
+    schedule(pump);
+  });
 }
 
-function applySearchIndex(idx){
-  searchIndex = idx;
-  searchIndexById = {};
-  for(const item of idx) searchIndexById[item.id] = item;
-  // אם המשתמש כבר הקליד משהו — עדכן תוצאות עם אינדקס מלא
-  const q = document.getElementById('search').value.trim();
-  if(q) runSearch(q);
+function onSearchIndexReady(){
+  // הרצה מחדש רק אם המשתמש באמת נמצא במסך תוצאות חיפוש —
+  // לפני התיקון זה היה חוטף את המסך גם אם המשתמש כבר פתח ערך.
+  const inp = document.getElementById('search');
+  const q = inp ? inp.value.trim() : '';
+  if(q && currentSearchQuery && !currentEntry && currentPage === 'dictionary') runSearch(q);
 }
+function onSearchIndexFailed(err){
+  if(!currentSearchQuery) return;
+  fadeContent('<div class="search-no-results">' +
+    'לא ניתן לחפש בתוכן ההגדרות כרגע.<br/>' +
+    '<span style="font-size:0.85em;color:var(--ink-faint)">' + escapeHtml(err.message || '') + '</span><br/>' +
+    '<button class="search-pg-btn" style="margin-top:14px;width:auto;padding:6px 18px" onclick="retrySearchIndex()">נסה שוב</button>' +
+    '</div>');
+}
+window.retrySearchIndex = function(){
+  searchIndexFailed = false;
+  ensureSearchIndex().catch(() => {});
+  if(currentSearchQuery) runSearch(currentSearchQuery);
+};
 
 async function load(){
-  // ── טעינה ראשונית מינימלית: רק terms.json (~12KB) — סרגל + נחיתה ──
-  const terms = await fetch(TERMS_URL).then(r => r.json());
-  data = terms;
+  try{
+    const res = await fetch(TERMS_URL + (DATA_VERSION ? '?v=' + DATA_VERSION : ''));
+    if(!res.ok) throw new Error('טעינת רשימת הערכים נכשלה (' + res.status + ')');
+    data = await res.json();
+  }catch(err){
+    console.error('load() failed:', err);
+    document.getElementById('content').innerHTML =
+      '<div class="info-page"><h1 class="info-title">שגיאה בטעינת המילון</h1>' +
+      '<p style="color:var(--ink-faint);text-align:center">' + escapeHtml(err.message || '') + '</p>' +
+      '<p style="text-align:center;margin-top:18px"><button class="search-pg-btn" style="width:auto;padding:6px 18px" onclick="location.reload()">רענן</button></p></div>';
+    return;
+  }
   renderNav();
-  buildTitleIndex();  // אינדקס כותרות מיידי — חיפוש עובד כבר!
+  buildTitleIndex();   // חיפוש כותרות עובד מיד
 
   if(data.topics.length){
     currentTopic = data.topics[0].id;
-    document.querySelector('.topic').classList.add('open');
-    document.querySelector('.topic-head').classList.add('active');
+    const firstTopic = document.querySelector('.topic');
+    const firstHead  = document.querySelector('.topic-head');
+    if(firstTopic) firstTopic.classList.add('open');
+    if(firstHead){ firstHead.classList.add('active'); firstHead.setAttribute('aria-expanded','true'); }
     renderTopicLanding(data.topics[0], 0);
   }
-
-  // ── אינדקס חיפוש מלא: מתחיל לרדת מיד (לא ממתין ל-idle) ──
-  ensureSearchIndex();
+  ensureSearchIndex().catch(() => {});
 }
 
 function renderNav(){
   document.getElementById('nav').innerHTML = data.topics.map((t) => `
-    <div class="topic" data-topic="${t.id}">
-      <div class="topic-head" onclick="selectTopic('${t.id}')">
+    <div class="topic" data-topic="${escapeHtml(t.id)}">
+      <div class="topic-head" role="button" tabindex="0" aria-expanded="false"
+           onclick="selectTopic('${escapeAttr(t.id)}')"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectTopic('${escapeAttr(t.id)}');}">
         <div>
-          <div class="topic-title">${t.title}</div>
-          <div class="topic-subtitle">${t.subtitle}</div>
+          <div class="topic-title">${escapeHtml(t.title)}</div>
+          <div class="topic-subtitle">${escapeHtml(t.subtitle)}</div>
         </div>
         <div class="topic-count">${t.entries.length}</div>
       </div>
       <div class="entries">
         ${t.entries.map((e, i) => `
-          <div class="entry-link ${isBookmarked(e.id) ? 'bookmarked' : ''}" data-entry="${e.id}" data-num="${i+1}." onclick="event.stopPropagation(); goToEntry('${t.id}','${e.id}')" onmouseenter="prefetchEntry('${e.id}')" onfocus="prefetchEntry('${e.id}')">${e.term}</div>
+          <div class="entry-link ${isBookmarked(e.id) ? 'bookmarked' : ''}" role="link" tabindex="0"
+               data-entry="${escapeHtml(e.id)}" data-num="${i+1}."
+               onclick="event.stopPropagation(); goToEntry('${escapeAttr(t.id)}','${escapeAttr(e.id)}')"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();goToEntry('${escapeAttr(t.id)}','${escapeAttr(e.id)}');}"
+               onmouseenter="prefetchEntry('${escapeAttr(e.id)}')"
+               onfocus="prefetchEntry('${escapeAttr(e.id)}')">${escapeHtml(e.term)}</div>
         `).join('')}
       </div>
     </div>
   `).join('');
 }
 
+// מלבד escapeHtml — גם גרש בודד חייב בריחה, כי הוא סוגר את מחרוזת ה-onclick
+function escapeAttr(s){ return escapeHtml(s).replace(/'/g, '&#39;'); }
+
 function selectTopic(id){
   const ti = data.topics.findIndex(t => t.id === id);
   const topic = data.topics[ti];
   const wasOpen = document.querySelector(`.topic[data-topic="${id}"]`).classList.contains('open');
   document.querySelectorAll('.topic').forEach(el => {
-    el.classList.toggle('open', el.dataset.topic === id ? !wasOpen : false);
-    el.querySelector('.topic-head').classList.toggle('active', el.dataset.topic === id);
+    const open = el.dataset.topic === id ? !wasOpen : false;
+    el.classList.toggle('open', open);
+    const head = el.querySelector('.topic-head');
+    head.classList.toggle('active', el.dataset.topic === id);
+    head.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
   document.querySelectorAll('.entry-link').forEach(el => el.classList.remove('active'));
   currentTopic = id;
   currentEntry = null;
+  pushNav({ k: 'topic', t: id });
   renderTopicLanding(topic, ti);
 }
 
@@ -1644,8 +2198,12 @@ function prefetchNeighbors(topicId, ei){
   if(ei > 0) prefetchEntry(topic.entries[ei-1].id);
   if(ei < topic.entries.length-1) prefetchEntry(topic.entries[ei+1].id);
   // קשורים — נטענים בעצלתיים מהערך עצמו אם ה-DOM כבר נבנה
-  requestIdleCallback ? requestIdleCallback(prefetchRelatedFromDom, {timeout: 2000})
-                      : setTimeout(prefetchRelatedFromDom, 500);
+  // (window.requestIdleCallback — לא מזהה חשוף; Safari מתחת ל-16.4 זורק ReferenceError)
+  if(typeof window.requestIdleCallback === 'function'){
+    window.requestIdleCallback(prefetchRelatedFromDom, {timeout: 2000});
+  }else{
+    setTimeout(prefetchRelatedFromDom, 500);
+  }
 }
 function prefetchRelatedFromDom(){
   document.querySelectorAll('.related-link[data-entry]').forEach(el => {
@@ -1654,6 +2212,8 @@ function prefetchRelatedFromDom(){
 }
 
 async function goToEntry(topicId, entryId){
+  // במובייל — סגור את המגירה ברגע שנבחר ערך
+  if(typeof setNavOpen === 'function') setNavOpen(false);
   // עדכן סרגל
   if(currentTopic !== topicId){
     document.querySelectorAll('.topic').forEach(el => {
@@ -1665,6 +2225,7 @@ async function goToEntry(topicId, entryId){
   }
   currentTopic = topicId;
   currentEntry = entryId;
+  pushNav({ k: 'entry', t: topicId, e: entryId });
   document.querySelectorAll('.entry-link').forEach(el => {
     el.classList.toggle('active', el.dataset.entry === entryId);
   });
@@ -1701,7 +2262,7 @@ async function goToEntry(topicId, entryId){
     clearTimeout(spinnerTimer);
     console.error('Failed to load entry:', err);
     if(currentEntry === entryId){
-      fadeContent(`<div class="info-page"><h1 class="info-title">שגיאה בטעינת הערך</h1><p style="color:var(--ink-faint);">${err.message}</p></div>`);
+      fadeContent(`<div class="info-page"><h1 class="info-title">שגיאה בטעינת הערך</h1><p style="color:var(--ink-faint);">${escapeHtml(err.message)}</p></div>`);
     }
   }
 }
@@ -1710,11 +2271,17 @@ const HEB_NUM = ['א','ב','ג','ד','ה','ו','ז','ח','ט','י','י״א','י�
 const HEB_NUM_BIG = ['ראשון','שני','שלישי','רביעי','חמישי','ששי','שביעי','שמיני','תשיעי','עשירי'];
 
 function setBreadcrumb(parts){
+  // escapeHtml חובה — parts כולל את שאילתת החיפוש הגולמית של המשתמש
   document.getElementById('breadcrumb').innerHTML = parts.map((p, i) =>
-    `${i > 0 ? '<span class="breadcrumb-sep">·</span>' : ''}<span class="${i === parts.length-1 ? 'breadcrumb-current' : ''}">${p}</span>`
+    `${i > 0 ? '<span class="breadcrumb-sep">·</span>' : ''}<span class="${i === parts.length-1 ? 'breadcrumb-current' : ''}">${escapeHtml(p)}</span>`
   ).join('');
 }
 
+// מודיע לקוראי מסך על החלפת תוכן — אחרת ההחלפה שקטה לחלוטין
+function announce(msg){
+  const s = document.getElementById('a11y-status');
+  if(s) s.textContent = msg;
+}
 function fadeContent(html){
   const c = document.getElementById('content');
   c.innerHTML = html;
@@ -1731,15 +2298,18 @@ function renderTopicLanding(topic, ti){
   fadeContent(`
     <div class="topic-landing">
       <div class="topic-landing-eyebrow">שער ${HEB_NUM_BIG[ti] || ti+1}</div>
-      <h1 class="topic-landing-title">${topic.title}</h1>
-      <div class="topic-landing-subtitle">${topic.subtitle}</div>
+      <h1 class="topic-landing-title">${escapeHtml(topic.title)}</h1>
+      <div class="topic-landing-subtitle">${escapeHtml(topic.subtitle)}</div>
       <div class="topic-landing-rule"></div>
       <div class="topic-landing-hint">בחר ערך מן הרשימה</div>
       <div class="entry-grid">
         ${topic.entries.map((e, i) => `
-          <div class="entry-card" onclick="goToEntry('${topic.id}','${e.id}')" onmouseenter="prefetchEntry('${e.id}')">
+          <div class="entry-card" role="link" tabindex="0"
+               onclick="goToEntry('${escapeAttr(topic.id)}','${escapeAttr(e.id)}')"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToEntry('${escapeAttr(topic.id)}','${escapeAttr(e.id)}');}"
+               onmouseenter="prefetchEntry('${escapeAttr(e.id)}')">
             <div class="entry-card-num">ערך ${HEB_NUM[i] || (i+1)}</div>
-            <div class="entry-card-term">${e.term}</div>
+            <div class="entry-card-term">${escapeHtml(e.term)}</div>
           </div>
         `).join('')}
       </div>
@@ -1751,13 +2321,12 @@ function renderTopicLanding(topic, ti){
 function highlightSearchInPage(query){
   const content = document.getElementById('content');
   if(!content || !query) return;
+  const ix = searchIx || titleIx;
+  if(!ix) return;
+  const r = runEngine(ix, query, false);
+  const marks = collectMatchTokens(ix, r.resolved);
+  if(!marks.size) return;
 
-  const q      = normalizeMaleChaser(normalizeForSearch(query));
-  const words  = q.split(/\s+/).filter(w => w.length >= 2);
-  const wordsNoHe = words.map(stripHePrefix);
-  if(!words.length) return;
-
-  // אוסף כל צמתי-טקסט בתוכן
   const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
   const textNodes = [];
   let node;
@@ -1769,39 +2338,35 @@ function highlightSearchInPage(query){
 
   for(const tn of textNodes){
     const text = tn.textContent;
-    const norm = normalizeMaleChaser(normalizeForSearch(text));
-    const anyMatch = words.some((w, i) => norm.includes(w) || norm.includes(wordsNoHe[i]));
-    if(!anyMatch) continue;
-
+    const toks = tokenizeWithPos(text);
+    let any = false;
+    for(const t of toks) if(marks.has(t.tok)){ any = true; break; }
+    if(!any) continue;
     const frag = document.createDocumentFragment();
     let last = 0;
-    const re = /[א-ת]+/g;
-    let m;
-    while((m = re.exec(text)) !== null){
-      const w     = m[0];
-      const wNorm = normalizeMaleChaser(normalizeForSearch(w));
-      const hit   = words.some((word, i) => wNorm.includes(word) || (wordsNoHe[i] !== word && wNorm.includes(wordsNoHe[i])));
-      if(hit){
-        if(m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
-        const mark = document.createElement('mark');
-        mark.className = 'search-hl-mark';
-        mark.textContent = w;
-        frag.appendChild(mark);
-        last = m.index + w.length;
-      }
+    for(const t of toks){
+      if(!marks.has(t.tok)) continue;
+      if(t.start > last) frag.appendChild(document.createTextNode(text.slice(last, t.start)));
+      const mark = document.createElement('mark');
+      mark.className = 'search-hl-mark';
+      mark.textContent = text.slice(t.start, t.end);
+      frag.appendChild(mark);
+      last = t.end;
     }
     if(last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
     tn.parentNode.replaceChild(frag, tn);
   }
 
-  // גלילה למיקום הראשון
-  setTimeout(() => {
+  clearTimeout(_hlScrollTimer);
+  _hlScrollTimer = setTimeout(() => {
     const first = content.querySelector('mark.search-hl-mark');
     if(first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 120);
 }
+let _hlScrollTimer = null;
 
 function renderEntryPage(topic, ti, entry, ei){
+  announce('ערך: ' + entry.term);
   setBreadcrumb(['אוצר המונחים', topic.title, entry.term]);
   
 
@@ -1809,11 +2374,14 @@ function renderEntryPage(topic, ti, entry, ei){
     const r = findEntry(rid);
     if(!r) return '';
     return `
-      <div class="related-link" data-entry="${rid}" onclick="goToEntryByEntryId('${rid}')" onmouseenter="prefetchEntry('${rid}')">
+      <div class="related-link" role="link" tabindex="0" data-entry="${escapeHtml(rid)}"
+           onclick="goToEntryByEntryId('${escapeAttr(rid)}')"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToEntryByEntryId('${escapeAttr(rid)}');}"
+           onmouseenter="prefetchEntry('${escapeAttr(rid)}')">
         <span class="related-link-arrow">←</span>
         <span class="related-link-text">
-          <span>${r.entry.term}</span>
-          <span class="related-link-topic">${r.topic.title}</span>
+          <span>${escapeHtml(r.entry.term)}</span>
+          <span class="related-link-topic">${escapeHtml(r.topic.title)}</span>
         </span>
       </div>
     `;
@@ -1824,12 +2392,16 @@ function renderEntryPage(topic, ti, entry, ei){
       <header class="entry-page-header">
         <div class="entry-eyebrow">ערך ${HEB_NUM[ei] || (ei+1)}</div>
         <h1 class="entry-term">
-          <span>${entry.term}</span>
-          <button class="entry-bookmark ${isBookmarked(entry.id) ? 'active' : ''}" onclick="onToggleBookmark('${entry.id}', this)" title="הוסף לסימניות" aria-label="סימניה">
+          <span>${escapeHtml(entry.term)}</span>
+          <button class="entry-bookmark ${isBookmarked(entry.id) ? 'active' : ''}"
+                  onclick="onToggleBookmark('${escapeAttr(entry.id)}', this)"
+                  aria-pressed="${isBookmarked(entry.id) ? 'true' : 'false'}"
+                  title="${isBookmarked(entry.id) ? 'הסר מהסימניות' : 'הוסף לסימניות'}"
+                  aria-label="${isBookmarked(entry.id) ? 'הסר מהסימניות' : 'הוסף לסימניות'}">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
           </button>
         </h1>
-        <div class="entry-topic-label">${topic.title} · ${topic.subtitle}</div>
+        <div class="entry-topic-label">${escapeHtml(topic.title)} · ${escapeHtml(topic.subtitle)}</div>
       </header>
       ${entry.definitions.map((d, i) => {
         // אם הטקסט מתחיל ב-[ (הפניה / הערה) — לא נחיל את ה-drop-cap האדום
@@ -1880,394 +2452,210 @@ function goToEntryByEntryId(eid){
 }
 
 // ════════════════════════════════════════════════════════════════
-//  ─── מנוע חיפוש (כתיב מלא/חסר תמיד פעיל) ───
+//  ─── תצוגת תוצאות החיפוש ───
 // ════════════════════════════════════════════════════════════════
 const SEARCH_PAGE_SIZE = 20;
-const MAX_WORDS_BETWEEN = 3;    // מקסימום מילים בין שתי מילות חיפוש עוקבות
-let   searchOptAlsoContent = true;   // ברירת מחדל: גם בתוכן
-let   currentSearchQuery   = "";
-let   currentSearchResults = [];
-let   currentSearchPage    = 1;
+let searchOptAlsoContent = true;
+let currentSearchQuery   = "";
+let currentSearchResults = [];
+let currentSearchPage    = 1;
+let currentMatchTokens   = null;   // Set של הטוקנים שהתאימו — משמש להדגשה
+let currentResolved      = null;   // תוצאת פענוח מילות החיפוש (לחישוב ההגדרה המתאימה)
 
-// ─── פונקציות נורמליזציה (port מ-mion_update_final) ───
-function stripNikud(s){ return (s || '').replace(/[֑-ׇ]/g, ''); }
-function normalizeForSearch(s){
-  let r = stripNikud(s);
-  r = r.replace(/[־\-–—]/g, ' ');
-  r = r.replace(/[^\p{L}\p{N}\s]/gu, ' ');
-  r = r.replace(/\s+/g, ' ').trim().toLowerCase();
-  return r;
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-function normalizeMaleChaser(s){
-  return (s || '').replace(/[א-ת]+/g, w => {
-    if(w.length <= 3) return w;
-    return w[0] + w.slice(1).replace(/[יו]/g, '');
-  });
-}
-function stripHePrefix(w){
-  return (w.length >= 3 && w[0] === 'ה') ? w.slice(1) : w;
-}
-const _wholeWordCache = new Map();
-function isWholeWord(text, word){
-  let re = _wholeWordCache.get(word);
-  if(!re){
-    const esc = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    re = new RegExp(`(?:^|[^\\u0590-\\u05FF])${esc}(?:$|[^\\u0590-\\u05FF])`);
-    _wholeWordCache.set(word, re);
+
+// טוקניזציה ששומרת מיקומים — נדרשת להדגשה מדויקת ולחיתוך קטע סביב ההתאמה
+function tokenizeWithPos(s){
+  const out = [];
+  if(!s) return out;
+  const n = s.length;
+  let i = 0;
+  while(i < n){
+    const c = s.charCodeAt(i);
+    if(!isWordCode(c)){ i++; continue; }
+    let j = i + 1;
+    while(j < n && isWordCode(s.charCodeAt(j))) j++;
+    let t = s.slice(i, j);
+    if(NIKUD_RE.test(t)) t = t.replace(NIKUD_ALL, '');
+    t = t.replace(SOF_RE, ch => SOF_MAP[ch]).toLowerCase();
+    out.push({ tok: t, start: i, end: j });
+    i = j;
   }
-  return re.test(text);
-}
-// ─── התאמת טוקן עברי: מילת חיפוש מול טוקן בטקסט ───
-// מאפשר: התאמה מדויקת, סיומות (רבים וכד'), תחיליות ידועות (ב/ל/ה/ו/מ/ש/כ)
-const _HEB_PRE1 = new Set(['ב','ל','ה','ו','מ','ש','כ']);
-const _HEB_PRE2 = new Set(['וב','ול','וה','ומ','וש','וכ','מה','שה','כש']);
-function tokenMatchesWord(token, word){
-  if(token === word) return true;
-  if(token.startsWith(word)) return true;           // פגם→פגמים, עולם→עולמות
-  const diff = token.length - word.length;
-  if(diff === 1 && _HEB_PRE1.has(token[0]) && token.endsWith(word)) return true;
-  if(diff === 2 && _HEB_PRE2.has(token.slice(0,2)) && token.endsWith(word)) return true;
-  return false;
-}
-// ─── התאמה קפדנית: כל המילים, באותו סדר, במרחק מקסימלי maxBetween ───
-// "יונתן הלך לגן" יימצא ב"יונתן [הקטן] הלך [גם הוא] לגן" — אבל לא ב"לגן הלך יונתן"
-// loose=false: tokenMatchesWord (מדויק/תחיליות ידועות)
-// loose=true:  t.includes(w) (הטיות מורפולוגיות — פגם←להיפגם)
-function orderedNearMatch(text, words, wordsNoHe, maxBetween, loose){
-  if(!text) return false;
-  if(words.length === 0) return true;
-  const match = loose
-    ? (t, w) => t.includes(w)
-    : (t, w) => tokenMatchesWord(t, w);
-
-  if(words.length === 1){
-    const w = words[0], wNH = wordsNoHe[0];
-    const toks = text.split(/[^א-ת]+/).filter(Boolean);
-    for(const t of toks){
-      if(match(t, w) || (wNH !== w && match(t, wNH))) return true;
-    }
-    return false;
-  }
-
-  const tokens = text.split(/[^א-ת]+/).filter(Boolean);
-  if(tokens.length < words.length) return false;
-
-  const positions = [];
-  for(let i = 0; i < words.length; i++){
-    const w = words[i], wNH = wordsNoHe[i];
-    const pos = [];
-    for(let ti = 0; ti < tokens.length; ti++){
-      const t = tokens[ti];
-      if(match(t, w) || (wNH !== w && match(t, wNH))) pos.push(ti);
-    }
-    if(!pos.length) return false;
-    positions.push(pos);
-  }
-
-  const MAX_GAP = maxBetween + 1;
-  for(const start of positions[0]){
-    let prev = start, ok = true;
-    for(let wi = 1; wi < words.length; wi++){
-      let found = -1;
-      for(const p of positions[wi]){
-        if(p > prev && p - prev <= MAX_GAP){ found = p; break; }
-      }
-      if(found === -1){ ok = false; break; }
-      prev = found;
-    }
-    if(ok) return true;
-  }
-  return false;
+  return out;
 }
 
-// בדיקה רב-שלבית: מחזירה את אינדקס ההגדרה + tier
-// tier 1: התאמה מדויקת, מרחק ≤3
-// tier 2: התאמה מדויקת, מרחק ≤6
-// tier 3: הטיות מורפולוגיות (substring), מרחק ≤3
-// -2 = אין התאמה כלל
-const STRICT_GAP  = 3;     // מרחק צמוד — בקשת המשתמש
-const RELAXED_GAP = 6;     // מרחק מרוחק סביר לעברית
-function strictMultiWordMatch(item, words, wordsNoHe, alsoContent){
-  // ── Tier 1 — התאמה מדויקת + מרחק צמוד ──
-  if(orderedNearMatch(item.termN, words, wordsNoHe, STRICT_GAP)) return { defIdx: -1, tier: 1 };
-  if(alsoContent && item.defsN && Array.isArray(item.defsN)){
-    for(let i = 0; i < item.defsN.length; i++){
-      if(orderedNearMatch(item.defsN[i], words, wordsNoHe, STRICT_GAP)) return { defIdx: i, tier: 1 };
+// אוסף את כל צורות המילים שהתאימו בפועל — בסיס להדגשה עקבית עם ההתאמה
+function collectMatchTokens(ix, resolved){
+  const set = new Set();
+  if(!ix || !resolved) return set;
+  for(const r of resolved){
+    for(const id of r.qmap.keys()){
+      const t = ix.vocabList[id];
+      if(t) set.add(t);
     }
   }
-  // ── Tier 2 — התאמה מדויקת + מרחק מרוחק ──
-  if(orderedNearMatch(item.termN, words, wordsNoHe, RELAXED_GAP)) return { defIdx: -1, tier: 2 };
-  if(alsoContent && item.defsN && Array.isArray(item.defsN)){
-    for(let i = 0; i < item.defsN.length; i++){
-      if(orderedNearMatch(item.defsN[i], words, wordsNoHe, RELAXED_GAP)) return { defIdx: i, tier: 2 };
-    }
-  }
-  // ── Tier 3 — הטיות מורפולוגיות (substring) + מרחק צמוד ──
-  // תופס: פגם←להיפגם, עולם←עולמות, ברא←נבראו וכד'
-  if(orderedNearMatch(item.termN, words, wordsNoHe, STRICT_GAP, true)) return { defIdx: -1, tier: 3 };
-  if(alsoContent && item.defsN && Array.isArray(item.defsN)){
-    for(let i = 0; i < item.defsN.length; i++){
-      if(orderedNearMatch(item.defsN[i], words, wordsNoHe, STRICT_GAP, true)) return { defIdx: i, tier: 3 };
-    }
-  }
-  return { defIdx: -2, tier: 0 };
+  return set;
 }
 
-// עבור חיפוש מילה אחת — איתור ההגדרה הראשונה שמכילה את המילה
-// loose=true: גם הטיות מורפולוגיות (substring)
-function findFirstMatchingDef(item, words, wordsNoHe, loose){
-  if(!item.defsN || !Array.isArray(item.defsN)) return -1;
-  const match = loose ? (t, w) => t.includes(w) : (t, w) => tokenMatchesWord(t, w);
-  for(let i = 0; i < item.defsN.length; i++){
-    const toks = item.defsN[i].split(/[^א-ת]+/).filter(Boolean);
-    for(let wi = 0; wi < words.length; wi++){
-      const w = words[wi], wNH = wordsNoHe[wi];
-      for(const t of toks){
-        if(match(t, w) || (wNH !== w && match(t, wNH))) return i;
-      }
-    }
+function highlightTokens(text, matchTokens){
+  if(!text) return '';
+  if(!matchTokens || !matchTokens.size) return escapeHtml(text);
+  const toks = tokenizeWithPos(text);
+  let out = '', last = 0;
+  for(const t of toks){
+    if(!matchTokens.has(t.tok)) continue;
+    out += escapeHtml(text.slice(last, t.start));
+    out += '<span class="search-hl">' + escapeHtml(text.slice(t.start, t.end)) + '</span>';
+    last = t.end;
   }
-  return -1;
+  out += escapeHtml(text.slice(last));
+  return out;
 }
 
-// ─── חיפוש ראשי ───
-function searchEntries(rawQuery, alsoContent){
-  if(!searchIndex) return null;          // עדיין לא נטען
-  const q = normalizeMaleChaser(normalizeForSearch(rawQuery));
-  if(!q) return [];
-  const words = q.split(/\s+/).filter(w => w.length > 0).slice(0, 10);
-  if(!words.length) return [];
-  const wordsNoHe = words.map(stripHePrefix);
-
-  const results = [];
-  for(const item of searchIndex){
-    let titleScore = 0, contentScore = 0;
-    let allMatched = true;
-
-    for(let i = 0; i < words.length; i++){
-      const w = words[i], wNH = wordsNoHe[i];
-      let wScore = 0, foundInTitle = false;
-
-      // התאמה בכותרת (ניקוד גבוה)
-      if(item.termN.includes(w)){
-        wScore += isWholeWord(item.termN, w) ? 15 : 10;
-        foundInTitle = true;
-      }else if(wNH !== w && item.termN.includes(wNH)){
-        wScore += isWholeWord(item.termN, wNH) ? 14 : 9;
-        foundInTitle = true;
-      }
-
-      // התאמה בתוכן (אם המצב מאופשר)
-      if(alsoContent){
-        if(item.textN.includes(w)){
-          const pos = item.textN.indexOf(w);
-          const posBonus = pos < 100 ? 4 : (pos < 400 ? 1 : 0);
-          wScore += (isWholeWord(item.textN, w) ? 5 : 3) + posBonus;
-        }else if(wNH !== w && item.textN.includes(wNH)){
-          const pos = item.textN.indexOf(wNH);
-          const posBonus = pos < 100 ? 3 : (pos < 400 ? 1 : 0);
-          wScore += (isWholeWord(item.textN, wNH) ? 4 : 2) + posBonus;
-        }
-      }
-
-      if(wScore === 0){ allMatched = false; break; }
-      if(foundInTitle) titleScore += wScore;
-      else             contentScore += wScore;
-    }
-
-    if(!allMatched) continue;
-
-    // ── קביעת tier + הגדרה תואמת ──
-    let matchedDefIdx = -1;
-    let matchTier = 1;
-    if(words.length > 1){
-      const m = strictMultiWordMatch(item, words, wordsNoHe, alsoContent);
-      if(m.defIdx === -2) continue;
-      matchedDefIdx = m.defIdx;
-      matchTier     = m.tier;
-    }else{
-      // ── מילה אחת: tier 1 (מדויק) או tier 3 (הטיה מורפולוגית) ──
-      const w = words[0], wNH = wordsNoHe[0];
-      const titleToks = item.termN.split(/[^א-ת]+/).filter(Boolean);
-      const exactTitle = titleToks.some(t => tokenMatchesWord(t, w) || (wNH !== w && tokenMatchesWord(t, wNH)));
-      if(exactTitle){
-        matchTier = 1;
-      }else if(alsoContent){
-        const exactDef = findFirstMatchingDef(item, words, wordsNoHe, false);
-        if(exactDef >= 0){ matchTier = 1; matchedDefIdx = exactDef; }
-        else{ matchTier = 3; matchedDefIdx = findFirstMatchingDef(item, words, wordsNoHe, true); }
-      }else{
-        matchTier = 3;  // substring בכותרת
-      }
-      // אם נמצא בכותרת אבל צריך למצוא הגדרה להצגה
-      if(matchedDefIdx < 0 && titleScore === 0){
-        matchedDefIdx = findFirstMatchingDef(item, words, wordsNoHe, true);
-      }
-    }
-
-    // ── חישוב דיוק ההתאמה (exactness) ──
-    // התאמה מלאה בכותרת (שם הערך ≈ מילות חיפוש) → ניקוד מקסימלי
-    let exactness = 0;
-    const termWords = item.termN.split(/\s+/).filter(Boolean);
-    const allWordsInTitle = words.every(w => {
-      const wNH = stripHePrefix(w);
-      return item.termN.includes(w) || (wNH !== w && item.termN.includes(wNH));
-    });
-    if(allWordsInTitle){
-      // כותרת קצרה שמכילה את כל מילות החיפוש = מאוד רלוונטי
-      exactness += 100;
-      // בונוס אם הכותרת קצרה (יותר ממוקד)
-      if(termWords.length <= words.length + 2) exactness += 50;
-      if(termWords.length <= words.length) exactness += 50;
-    }
-    // בונוס להתאמת מילה שלמה (לא substring)
-    for(const w of words){
-      if(isWholeWord(item.termN, w)) exactness += 20;
-    }
-
-    results.push({
-      ...item,
-      matchedDefIdx,
-      matchTier,
-      titleScore,
-      contentScore,
-      exactness,
-      hasTitle: titleScore > 0
-    });
+// קטע תצוגה שממורכז סביב ההתאמה הראשונה.
+// קודם הוצגו תמיד 350 התווים הראשונים של ההגדרה — ב-28% מהמקרים
+// מילת החיפוש כלל לא הופיעה בתצוגה המקדימה.
+function makeSnippet(text, matchTokens, maxLen){
+  if(!text) return '';
+  maxLen = maxLen || 300;
+  let hit = -1;
+  if(matchTokens && matchTokens.size){
+    for(const t of tokenizeWithPos(text)) if(matchTokens.has(t.tok)){ hit = t.start; break; }
   }
-
-  // ── מיון היררכי: tier → כותרת → דיוק → ניקוד ──
-  results.sort((a, b) => {
-    // 1. Tier: מדויק (1) → מרוחק (2) → הטיות (3)
-    if(a.matchTier !== b.matchTier) return a.matchTier - b.matchTier;
-    // 2. כותרת קודם לתוכן
-    if(a.hasTitle !== b.hasTitle) return a.hasTitle ? -1 : 1;
-    // 3. דיוק ההתאמה (כל מילות החיפוש בכותרת, כותרת קצרה, מילים שלמות)
-    if(a.exactness !== b.exactness) return b.exactness - a.exactness;
-    // 4. ניקוד כולל
-    return (b.titleScore + b.contentScore) - (a.titleScore + a.contentScore);
-  });
-  return results;
+  if(hit < 0){
+    return text.length > maxLen ? text.slice(0, maxLen).trimEnd() + '…' : text;
+  }
+  let start = Math.max(0, hit - Math.round(maxLen * 0.35));
+  if(start > 0){
+    const sp = text.indexOf(' ', start);
+    if(sp >= 0 && sp < start + 40) start = sp + 1;
+  }
+  let end = Math.min(text.length, start + maxLen);
+  if(end < text.length){
+    const sp = text.lastIndexOf(' ', end);
+    if(sp > start + maxLen * 0.6) end = sp;
+  }
+  return (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
 }
 
-// ─── הדגשת מילים תואמות בטקסט מקדים ───
-function highlightMatches(text, words, wordsNoHe){
-  if(!text || !words.length) return text;
-  // בנה regex אחד שמתאים לכל המילים (כולל גרסאות ה-)
-  const allTerms = new Set();
-  words.forEach(w => allTerms.add(w));
-  wordsNoHe.forEach(w => allTerms.add(w));
-  const sorted = [...allTerms].filter(t => t.length >= 2).sort((a, b) => b.length - a.length);
-  if(!sorted.length) return text;
-  // נורמליזציה של הטקסט לחיפוש (אבל שמירת המקור להצגה)
-  // נפעיל regex על הטקסט המנורמל ונסמן מיקומים → אחר כך נמפה לטקסט המקורי
-  const norm = normalizeMaleChaser(normalizeForSearch(text));
-  const esc = sorted.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  const re = new RegExp(`(${esc.join('|')})`, 'gi');
-  // מאחר שהמיפוי טקסט-מקורי↔מנורמל מורכב, נשתמש בגישה פשוטה:
-  // נחלק לפי מילים בטקסט המקורי ונבדוק כל אחת
-  return text.replace(/[א-ת]+/g, w => {
-    const wn = normalizeMaleChaser(normalizeForSearch(w));
-    for(const term of sorted){
-      if(wn.includes(term) || normalizeMaleChaser(stripHePrefix(wn)).includes(term)){
-        return `<span class="search-hl">${w}</span>`;
-      }
-    }
-    return w;
-  });
-}
-
-// ─── רינדור עמוד תוצאות ───
 function renderSearchResults(titleOnly){
   const total = currentSearchResults.length;
   const totalPages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
   if(currentSearchPage > totalPages) currentSearchPage = totalPages;
   if(currentSearchPage < 1) currentSearchPage = 1;
-  setBreadcrumb(['חיפוש', `"${currentSearchQuery}"`]);
-  if(total === 0 && !titleOnly){
-    fadeContent(`<div class="search-no-results">לא נמצאו תוצאות עבור "<strong>${escapeHtml(currentSearchQuery)}</strong>"</div>`);
-    return;
-  }
-  if(total === 0 && titleOnly){
-    fadeContent(`<div class="search-no-results">
-      <div class="spinner" style="margin:0 auto 12px;width:28px;height:28px"></div>
-      מחפש בתוכן ההגדרות…</div>`);
+  setBreadcrumb(['חיפוש', '"' + currentSearchQuery + '"']);
+
+  if(total === 0){
+    if(titleOnly && !searchIndexFailed){
+      fadeContent('<div class="search-no-results">' +
+        '<div class="spinner" style="margin:0 auto 12px;width:28px;height:28px"></div>' +
+        'מחפש בתוכן ההגדרות…</div>');
+    }else{
+      fadeContent('<div class="search-no-results">לא נמצאו תוצאות עבור "<strong>' +
+        escapeHtml(currentSearchQuery) + '</strong>"</div>');
+    }
     return;
   }
 
-  const q = normalizeMaleChaser(normalizeForSearch(currentSearchQuery));
-  const words     = q.split(/\s+/).filter(Boolean);
-  const wordsNoHe = words.map(stripHePrefix);
-
+  announce(total + ' תוצאות חיפוש');
   const start = (currentSearchPage - 1) * SEARCH_PAGE_SIZE;
+  if(!titleOnly) fillDefIndexes(start, SEARCH_PAGE_SIZE);
   const slice = currentSearchResults.slice(start, start + SEARCH_PAGE_SIZE);
-
-  // ─── בחירת תצוגה מקדימה ממוקדת התאמה ───
-  // matchedDefIdx>=0 → defsP[i] (ההגדרה שהותאמה); -1 → כותרת בלבד, נשתמש בהגדרה הראשונה; אחר → preview
-  function pickPreview(r){
-    if(r.matchedDefIdx >= 0 && r.defsP && r.defsP[r.matchedDefIdx]){
-      return r.defsP[r.matchedDefIdx];
-    }
-    if(r.defsP && r.defsP.length > 0 && r.defsP[0]){
-      return r.defsP[0];
-    }
-    return r.preview || '';
-  }
+  const mt = currentMatchTokens;
 
   const items = slice.map(r => {
-    const previewText = pickPreview(r);
-    const defLabel = (r.matchedDefIdx >= 0 && r.defsP && r.defsP.length > 1)
-      ? `<span class="search-result-deflabel">הגדרה ${r.matchedDefIdx + 1}/${r.defsP.length}</span>`
-      : '';
-    return `
-    <div class="search-result" onclick="goToEntryByEntryId('${r.id}')" onmouseenter="prefetchEntry('${r.id}')">
-      <div class="search-result-head">
-        <div class="search-result-term">${highlightMatches(r.term, words, wordsNoHe)}</div>
-        <div class="search-result-topic">${r.topicTitle}</div>
-      </div>
-      <div class="search-result-preview">${defLabel}${highlightMatches(previewText, words, wordsNoHe)}</div>
-    </div>
-  `;}).join('');
+    let previewHtml = '', defLabel = '';
+    if(!titleOnly && searchData && r.ei !== undefined){
+      const entry = searchData.entries[r.ei];
+      if(entry && entry.d && entry.d.length){
+        const di = (r.defIdx !== undefined && r.defIdx >= 0 && r.defIdx < entry.d.length) ? r.defIdx : 0;
+        previewHtml = highlightTokens(makeSnippet(entry.d[di], mt, 300), mt);
+        if(entry.d.length > 1){
+          defLabel = '<span class="search-result-deflabel">הגדרה ' + (di + 1) + '/' + entry.d.length + '</span>';
+        }
+      }
+    }
+    return '<div class="search-result" role="button" tabindex="0" data-entry="' + escapeHtml(r.id) + '" ' +
+      'onclick="goToEntryByEntryId(\'' + escapeHtml(r.id) + '\')" ' +
+      'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();goToEntryByEntryId(\'' + escapeHtml(r.id) + '\');}" ' +
+      'onmouseenter="prefetchEntry(\'' + escapeHtml(r.id) + '\')">' +
+      '<div class="search-result-head">' +
+        '<div class="search-result-term">' + highlightTokens(r.term, mt) + '</div>' +
+        '<div class="search-result-topic">' + escapeHtml(r.topicTitle || '') + '</div>' +
+      '</div>' +
+      (previewHtml ? '<div class="search-result-preview">' + defLabel + previewHtml + '</div>' : '') +
+    '</div>';
+  }).join('');
 
-  const pagination = totalPages > 1 ? `
-    <div class="search-pagination">
-      <button class="search-pg-btn" onclick="searchPagePrev()" ${currentSearchPage === 1 ? 'disabled' : ''} title="עמוד קודם">›</button>
-      <span class="search-pg-info">עמוד ${currentSearchPage} מתוך ${totalPages}</span>
-      <button class="search-pg-btn" onclick="searchPageNext()" ${currentSearchPage === totalPages ? 'disabled' : ''} title="עמוד הבא">‹</button>
-    </div>` : '';
+  const pagination = totalPages > 1 ?
+    '<div class="search-pagination">' +
+      '<button class="search-pg-btn" onclick="searchPagePrev()" ' + (currentSearchPage === 1 ? 'disabled' : '') + ' title="עמוד קודם" aria-label="עמוד קודם">›</button>' +
+      '<span class="search-pg-info">עמוד ' + currentSearchPage + ' מתוך ' + totalPages + '</span>' +
+      '<button class="search-pg-btn" onclick="searchPageNext()" ' + (currentSearchPage === totalPages ? 'disabled' : '') + ' title="עמוד הבא" aria-label="עמוד הבא">‹</button>' +
+    '</div>' : '';
 
-  fadeContent(`
-    <div class="search-results">
-      <div class="search-results-meta">${total} תוצאות עבור "<strong>${escapeHtml(currentSearchQuery)}</strong>"${titleOnly ? ' <span style="color:var(--gold);font-size:0.85em">(טוען חיפוש מלא…)</span>' : ''}</div>
-      ${items}
-      ${pagination}
-    </div>
-  `);
+  fadeContent(
+    '<div class="search-results">' +
+      '<div class="search-results-meta" role="status">' + total + ' תוצאות עבור "<strong>' +
+        escapeHtml(currentSearchQuery) + '</strong>"' +
+        (titleOnly ? ' <span style="color:var(--gold);font-size:0.85em">(מחפש גם בתוכן…)</span>' : '') +
+      '</div>' + items + pagination +
+    '</div>');
 }
 
-function searchPagePrev(){ if(currentSearchPage > 1){ currentSearchPage--; renderSearchResults(); window.scrollTo(0,0); } }
+let _searchPageTitleOnly = false;
+function searchPagePrev(){ if(currentSearchPage > 1){ currentSearchPage--; renderSearchResults(_searchPageTitleOnly); } }
 function searchPageNext(){
   const tp = Math.ceil(currentSearchResults.length / SEARCH_PAGE_SIZE);
-  if(currentSearchPage < tp){ currentSearchPage++; renderSearchResults(); window.scrollTo(0,0); }
+  if(currentSearchPage < tp){ currentSearchPage++; renderSearchResults(_searchPageTitleOnly); }
 }
 
-function escapeHtml(s){
-  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-// ─── הרצת חיפוש (debounced) ───
+// ─── הרצת חיפוש ───
 function runSearch(query){
+  const isNew = currentSearchQuery !== query;
   currentSearchQuery = query;
   currentSearchPage  = 1;
-  if(searchIndex === null){
-    // אינדקס מלא עדיין לא נטען — חיפוש כותרות מיידי!
-    ensureSearchIndex();
-    currentSearchResults = searchTitlesOnly(query);
-    renderSearchResults(/* titleOnly */ true);
+  if(isNew) pushNav({ k: 'search', q: query });
+
+  if(!searchIx){
+    // האינדקס המלא עדיין לא מוכן — חיפוש כותרות מיידי
+    if(!searchIndexFailed) ensureSearchIndex().catch(() => {});
+    const titleRes = searchTitlesOnly(query);
+    const tr = runEngine(titleIx, query, false);
+    currentMatchTokens = collectMatchTokens(titleIx, tr.resolved);
+    currentSearchResults = titleRes;
+    _searchPageTitleOnly = true;
+    renderSearchResults(true);
     return;
   }
-  currentSearchResults = searchEntries(query, searchOptAlsoContent) || [];
-  renderSearchResults();
+
+  const r = runEngine(searchIx, query, searchOptAlsoContent);
+  currentMatchTokens = collectMatchTokens(searchIx, r.resolved);
+  currentResolved    = r.resolved;
+  // ההגדרה המתאימה מחושבת עצלנית — רק ל-20 התוצאות שמוצגות בפועל,
+  // לא ל-500 התוצאות כולן
+  currentSearchResults = r.results.map(x => {
+    const entry = searchData.entries[x.ei];
+    return { id: entry.i, term: entry.t, topicTitle: searchData.topics[entry.p] || '',
+             ei: x.ei, tier: x.tier, defIdx: -1 };
+  });
+  _searchPageTitleOnly = false;
+  renderSearchResults(false);
+}
+
+function fillDefIndexes(from, count){
+  const resolved = currentResolved;
+  if(!searchIx || !resolved) return;
+  const end = Math.min(currentSearchResults.length, from + count);
+  for(let i = from; i < end; i++){
+    const r = currentSearchResults[i];
+    if(r.defIdx >= 0) continue;
+    const b = bestDefinitionFor(searchIx, r.ei, resolved);
+    r.defIdx = b.defIdx >= 0 ? b.defIdx : 0;
+  }
 }
 
 // ─── כפתור "חפש" וקיצור Enter ───
@@ -2338,19 +2726,20 @@ document.addEventListener('click', e => {
 document.querySelectorAll('input[name="search-scope"]').forEach(r => {
   r.addEventListener('change', () => {
     searchOptAlsoContent = (r.value === 'all');
-    try{ localStorage.setItem('milon_search_scope', r.value); }catch(e){}
-    if(currentSearchQuery) runSearch(currentSearchQuery);
+    lsSet('milon_search_scope', r.value);
+    // רק אם מוצגות תוצאות חיפוש — אחרת המשתמש קורא ערך ואין לקטוע אותו
+    if(currentSearchQuery && currentPage === 'dictionary' && !currentEntry) runSearch(currentSearchQuery);
   });
 });
 // טעינת העדפה מ-localStorage
-try{
-  const saved = localStorage.getItem('milon_search_scope');
+{
+  const saved = lsGet('milon_search_scope');
   if(saved){
     searchOptAlsoContent = (saved === 'all');
     const el = document.querySelector(`input[name="search-scope"][value="${saved}"]`);
     if(el) el.checked = true;
   }
-}catch(e){}
+}
 
 const sizes = ['md','lg','xl'];
 let sizeIdx = 0;
@@ -2361,14 +2750,32 @@ document.getElementById('font-btn').addEventListener('click', () => {
 
 // ─── Bookmarks (per-entry) ───
 const BOOKMARKS_KEY = 'milon_bookmarks_v1';
+// מוחזק בזיכרון — renderNav קרא ל-isBookmarked 653 פעם, כלומר 653 JSON.parse בכל רינדור
+let _bookmarks = null;
 function getBookmarks(){
-  try{ return new Set(JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '[]')); }
-  catch(e){ return new Set(); }
+  if(_bookmarks) return _bookmarks;
+  try{ _bookmarks = new Set(JSON.parse(lsGet(BOOKMARKS_KEY) || '[]')); }
+  catch(e){ _bookmarks = new Set(); }
+  return _bookmarks;
 }
 function saveBookmarks(s){
-  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify([...s]));
+  _bookmarks = s;
+  // localStorage זורק במצב פרטי / כשהמכסה מלאה — אסור שיפיל את הלחיצה
+  lsSet(BOOKMARKS_KEY, JSON.stringify([...s]));
 }
 function isBookmarked(eid){ return getBookmarks().has(eid); }
+// טאב אחר שינה סימניות — רענן את המצב בזיכרון ואת הסימונים בסרגל
+window.addEventListener('storage', e => {
+  if(e.key !== BOOKMARKS_KEY) return;
+  _bookmarks = null;
+  const s = getBookmarks();
+  document.querySelectorAll('.entry-link[data-entry]').forEach(el => {
+    el.classList.toggle('bookmarked', s.has(el.dataset.entry));
+  });
+  const btn = document.querySelector('.entry-bookmark');
+  if(btn && currentEntry) btn.classList.toggle('active', s.has(currentEntry));
+  if(currentPage === 'bookmarks') setPage('bookmarks');
+});
 function toggleBookmark(eid){
   const s = getBookmarks();
   if(s.has(eid)) s.delete(eid); else s.add(eid);
@@ -2387,7 +2794,12 @@ document.getElementById('bookmarks-page-btn').addEventListener('click', () => se
 
 window.onToggleBookmark = function(eid, btn){
   const now = toggleBookmark(eid);
-  if(btn) btn.classList.toggle('active', now);
+  if(btn){
+    btn.classList.toggle('active', now);
+    btn.setAttribute('aria-pressed', now ? 'true' : 'false');
+    btn.setAttribute('aria-label', now ? 'הסר מהסימניות' : 'הוסף לסימניות');
+    btn.setAttribute('title', now ? 'הסר מהסימניות' : 'הוסף לסימניות');
+  }
   // also update sidebar marker
   document.querySelectorAll(`.entry-link[data-entry="${eid}"]`).forEach(el => {
     el.classList.toggle('bookmarked', now);
@@ -2414,6 +2826,7 @@ function resetSearchState(){
 // Page switching (about/contact)
 let currentPage = 'dictionary';
 function setPage(p){
+  if(p !== currentPage) pushNav({ k: 'page', p: p });
   currentPage = p;
   resetSearchState();   // ← תמיד מאפס חיפוש במעבר עמוד
   document.querySelectorAll('.page-btn').forEach(b => b.classList.toggle('active', b.dataset.page === p));
@@ -2487,21 +2900,22 @@ function renderBookmarks(){
       <div class="info-rule"></div>
       ${Object.values(byTopic).map(g => `
         <div class="bookmark-group">
-          <div class="bookmark-topic">${g.topic.title}</div>
+          <div class="bookmark-topic">${escapeHtml(g.topic.title)}</div>
           <div class="bookmark-list">
             ${g.entries.map(e => {
-              // Preview נלקח מ-search-index (לא דורש load של data.json)
-              const sidx = searchIndexById && searchIndexById[e.id];
-              const previewRaw = sidx ? (sidx.preview || '') : '';
+              const sidx = searchById && searchById[e.id];
+              const previewRaw = (sidx && sidx.entry.d && sidx.entry.d[0]) ? sidx.entry.d[0] : '';
               const preview = previewRaw.length > 120 ? previewRaw.slice(0, 120) + '…' : previewRaw;
               return `
               <div class="bookmark-row">
-                <button class="bookmark-remove" onclick="onRemoveBookmark('${e.id}')" title="הסר">
+                <button class="bookmark-remove" onclick="onRemoveBookmark('${escapeAttr(e.id)}')" title="הסר מהסימניות" aria-label="הסר מהסימניות">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                 </button>
-                <div class="bookmark-content" onclick="goToEntryByEntryId('${e.id}')">
-                  <div class="bookmark-term">${e.term}</div>
-                  <div class="bookmark-preview">${preview}</div>
+                <div class="bookmark-content" role="link" tabindex="0"
+                     onclick="goToEntryByEntryId('${escapeAttr(e.id)}')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToEntryByEntryId('${escapeAttr(e.id)}');}">
+                  <div class="bookmark-term">${escapeHtml(e.term)}</div>
+                  <div class="bookmark-preview">${escapeHtml(preview)}</div>
                 </div>
                 <span class="bookmark-arrow">←</span>
               </div>
@@ -2647,6 +3061,91 @@ function renderContact(){
   `;
 }
 
+// ─── מגירת ניווט למובייל ───
+const MOBILE_Q = window.matchMedia('(max-width: 860px)');
+function isMobile(){ return MOBILE_Q.matches; }
+let _navReturnFocus = null;
+function setNavOpen(open){
+  const wasOpen = document.body.classList.contains('nav-open');
+  document.body.classList.toggle('nav-open', open);
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('nav-backdrop');
+  if(sb){
+    sb.classList.toggle('open', open);
+    // inert (בנוסף ל-visibility) — חוסם גם עכבר וגם מקלדת בדפדפנים תומכים
+    if(isMobile() && !open) sb.setAttribute('inert', '');
+    else sb.removeAttribute('inert');
+  }
+  if(bd) bd.classList.toggle('open', open);
+  const btn = document.getElementById('nav-toggle');
+  if(btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if(!isMobile()) return;
+  if(open && !wasOpen){
+    _navReturnFocus = document.activeElement;
+    const first = document.getElementById('search');
+    if(first) setTimeout(() => first.focus(), 60);
+  }else if(!open && wasOpen){
+    // החזר את המיקוד למקום שממנו נפתחה המגירה
+    const back = _navReturnFocus && _navReturnFocus.focus ? _navReturnFocus : btn;
+    if(back && back.focus) back.focus();
+    _navReturnFocus = null;
+  }
+}
+// ═══ ניווט היסטוריה: כפתור "אחורה" מחזיר מסך, לא יוצא מהאתר ═══
+let _navLock = false;   // מונע דחיפת state בזמן טיפול ב-popstate
+function pushNav(st, replace){
+  if(_navLock) return;
+  try{
+    const fn = replace ? 'replaceState' : 'pushState';
+    history[fn](st, '');
+  }catch(e){}
+}
+function applyNav(st){
+  _navLock = true;
+  try{
+    if(!st || !st.k){
+      setPage('dictionary');
+    }else if(st.k === 'entry' && st.t && st.e){
+      goToEntry(st.t, st.e);
+    }else if(st.k === 'topic' && st.t && data){
+      const ti = data.topics.findIndex(t => t.id === st.t);
+      if(ti >= 0){ currentTopic = st.t; currentEntry = null; renderTopicLanding(data.topics[ti], ti); }
+    }else if(st.k === 'search' && st.q){
+      const inp = document.getElementById('search');
+      if(inp) inp.value = st.q;
+      runSearch(st.q);
+    }else if(st.k === 'page'){
+      setPage(st.p || 'dictionary');
+    }
+  }finally{
+    _navLock = false;
+  }
+}
+window.addEventListener('popstate', e => {
+  // במובייל: אם המגירה פתוחה, "אחורה" קודם כל סוגר אותה
+  if(document.body.classList.contains('nav-open')){ setNavOpen(false); }
+  applyNav(e.state);
+});
+
+window.toggleNav = function(){ setNavOpen(!document.body.classList.contains('nav-open')); };
+document.getElementById('nav-toggle').addEventListener('click', window.toggleNav);
+document.getElementById('nav-backdrop').addEventListener('click', () => setNavOpen(false));
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.body.classList.contains('nav-open')) setNavOpen(false);
+});
+// המגירה הסגורה חייבת להיות inert במובייל, ולא-inert בדסקטופ
+function _syncDrawerInert(){
+  const sb = document.getElementById('sidebar');
+  if(!sb) return;
+  if(isMobile() && !document.body.classList.contains('nav-open')) sb.setAttribute('inert', '');
+  else sb.removeAttribute('inert');
+}
+_syncDrawerInert();
+// אם המסך הורחב חזרה לדסקטופ — אין טעם להשאיר מצב "מגירה פתוחה"
+const onMQChange = e => { if(!e.matches) setNavOpen(false); _syncDrawerInert(); };
+if(MOBILE_Q.addEventListener) MOBILE_Q.addEventListener('change', onMQChange);
+else if(MOBILE_Q.addListener) MOBILE_Q.addListener(onMQChange);
+
 // ─── Splitter (גרירה לשינוי רוחב הסרגל הצדדי) ───
 (function setupSplitter(){
   const SPLIT_KEY = 'milon_sidebar_width_v1';
@@ -2657,20 +3156,56 @@ function renderContact(){
   const MAX_PCT = 0.6; // עד 60% מרוחב המסך
 
   // שחזור רוחב שמור
-  const saved = parseInt(localStorage.getItem(SPLIT_KEY) || '', 10);
+  const saved = parseInt(lsGet(SPLIT_KEY) || '', 10);
   if(saved && saved >= MIN && saved <= window.innerWidth * MAX_PCT){
     document.documentElement.style.setProperty('--sidebar-width', saved + 'px');
   }
 
-  let dragging = false;
-  splitter.addEventListener('mousedown', (e) => {
-    dragging = true;
-    splitter.classList.add('dragging');
-    document.body.classList.add('resizing');
+  // ── הפעלה במקלדת: חיצים משנים רוחב, Home מאפס ──
+  function currentWidth(){
+    const v = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width'), 10);
+    return v || 340;
+  }
+  function setWidth(w){
+    const max = window.innerWidth * MAX_PCT;
+    w = Math.max(MIN, Math.min(w, max));
+    document.documentElement.style.setProperty('--sidebar-width', w + 'px');
+    lsSet(SPLIT_KEY, String(w));
+    splitter.setAttribute('aria-valuenow', String(Math.round(w)));
+  }
+  splitter.addEventListener('keydown', e => {
+    const step = e.shiftKey ? 40 : 12;
+    // RTL: הסרגל בימין, לכן חץ שמאלה מגדיל אותו
+    if(e.key === 'ArrowLeft')       { setWidth(currentWidth() + step); }
+    else if(e.key === 'ArrowRight') { setWidth(currentWidth() - step); }
+    else if(e.key === 'Home')       { document.documentElement.style.removeProperty('--sidebar-width'); lsDel(SPLIT_KEY); }
+    else return;
     e.preventDefault();
   });
 
-  document.addEventListener('mousemove', (e) => {
+  let dragging = false;
+  function endDrag(){
+    if(!dragging) return;
+    dragging = false;
+    splitter.classList.remove('dragging');
+    document.body.classList.remove('resizing');
+    const w = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width');
+    const px = parseInt(w, 10);
+    if(px) lsSet(SPLIT_KEY, px);
+  }
+  splitter.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    splitter.classList.add('dragging');
+    document.body.classList.add('resizing');
+    try{ splitter.setPointerCapture(e.pointerId); }catch(err){}
+    e.preventDefault();
+  });
+  // גרירה שנגמרת מחוץ לחלון השאירה את הממשק מוקפא (pointer-events:none על הכל)
+  document.addEventListener('pointerup', endDrag);
+  document.addEventListener('pointercancel', endDrag);
+  window.addEventListener('blur', endDrag);
+
+  document.addEventListener('pointermove', (e) => {
     if(!dragging) return;
     // ב-RTL הסרגל בצד ימין; הרוחב = (innerWidth - clientX - padding)
     const padding = 16; // .page padding
@@ -2681,21 +3216,18 @@ function renderContact(){
     document.documentElement.style.setProperty('--sidebar-width', w + 'px');
   });
 
-  document.addEventListener('mouseup', () => {
-    if(!dragging) return;
-    dragging = false;
-    splitter.classList.remove('dragging');
-    document.body.classList.remove('resizing');
-    // שמירה
-    const w = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width');
-    const px = parseInt(w, 10);
-    if(px) localStorage.setItem(SPLIT_KEY, px);
+  // רוחב שמור עלול להיות רחב מדי אחרי הקטנת החלון — מצמצמים מחדש
+  window.addEventListener('resize', () => {
+    const cur = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width'), 10);
+    if(!cur) return;
+    const max = window.innerWidth * MAX_PCT;
+    if(cur > max) document.documentElement.style.setProperty('--sidebar-width', Math.max(MIN, max) + 'px');
   });
 
   // double-click איפוס לברירת מחדל
   splitter.addEventListener('dblclick', () => {
     document.documentElement.style.removeProperty('--sidebar-width');
-    localStorage.removeItem(SPLIT_KEY);
+    lsDel(SPLIT_KEY);
   });
 })();
 
@@ -2704,7 +3236,7 @@ load();
 
 // ── רישום Service Worker (שמירת קבצים למחשב המשתמש) ──
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
+  navigator.serviceWorker.register('/sw.js').catch(err => console.warn('SW registration failed:', err));
 }
 </script>
 </body>
