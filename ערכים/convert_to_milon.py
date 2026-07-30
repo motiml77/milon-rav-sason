@@ -12,7 +12,10 @@
 import json
 import re
 import os
+import sys
 from datetime import date
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 INPUT_JS = os.path.join(os.path.dirname(__file__), "data.js")
 OUTPUT_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data.json")
@@ -334,95 +337,32 @@ for topic in out["topics"]:
 # (in-memory הדאטה ב-`out` עדיין משמש להלן ליצירת terms.json + search-index.json + entries/*)
 
 # ====================================================================
-# ---------- search-index.json (אינדקס חיפוש מנורמל) ----------
+# ---------- search-index.json (פורמט חדש — מודול משותף) ----------
 # ====================================================================
+# הנרמול/הטוקניזציה לחיפוש קורים ב-JS בלבד (מקור אמת יחיד).
+# כאן נכתב רק טקסט נקי מלא לכל הגדרה. אותן פונקציות משמשות גם את
+# rebuild_index_from_entries.py, כדי שהפורמט לא ייפרד לשני מימושים.
+from datetime import datetime as _dt
+_VERSION = _dt.now().strftime('%Y-%m-%d-%H%M%S')
 
-NIKUD_RE       = re.compile(r'[֑-ׇ]')
-HTML_TAG_RE    = re.compile(r'<[^>]+>')
-NON_LETTER_RE  = re.compile(r'[־\-–—]')   # מקפים → רווח
-PUNCT_RE       = re.compile(r'[^\w\s֐-׿]', re.UNICODE)
-WS_RE          = re.compile(r'\s+')
-HEB_WORD_RE    = re.compile(r'[א-ת]+')
+from build_search_index import build_payload, build_terms, write_json
 
-def strip_html(s):
-    return HTML_TAG_RE.sub(' ', s or '')
+_payload = build_payload(out["topics"], _VERSION)
 
-def normalize_for_search(text):
-    """ניקוי בסיסי: ניקוד, מקפים, פיסוק, רווחים."""
-    if not text:
-        return ""
-    s = NIKUD_RE.sub('', text)
-    s = NON_LETTER_RE.sub(' ', s)
-    s = PUNCT_RE.sub(' ', s)
-    s = WS_RE.sub(' ', s).strip().lower()
-    return s
-
-def normalize_male_chaser(text):
-    """כתיב מלא/חסר: מסיר י/ו באמצע מילה (>3 אותיות)."""
-    if not text:
-        return ""
-    def fix_word(m):
-        w = m.group(0)
-        if len(w) <= 3:
-            return w
-        return w[0] + re.sub(r'[יו]', '', w[1:])
-    return HEB_WORD_RE.sub(fix_word, text)
-
-def build_preview(definitions, max_chars=300):
-    """תצוגה מקדימה של 300 תווים מההגדרה הראשונה (טקסט נקי) — fallback."""
-    for d in definitions:
-        plain = strip_html(d.get("text", ""))
-        plain = re.sub(r'\s+', ' ', plain).strip()
-        if plain:
-            if len(plain) > max_chars:
-                return plain[:max_chars].rstrip() + "…"
-            return plain
-    return ""
-
-def build_def_previews(definitions, max_chars_per_def=350):
-    """מערך של תצוגות מקדימות פר-הגדרה (טקסט נקי, לא מנורמל) — לחיפוש חכם."""
-    out = []
-    for d in definitions:
-        plain = strip_html(d.get("text", ""))
-        plain = re.sub(r'\s+', ' ', plain).strip()
-        if not plain:
-            out.append("")
-            continue
-        if len(plain) > max_chars_per_def:
-            plain = plain[:max_chars_per_def].rstrip() + "…"
-        out.append(plain)
-    return out
-
-search_index = []
-for topic in out["topics"]:
-    for entry in topic["entries"]:
-        # ─── טקסט נקי פר-הגדרה (לקרבה רב-מילים בתוך הגדרה אחת) ───
-        defs_texts = []
-        for d in entry["definitions"]:
-            txt = strip_html(d.get("text", ""))
-            if d.get("source"):
-                txt = txt + " " + d["source"]
-            defs_texts.append(txt)
-
-        # נורמליזציה + כתיב מלא/חסר (תמיד פעיל)
-        term_mc  = normalize_male_chaser(normalize_for_search(entry["term"]))
-        defs_mc  = [normalize_male_chaser(normalize_for_search(t)) for t in defs_texts]
-        # textN לא נשמר ל-JSON — JS בונה אותו בזמן טעינה מ-defsN (חיסכון של ~50%)
-
-        search_index.append({
-            "id":          entry["id"],
-            "term":        entry["term"],
-            "topicTitle":  topic["title"],
-            "termN":       term_mc,
-            "defsN":       defs_mc,    # מנורמל פר-הגדרה (textN נבנה מזה ב-JS)
-            "defsP":       build_def_previews(entry["definitions"], 350),  # תצוגה מקדימה פר-הגדרה (לא מנורמל)
-            "preview":     build_preview(entry["definitions"], 300),       # fallback להגדרה הראשונה
-        })
+# ── בקרת שפיות: ריצה שהפיקה אפס ערכים/הגדרות לא תדרוס את הפלט הקיים ──
+_n_entries = len(_payload["entries"])
+_n_defs    = sum(len(e["d"]) for e in _payload["entries"])
+if _n_entries == 0 or _n_defs == 0:
+    raise SystemExit(
+        f"ABORT: ההמרה הפיקה {_n_entries} ערכים ו-{_n_defs} הגדרות. "
+        "הפלט הקיים לא נדרס. בדוק את קובץ ה-Word לפני ריצה חוזרת."
+    )
+if _n_entries < 400:
+    print(f"WARNING: רק {_n_entries} ערכים (צפוי ~650). ודא שקובץ ה-Word שלם.")
 
 SEARCH_INDEX_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "search-index.json")
-with open(SEARCH_INDEX_JSON, "w", encoding="utf-8") as f:
-    json.dump(search_index, f, ensure_ascii=False, separators=(',', ':'))
-print(f"OK: search-index.json ({len(search_index)} entries)")
+write_json(SEARCH_INDEX_JSON, _payload)
+print(f"OK: search-index.json ({_n_entries} entries, {_n_defs} definitions)")
 
 # ---------- entries/<id>.json (Lazy loading — קובץ קטן לכל ערך) ----------
 ENTRIES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'entries')
@@ -455,26 +395,12 @@ for topic in out["topics"]:
 print(f"OK: entries/*.json ({_entry_count} files)")
 
 # ---------- terms.json (קל — רק שמות ערכים לסרגל) ----------
-terms = {
-    "title": out["title"],
-    "subtitle": out["subtitle"],
-    "topics": [
-        {
-            "id": t["id"],
-            "title": t["title"],
-            "subtitle": t.get("subtitle", ""),
-            "entries": [{"id": e["id"], "term": e["term"], "termN": normalize_male_chaser(normalize_for_search(e["term"]))} for e in t["entries"]]
-        }
-        for t in out["topics"]
-    ]
-}
 TERMS_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "terms.json")
-with open(TERMS_JSON, "w", encoding="utf-8") as f:
-    json.dump(terms, f, ensure_ascii=False, separators=(',', ':'))
+write_json(TERMS_JSON, build_terms(out["title"], out["subtitle"], out["topics"]))
+print("OK: terms.json")
 
 # ---------- עדכון גרסת Service Worker + SEARCH_URL ----------
-from datetime import datetime as _dt
-_ts = _dt.now().strftime('%Y-%m-%d-%H%M')  # גרסה ייחודית לכל הרצה
+_ts = _VERSION   # אותה גרסה שנכתבה לתוך search-index.json
 
 sw_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sw.js')
 if os.path.exists(sw_path):
@@ -502,7 +428,8 @@ print(f"OK: terms.json + entries/ ({_entry_count} files)")
 print(f"  Topics: {stats['topics']}")
 print(f"  Entries: {stats['entries']}")
 print(f"  Definitions: {stats['definitions']}")
-print(f"  With source: {stats['with_source']} ({stats['with_source']*100//stats['definitions']}%)")
+_pct = (stats['with_source']*100//stats['definitions']) if stats['definitions'] else 0
+print(f"  With source: {stats['with_source']} ({_pct}%)")
 print(f"  Without source: {stats['definitions'] - stats['with_source']}")
 print(f"  Entries with related refs: {stats['entries_with_refs']}")
 print(f"  Total references resolved: {stats['refs_found']}")

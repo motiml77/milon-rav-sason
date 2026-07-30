@@ -1,0 +1,522 @@
+{
+  "note": "סט בקרה לאיכות החיפוש. expected = מזהי הערכים שנחשבים תשובה נכונה.",
+  "generated_from_index_version": "2026-07-29-205241",
+  "intents": {
+    "known-item": "המשתמש יודע את שם הערך — נמדד Success@1",
+    "head-term": "מילת ראש של משפחת ערכים — נמדד Success@3",
+    "phrase": "ביטוי מתוך הגדרה — נמדד Success@1",
+    "abbrev": "קיצור בגרשיים — נמדד Success@3",
+    "typo": "שגיאת כתיב — נמדד Success@3 (יעד לשיפור עתידי)"
+  },
+  "queries": [
+    {
+      "query": "נרנח\"י",
+      "intent": "known-item",
+      "expected": [
+        "t_1"
+      ],
+      "expectedTitles": [
+        "נרנח\"י"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "נרנחי",
+      "intent": "known-item",
+      "expected": [
+        "t_1"
+      ],
+      "expectedTitles": [
+        "נרנח\"י"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "הבלא דגרמי",
+      "intent": "known-item",
+      "expected": [
+        "t_3"
+      ],
+      "expectedTitles": [
+        "הבלא דגרמי"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "רשימו",
+      "intent": "known-item",
+      "expected": [
+        "t_22"
+      ],
+      "expectedTitles": [
+        "רשימו"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "החלל הפנוי והקו",
+      "intent": "known-item",
+      "expected": [
+        "t_23"
+      ],
+      "expectedTitles": [
+        "החלל הפנוי והקו"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "מלכות אין סוף",
+      "intent": "known-item",
+      "expected": [
+        "t_25"
+      ],
+      "expectedTitles": [
+        "מלכות אין סוף"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "בעלה דמטרוניתא",
+      "intent": "known-item",
+      "expected": [
+        "t_39"
+      ],
+      "expectedTitles": [
+        "בעלה דמטרוניתא"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "טלית ציצית",
+      "intent": "known-item",
+      "expected": [
+        "t_61"
+      ],
+      "expectedTitles": [
+        "טלית, ציצית"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "עבודה צורך גבוה",
+      "intent": "known-item",
+      "expected": [
+        "t_135"
+      ],
+      "expectedTitles": [
+        "עבודה צורך גבוה"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "פירוד לאה ורחל",
+      "intent": "known-item",
+      "expected": [
+        "t_88"
+      ],
+      "expectedTitles": [
+        "פירוד לאה ורחל"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "מרכבה לשכינה",
+      "intent": "known-item",
+      "expected": [
+        "t_95"
+      ],
+      "expectedTitles": [
+        "מרכבה לשכינה"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "ברכת הלבנה",
+      "intent": "known-item",
+      "expected": [
+        "t_119"
+      ],
+      "expectedTitles": [
+        "ברכת הלבנה"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "שיעור קומת אדם",
+      "intent": "known-item",
+      "expected": [
+        "t_12"
+      ],
+      "expectedTitles": [
+        "שיעור קומת אדם"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "ממלא גדול מהסובב",
+      "intent": "known-item",
+      "expected": [
+        "t_10"
+      ],
+      "expectedTitles": [
+        "ממלא גדול מהסובב"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "הנהגת הייחוד",
+      "intent": "known-item",
+      "expected": [
+        "t_29"
+      ],
+      "expectedTitles": [
+        "הנהגת הייחוד"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "הנהגת המשפט",
+      "intent": "known-item",
+      "expected": [
+        "t_30"
+      ],
+      "expectedTitles": [
+        "הנהגת המשפט"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "פנימיות וחיצוניות",
+      "intent": "known-item",
+      "expected": [
+        "t_9"
+      ],
+      "expectedTitles": [
+        "פנימיות וחיצוניות"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "כהן לוי וישראל",
+      "intent": "known-item",
+      "expected": [
+        "t_38"
+      ],
+      "expectedTitles": [
+        "כהן לוי וישראל"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "סגולה ובחירה",
+      "intent": "known-item",
+      "expected": [
+        "t_64"
+      ],
+      "expectedTitles": [
+        "סגולה ובחירה"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "שכינה גפן",
+      "intent": "known-item",
+      "expected": [
+        "t_75"
+      ],
+      "expectedTitles": [
+        "שכינה – גפן"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "נבואה לעומת תושבע",
+      "intent": "known-item",
+      "expected": [
+        "t_37"
+      ],
+      "expectedTitles": [
+        "נבואה לעומת תושב\"ע"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "משה ורשבי",
+      "intent": "known-item",
+      "expected": [
+        "t_42"
+      ],
+      "expectedTitles": [
+        "משה ורשב\"י"
+      ],
+      "note": "must be rank 1"
+    },
+    {
+      "query": "נשמה",
+      "intent": "head-term",
+      "expected": [
+        "t_4",
+        "t_5",
+        "t_6",
+        "t_7"
+      ],
+      "expectedTitles": [
+        "נשמה – מקור ההשגות של האדם",
+        "נשמה – שורש האופי העצמי של כל אחד",
+        "נשמה – מקור האמונה",
+        "נשמה – עצמותה והתלבשותה ברצון לטוב"
+      ],
+      "note": "any of the family in top 3"
+    },
+    {
+      "query": "בריאת העולם",
+      "intent": "head-term",
+      "expected": [
+        "t_13",
+        "t_15"
+      ],
+      "expectedTitles": [
+        "בריאת העולם",
+        "בריאת העולם – טעמי הבריאה"
+      ],
+      "note": "any of the family in top 3"
+    },
+    {
+      "query": "צמצום",
+      "intent": "head-term",
+      "expected": [
+        "t_21"
+      ],
+      "expectedTitles": [
+        "צמצום – הכח עומד להוות נפרדים מן האינסוף"
+      ],
+      "note": "any of the family in top 3"
+    },
+    {
+      "query": "הרע",
+      "intent": "head-term",
+      "expected": [
+        "t_20"
+      ],
+      "expectedTitles": [
+        "הרע – תכלית יצירתו בעולם"
+      ],
+      "note": "any of the family in top 3"
+    },
+    {
+      "query": "סדר ההשתלשלות",
+      "intent": "head-term",
+      "expected": [
+        "t_27"
+      ],
+      "expectedTitles": [
+        "סדר ההשתלשלות – רצון, מחשבה, הרהור, דיבור ומעשה"
+      ],
+      "note": "any of the family in top 3"
+    },
+    {
+      "query": "הרצון האלוקי",
+      "intent": "head-term",
+      "expected": [
+        "t_11"
+      ],
+      "expectedTitles": [
+        "הרצון האלוקי – כח פועל ומהווה"
+      ],
+      "note": "any of the family in top 3"
+    },
+    {
+      "query": "א\"א",
+      "intent": "abbrev",
+      "expected": [
+        "t_301"
+      ],
+      "expectedTitles": [
+        "אריך אנפין"
+      ],
+      "note": "acronym must resolve to its canonical entry"
+    },
+    {
+      "query": "אא",
+      "intent": "abbrev",
+      "expected": [
+        "t_301"
+      ],
+      "expectedTitles": [
+        "אריך אנפין"
+      ],
+      "note": "acronym must resolve to its canonical entry"
+    },
+    {
+      "query": "ז\"א",
+      "intent": "abbrev",
+      "expected": [
+        "t_300"
+      ],
+      "expectedTitles": [
+        "זעיר אנפין"
+      ],
+      "note": "acronym must resolve to its canonical entry"
+    },
+    {
+      "query": "זא",
+      "intent": "abbrev",
+      "expected": [
+        "t_300"
+      ],
+      "expectedTitles": [
+        "זעיר אנפין"
+      ],
+      "note": "acronym must resolve to its canonical entry"
+    },
+    {
+      "query": "ע\"ק",
+      "intent": "abbrev",
+      "expected": [
+        "t_302"
+      ],
+      "expectedTitles": [
+        "עתיק יומין"
+      ],
+      "note": "acronym must resolve to its canonical entry"
+    },
+    {
+      "query": "צימצום",
+      "intent": "typo",
+      "expected": [
+        "t_21"
+      ],
+      "expectedTitles": [
+        "צמצום – הכח עומד להוות נפרדים מן האינסוף"
+      ],
+      "note": "currently expected to FAIL — target for fuzzy fallback"
+    },
+    {
+      "query": "רשימא",
+      "intent": "typo",
+      "expected": [
+        "t_22"
+      ],
+      "expectedTitles": [
+        "רשימו"
+      ],
+      "note": "currently expected to FAIL — target for fuzzy fallback"
+    },
+    {
+      "query": "נשמא",
+      "intent": "typo",
+      "expected": [
+        "t_4",
+        "t_6",
+        "t_5",
+        "t_7"
+      ],
+      "expectedTitles": [
+        "נשמה – מקור ההשגות של האדם",
+        "נשמה – מקור האמונה",
+        "נשמה – שורש האופי העצמי של כל אחד",
+        "נשמה – עצמותה והתלבשותה ברצון לטוב"
+      ],
+      "note": "currently expected to FAIL — target for fuzzy fallback"
+    },
+    {
+      "query": "הבלא דגרמא",
+      "intent": "typo",
+      "expected": [
+        "t_3"
+      ],
+      "expectedTitles": [
+        "הבלא דגרמי"
+      ],
+      "note": "currently expected to FAIL — target for fuzzy fallback"
+    },
+    {
+      "query": "שכונסת וכוללת את כל נשמות",
+      "intent": "phrase",
+      "expected": [
+        "t_1"
+      ],
+      "expectedTitles": [
+        "נרנח\"י"
+      ],
+      "note": "unique 5-word phrase from the entry definition"
+    },
+    {
+      "query": "לאשתו התגלות האור בעולמ לכנ",
+      "intent": "phrase",
+      "expected": [
+        "t_48"
+      ],
+      "expectedTitles": [
+        "אהרון"
+      ],
+      "note": "unique 5-word phrase from the entry definition"
+    },
+    {
+      "query": "אחד כלי הממשיכ בקרבו שפעת",
+      "intent": "phrase",
+      "expected": [
+        "t_95"
+      ],
+      "expectedTitles": [
+        "מרכבה לשכינה"
+      ],
+      "note": "unique 5-word phrase from the entry definition"
+    },
+    {
+      "query": "ועיקר אורו הגדול והקדוש אור",
+      "intent": "phrase",
+      "expected": [
+        "t_142"
+      ],
+      "expectedTitles": [
+        "שמות ה' – ההדרגה מן האינסוף אל הכינויים והנבראים"
+      ],
+      "note": "unique 5-word phrase from the entry definition"
+    },
+    {
+      "query": "למלכות העולמ נפל ממדרגתו האצילית",
+      "intent": "phrase",
+      "expected": [
+        "t_189"
+      ],
+      "expectedTitles": [
+        "בינה בשלמותה – שם יהי\"ה – מדרגתה השביעית של המלכות"
+      ],
+      "note": "unique 5-word phrase from the entry definition"
+    },
+    {
+      "query": "בהנ מתגלה אישיותו המיוחדת שהוא",
+      "intent": "phrase",
+      "expected": [
+        "t_236"
+      ],
+      "expectedTitles": [
+        "פנים"
+      ],
+      "note": "unique 5-word phrase from the entry definition"
+    },
+    {
+      "query": "הצדיק העליונ אינ לו נטייה",
+      "intent": "phrase",
+      "expected": [
+        "t_283"
+      ],
+      "expectedTitles": [
+        "מדרגת הקדושה"
+      ],
+      "note": "unique 5-word phrase from the entry definition"
+    },
+    {
+      "query": "ממשיכימ שפעת אורו הגדול אל",
+      "intent": "phrase",
+      "expected": [
+        "t_330"
+      ],
+      "expectedTitles": [
+        "אורות וכלים – מקורם – כח החסד וכח הגבורה – שורשם האחד"
+      ],
+      "note": "unique 5-word phrase from the entry definition"
+    }
+  ]
+}
