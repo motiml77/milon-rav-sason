@@ -17,6 +17,8 @@ rav sason/
 └── ערכים/
     ├── מושגים לאתר - עפ''י טללי חיים.docx   ← קלט המקור
     ├── convert_docx_hierarchical.py         ← Step 1: docx → data.js
+    ├── update.py                            ← **הפקודה היחידה שצריך**: צינור + בדיקה עצמית
+    ├── id-map.json                          ← שם ערך → מזהה קבוע (חובה ל-commit!)
     ├── convert_to_milon.py                  ← Step 2: data.js → כל פלטי האתר
     ├── build_search_index.py                ← מודול משותף: פורמט search-index/terms
     ├── rebuild_index_from_entries.py        ← בונה מחדש אינדקס מ-entries/ בלי ה-docx
@@ -33,26 +35,52 @@ rav sason/
 
 ## 2. צינור ההמרה (Pipeline)
 
-### ריצה אוטומטית (פקודה אחת)
+### ריצה אוטומטית (פקודה אחת — מומלץ)
+
+```bash
+python "ערכים/update.py"
+```
+
+הפקודה עושה הכל **ובודקת את עצמה**:
+
+1. `docx` → `data.js`
+2. `data.js` → `search-index.json` + `terms.json` + `entries/*.json`,
+   ומעדכנת מספרי גרסה ב-`sw.js` וב-`milon.html`
+3. **מודדת את איכות החיפוש** מול ערכת הבקרה (45 שאילתות)
+4. מדפיסה בדיוק מה להעלות ל-git
+
+> **אם שלב 3 נכשל — הסקריפט משחזר את הפלט הקודם ויוצא בשגיאה (exit 1).**
+> האתר לא נפגע. אל תעשה push; תחקור קודם.
+>
+> אם שינית **שמות** של ערכים בוורד, ערכת הבקרה עלולה להצביע על שמות שאינם
+> קיימים יותר. במקרה כזה הרץ `node "ערכים/eval/make-golden.cjs"`, ודא שהציפיות
+> החדשות נכונות, ורק אז נסה שוב.
+
+### מזהי ערכים — יציבים בין עדכונים
+
+המזהה (`t_1`, `t_2`…) נקבע לפי **שם הערך**, לא לפי מקומו במסמך, דרך
+`ערכים/id-map.json` שנשמר בריפו.
+
+- ערך קיים שומר את מזההו גם אם הזזת אותו במסמך
+- ערך חדש מקבל את המספר הפנוי הבא
+- מזהה של ערך שנמחק **לא ממוחזר** — קישור ישן לא יצביע פתאום על ערך אחר
+
+**חובה ל-commit את `ערכים/id-map.json` יחד עם שאר הפלטים.** בלעדיו ההרצה הבאה
+תחלק מזהים מחדש ותשבור כל סימניה וכל קישור ששותף.
+
+### ריצה ידנית (רק לדיבוג שלב מסוים)
 
 ```bash
 cd 'C:\Users\Moti Levi\Desktop\AI\rav sason\ערכים'
 python -c "
 import os
 import convert_docx_hierarchical as cdh
-docx_path = os.path.abspath([f for f in os.listdir('.') if f.endswith('.docx') and not f.startswith('~$')][0])
-data = cdh.convert_docx_to_hierarchical(docx_path)
+docx = [f for f in os.listdir('.') if f.endswith('.docx') and not f.startswith('~$')][0]
+data = cdh.convert_docx_to_hierarchical(os.path.abspath(docx))
 cdh.save_to_js(data, 'data.js')
 import convert_to_milon
 "
 ```
-
-זה עושה את כל השלבים:
-1. **Step 1 — `convert_docx_hierarchical.py`**: קורא את ה-`.docx`, מפיק `ערכים/data.js`
-2. **Step 2 — `convert_to_milon.py`**: קורא את `ערכים/data.js`, ומפיק:
-   `search-index.json`, `terms.json`, `entries/*.json`, ומעדכן את מספר הגרסה
-   ב-`sw.js` וב-`milon.html`. הפורמט נקבע ב-`build_search_index.py` (מודול משותף) —
-   **אל תשכפל את הלוגיקה הזאת**, אחרת האינדקס ייפרד לשני פורמטים והחיפוש יישבר.
 
 ### הפעלת השרת לבדיקה
 
@@ -289,7 +317,7 @@ import convert_to_milon
 
 # שלב 2 — העלה לגיטהב (Vercel יפרוס אוטומטית תוך ~30 שניות)
 cd 'C:\Users\Moti Levi\Desktop\AI\rav sason'
-git add search-index.json terms.json entries/ sw.js milon.html
+git add search-index.json terms.json entries/ sw.js milon.html "ערכים/id-map.json"
 git commit -m "עדכון תוכן מהוורד"
 git push
 ```

@@ -266,6 +266,75 @@ def extract_references(text, term_index, current_id):
 
     return found
 
+# ====================================================================
+# ---------- מזהים יציבים בין עדכוני וורד ----------
+# ====================================================================
+# בעבר המזהה היה מספר סידורי לפי מקום במסמך, ולכן הוספת ערך אחד באמצע
+# הזיזה את כל המזהים אחריו — וכל סימניה או קישור ששותף הצביע פתאום על
+# ערך אחר. כאן המזהה נקבע לפי *שם הערך* דרך מפה שנשמרת בריפו.
+ID_MAP_PATH = os.path.join(os.path.dirname(__file__), "id-map.json")
+
+def _norm_key(term):
+    """מפתח זיהוי לערך: שם מנורמל, עמיד לשינויי רווחים/ניקוד/פיסוק."""
+    k = re.sub(r'[֑-ׇ]', '', term or '')
+    k = re.sub(r'[^\w\s\u0590-\u05ff]', ' ', k)
+    return re.sub(r'\s+', ' ', k).strip().lower()
+
+def load_id_map():
+    if not os.path.exists(ID_MAP_PATH):
+        return {"next": 1, "byTerm": {}}
+    with open(ID_MAP_PATH, encoding="utf-8") as f:
+        m = json.load(f)
+    m.setdefault("next", 1)
+    m.setdefault("byTerm", {})
+    return m
+
+def assign_stable_ids(raw_sections):
+    """
+    ממפה כל ערך למזהה קבוע. מחזיר (id_map, stats).
+    ערך שכבר קיבל מזהה בעבר — שומר אותו. ערך חדש מקבל את המספר הפנוי הבא.
+    מספר של ערך שנמחק לא ממוחזר לעולם.
+    """
+    m = load_id_map()
+    by_term = m["byTerm"]
+    used = set(by_term.values())
+    kept = added = 0
+    seen_keys = set()
+    occ = {}
+    for section in raw_sections:
+        for term in section["terms"]:
+            base = _norm_key(term["term"])
+            if not base:
+                continue
+            # במסמך יש 4 שמות שחוזרים כשני ערכים נפרדים — ממספרים אותם
+            occ[base] = occ.get(base, 0) + 1
+            key = base if occ[base] == 1 else f"{base}#{occ[base]}"
+            seen_keys.add(key)
+            if key in by_term:
+                kept += 1
+            else:
+                while f"t_{m['next']}" in used:
+                    m["next"] += 1
+                by_term[key] = f"t_{m['next']}"
+                used.add(by_term[key])
+                m["next"] += 1
+                added += 1
+    retired = [k for k in by_term if k not in seen_keys]
+    return m, {"kept": kept, "added": added, "retired": len(retired)}
+
+_id_map, _id_stats = assign_stable_ids(raw["sections"])
+_ID_BY_TERM = _id_map["byTerm"]
+
+_id_occ = {}
+def stable_id(term_text, fallback):
+    """נקרא פעם אחת לכל ערך, בסדר המסמך — כמו assign_stable_ids."""
+    base = _norm_key(term_text)
+    if not base:
+        return fallback
+    _id_occ[base] = _id_occ.get(base, 0) + 1
+    key = base if _id_occ[base] == 1 else f"{base}#{_id_occ[base]}"
+    return _ID_BY_TERM.get(key, fallback)
+
 # ---------- המרה (שלב 1: בניית מבנה ואינדקס) ----------
 out = {
     "title": "מילון מונחים בפנימיות התורה",
@@ -292,7 +361,7 @@ for section in raw["sections"]:
     }
     for term in section["terms"]:
         entry = {
-            "id": term["id"],
+            "id": stable_id(term["term"], term["id"]),
             "term": term["term"],
             "definitions": [],
             "related": []
@@ -315,7 +384,7 @@ for section in raw["sections"]:
         norm = normalize_term(term["term"])
         if norm:
             # אם יש כפילויות, נשמור רק את הראשון
-            term_index.setdefault(norm, term["id"])
+            term_index.setdefault(norm, entry["id"])
 
     out["topics"].append(topic)
     stats["topics"] += 1
@@ -335,6 +404,14 @@ for topic in out["topics"]:
 
 # הערה: data.json הוסר ב-Phase 1 (lazy loading). הערכים נשמרים ב-entries/<id>.json
 # (in-memory הדאטה ב-`out` עדיין משמש להלן ליצירת terms.json + search-index.json + entries/*)
+
+# ---------- שמירת מפת המזהים (חובה ל-commit יחד עם שאר הפלטים) ----------
+with open(ID_MAP_PATH, "w", encoding="utf-8") as f:
+    json.dump(_id_map, f, ensure_ascii=False, indent=1, sort_keys=True)
+print(f"OK: id-map.json ({_id_stats['kept']} ids kept, {_id_stats['added']} new, "
+      f"{_id_stats['retired']} retired)")
+if _id_stats['retired']:
+    print(f"  NOTE: {_id_stats['retired']} ערכים נעלמו מהוורד — המזהים שלהם לא ימוחזר")
 
 # ====================================================================
 # ---------- search-index.json (פורמט חדש — מודול משותף) ----------

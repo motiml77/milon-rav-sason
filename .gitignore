@@ -27,3 +27,6 @@ Thumbs.db
 
 .vercel
 data.json
+
+# גיבוי זמני של update.py
+ערכים/.update-backup/

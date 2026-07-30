@@ -1,6 +1,6 @@
 // ─── Service Worker — מילון פנימיות התורה ───
 // CACHE_VERSION מתעדכן אוטומטית ע"י convert_to_milon.py בכל הרצת pipeline
-const CACHE_VERSION = '2026-07-29-205241';
+const CACHE_VERSION = '2026-07-30-164408';
 const CACHE_NAME    = `milon-${CACHE_VERSION}`;
 
 // רק נכסים שאינם משתנים בין גרסאות תוכן. milon.html **לא** נמצא כאן:
