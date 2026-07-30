@@ -1965,7 +1965,9 @@ function bestDefinitionFor(ix, ei, resolved){
       if(hit > 0){ cov++; q += hit; if(first < 0 || (p >= 0 && p < first)) first = p; }
     }
     if(!cov) continue;
-    const s = q * cov;
+    // כיסוי מלא של כל מילות החיפוש בהגדרה אחת שווה יותר מסכום איכויות גבוה
+    const full = cov === resolved.length ? 3 : 1;
+    const s = q * cov * full;
     if(s > bestScore){ bestScore = s; best = di; bestPos = first < 0 ? 0 : first; }
   }
   return { defIdx: best, tokenPos: bestPos };
@@ -2488,16 +2490,19 @@ function tokenizeWithPos(s){
 }
 
 // אוסף את כל צורות המילים שהתאימו בפועל — בסיס להדגשה עקבית עם ההתאמה
+// מחזיר Map: טוקן → אינדקס מילת החיפוש שהוא התאים לה.
+// Map תומך ב-has()/size, כך ש-highlightTokens ממשיך לעבוד כמו קודם;
+// האינדקס נחוץ ל-makeSnippet כדי לדעת *כמה* מילות חיפוש שונות יש בכל חלון.
 function collectMatchTokens(ix, resolved){
-  const set = new Set();
-  if(!ix || !resolved) return set;
-  for(const r of resolved){
-    for(const id of r.qmap.keys()){
+  const map = new Map();
+  if(!ix || !resolved) return map;
+  for(let wi = 0; wi < resolved.length; wi++){
+    for(const id of resolved[wi].qmap.keys()){
       const t = ix.vocabList[id];
-      if(t) set.add(t);
+      if(t && !map.has(t)) map.set(t, wi);
     }
   }
-  return set;
+  return map;
 }
 
 function highlightTokens(text, matchTokens){
@@ -2523,12 +2528,40 @@ function makeSnippet(text, matchTokens, maxLen){
   maxLen = maxLen || 300;
   let hit = -1;
   if(matchTokens && matchTokens.size){
-    for(const t of tokenizeWithPos(text)) if(matchTokens.has(t.tok)){ hit = t.start; break; }
+    // אסוף כל מופע התאמה עם מזהה מילת החיפוש שלו
+    const hits = [];
+    for(const t of tokenizeWithPos(text)){
+      const wi = matchTokens.get ? matchTokens.get(t.tok) : (matchTokens.has(t.tok) ? 0 : undefined);
+      if(wi !== undefined) hits.push({ at: t.start, wi: wi });
+    }
+    if(hits.length === 1){
+      hit = hits[0].at;
+    }else if(hits.length > 1){
+      // בחר את החלון שמכסה את המספר הגדול ביותר של מילות חיפוש *שונות*,
+      // ובשוויון — את הצמוד ביותר. בלי זה שאילתה כמו "נשמות דקרי" הייתה
+      // ממורכזת על מופע מקרי של "נשמות" בתחילת ההגדרה, וההתאמה האמיתית
+      // (הצירוף המלא, עמוק בתוך ההגדרה) לא הייתה נראית בכלל.
+      const win = Math.round(maxLen * 0.8);
+      let bestI = 0, bestCov = -1, bestSpan = Infinity;
+      for(let i = 0; i < hits.length; i++){
+        const seen = new Set();
+        let j = i, last = hits[i].at;
+        while(j < hits.length && hits[j].at - hits[i].at <= win){
+          seen.add(hits[j].wi); last = hits[j].at; j++;
+        }
+        const cov = seen.size, span = last - hits[i].at;
+        if(cov > bestCov || (cov === bestCov && span < bestSpan)){
+          bestCov = cov; bestSpan = span; bestI = i;
+        }
+      }
+      // מרכז את הקטע על אמצע החלון שנבחר
+      hit = hits[bestI].at + Math.round(bestSpan / 2);
+    }
   }
   if(hit < 0){
     return text.length > maxLen ? text.slice(0, maxLen).trimEnd() + '…' : text;
   }
-  let start = Math.max(0, hit - Math.round(maxLen * 0.35));
+  let start = Math.max(0, hit - Math.round(maxLen * 0.5));
   if(start > 0){
     const sp = text.indexOf(' ', start);
     if(sp >= 0 && sp < start + 40) start = sp + 1;

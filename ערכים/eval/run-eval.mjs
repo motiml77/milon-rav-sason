@@ -127,6 +127,59 @@ const dts = results.map(r => r.dt).sort((a,b)=>a-b);
 console.log(`\nlatency: median ${dts[Math.floor(dts.length/2)].toFixed(2)} ms, max ${dts[dts.length-1].toFixed(2)} ms`);
 console.log(`SCORE = ${(A.mrr * 100).toFixed(2)}  (core MRR x100 — the single number to move)`);
 
+// ── איכות קטע התצוגה ──
+// באג שהיה: makeSnippet התמרכז על ההתאמה הראשונה של *מילה אחת*, ולכן בשאילתה
+// רבת-מילים הקטע יכול היה להציג מופע מקרי בלי ההתאמה האמיתית. נמדד כאן כדי
+// שלא יחזור.
+const multi = golden.queries.filter(g => g.query.trim().split(/\s+/).length > 1);
+let snipOk = 0, snipTot = 0;
+const snipBad = [];
+for (const g of multi){
+  const rep = JSON.parse(P(`(()=>{
+    const r = runEngine(searchIx, ${JSON.stringify(g.query)}, true);
+    const mt = collectMatchTokens(searchIx, r.resolved);
+    const out = [];
+    for (const x of r.results.slice(0, 5)){
+      const e = searchData.entries[x.ei];
+      const bd = bestDefinitionFor(searchIx, x.ei, r.resolved);
+      if (bd.defIdx < 0) continue;
+      const sn = makeSnippet(e.d[bd.defIdx], mt, 300);
+      const snToks = new Set(tokenize(sn));
+      let cov = 0;
+      for (const rr of r.resolved){
+        let hit = false;
+        for (const id of rr.qmap.keys()) if (snToks.has(searchIx.vocabList[id])) { hit = true; break; }
+        if (hit) cov++;
+      }
+      // האם ההגדרה עצמה מכילה את כל המילים? אם כן, הקטע חייב להראות אותן
+      const dToks = new Set(tokenize(e.d[bd.defIdx]));
+      let dcov = 0;
+      for (const rr of r.resolved){
+        let hit = false;
+        for (const id of rr.qmap.keys()) if (dToks.has(searchIx.vocabList[id])) { hit = true; break; }
+        if (hit) dcov++;
+      }
+      out.push({ t: e.t, cov, dcov, n: r.resolved.length });
+    }
+    return JSON.stringify(out);
+  })()`));
+  for (const x of rep){
+    if (x.dcov < x.n) continue;          // ההגדרה לא מכילה הכל — לא דורשים מהקטע
+    snipTot++;
+    if (x.cov === x.n) snipOk++;
+    else snipBad.push(`"${g.query}" -> ${x.t.slice(0,40)} (הקטע הראה ${x.cov}/${x.n} מילים)`);
+  }
+}
+if (snipTot){
+  console.log(`
+snippet quality: ${snipOk}/${snipTot} snippets show every query word that their definition contains` +
+              ` (${(snipOk*100/snipTot).toFixed(0)}%)`);
+  if (snipBad.length){
+    console.log('  misleading snippets:');
+    snipBad.slice(0, 8).forEach(b => console.log('    ! ' + b));
+  }
+}
+
 const failures = results.filter(r => !r.s3);
 if (failures.length){
   console.log(`\n── ${failures.length} queries with no expected hit in top 3 ──`);
