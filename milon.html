@@ -1330,6 +1330,27 @@
     padding: 0; margin: -1px; overflow: hidden;
     clip: rect(0 0 0 0); white-space: nowrap; border: 0;
   }
+  .search-hint-words{
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+  .search-hint-word{
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--gold);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 15px;
+    padding: 6px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .search-hint-word:hover{ background: var(--gold-deep); color: var(--cream); }
+
   .nav-toggle{ display: none; }
   .nav-backdrop{ display: none; }
 
@@ -1639,6 +1660,10 @@ const STOPWORDS = new Set(['של','את','הוא','היא','זה','זו','על',
 const Q_EXACT=1.00, Q_SUFFIX=0.88, Q_PREFIXED=0.80, Q_PRE_SUF=0.72, Q_STEMCUT=0.60, Q_SKEL=0.52;
 const STRONG_MATCH = 0.72;   // מכאן ומעלה נחשב "התאמה חזקה" לצורך דירוג
 const PROX_TOPK = 120;       // כמה מועמדים מקבלים ניתוח קרבה מלא
+// מרחק מקסימלי בין שתי מילות חיפוש עוקבות: עד 5 מילים ביניהן.
+// שאילתה רבת-מילים שמילותיה מפוזרות רחוק מזו לא נחשבת התאמה בכלל —
+// זה מה שמונע תוצאה שנראית שגויה למרות שהמילים "קיימות" בערך.
+const MAX_WORD_GAP = 5;
 
 // ─── בניית אינדקס (ניתנת לפיצול למנות כדי לא לתקוע את הדפדפן) ───
 function createIndexBuilder(items){
@@ -1773,21 +1798,42 @@ function fuzzyFix(ix, w){
   return best || w;
 }
 
+// מחזיר את המרחק הקטן ביותר בין המילה הראשונה לאחרונה ברצף תקין,
+// או -1 אם אין רצף שבו כל שתי מילים עוקבות במרחק של עד MAX_WORD_GAP מילים.
 function orderedSpan(lists){
   const n = lists.length;
   if(n === 1) return lists[0].length ? 0 : -1;
+  const maxStep = MAX_WORD_GAP + 1;
   let best = Infinity;
   for(const start of lists[0]){
     let prev = start, ok = true;
     for(let w = 1; w < n; w++){
       const arr = lists[w]; let found = -1;
-      for(let k = 0; k < arr.length; k++) if(arr[k] > prev){ found = arr[k]; break; }
+      // המילה הבאה חייבת להיות אחרי הקודמת *ובתוך* מרחק המילים המותר
+      for(let k = 0; k < arr.length; k++){
+        if(arr[k] > prev && arr[k] - prev <= maxStep){ found = arr[k]; break; }
+      }
       if(found === -1){ ok = false; break; }
       prev = found;
     }
     if(ok && prev - start < best) best = prev - start;
   }
   return best === Infinity ? -1 : best;
+}
+// ממלא את מערכי המיקומים של *כל* מילות החיפוש בסריקה אחת של הזרם.
+// קודם נעשו N סריקות נפרדות לכל הגדרה — צוואר בקבוק מרגע שהקרבה הפכה
+// לתנאי סינון שנבדק לכל מועמד ולא רק ל-120 הראשונים.
+// מחזיר null אם חסרה מילה, כדי לדלג על חישוב הקרבה כליל.
+function posInMulti(stream, resolved){
+  const n = resolved.length;
+  const out = new Array(n);
+  for(let w = 0; w < n; w++) out[w] = [];
+  for(let i = 0; i < stream.length; i++){
+    const id = stream[i];
+    for(let w = 0; w < n; w++) if(resolved[w].qmap.has(id)) out[w].push(i);
+  }
+  for(let w = 0; w < n; w++) if(!out[w].length) return null;
+  return out;
 }
 function posIn(stream, qmap){
   const p = [];
@@ -1838,24 +1884,33 @@ function runSearchPass(ix, resolved, titleOnly){
                base: tQ[d] * 14 + focus * 45 + (bFull ? bQ[d] * 1.5 * lenNorm : 0) });
   }
   pre.sort((a, b) => b.base - a.base);
-  const limit = N > 1 ? Math.min(pre.length, PROX_TOPK) : 0;
   const out = [];
   for(let i = 0; i < pre.length; i++){
     const p = pre[i], doc = ix.docs[p.d];
-    let tSpan = p.tFull ? 0 : -1, bSpan = p.bFull ? 0 : -1;
-    if(i < limit){
-      tSpan = p.tFull ? orderedSpan(resolved.map(r => posIn(doc.title, r.qmap))) : -1;
+    let tSpan = -1, bSpan = -1;
+    if(N === 1){
+      tSpan = p.tFull ? 0 : -1;
+      bSpan = p.bFull ? 0 : -1;
+    }else{
+      // רב-מילים: הקרבה היא תנאי סינון, ולכן נחשבת לכל מועמד ולא רק ל-120
+      // הראשונים. קבוצת המועמדים אחרי חיתוך AND קטנה, כך שזה זול.
+      if(p.tFull){
+        const tl = posInMulti(doc.title, resolved);
+        if(tl) tSpan = orderedSpan(tl);
+      }
       if(p.bFull){
-        bSpan = -1;
         for(let di = 0; di < doc.defs.length; di++){
-          const lists = resolved.map(r => posIn(doc.defs[di], r.qmap));
-          let ok = true;
-          for(const l of lists) if(!l.length){ ok = false; break; }
-          if(!ok) continue;
+          const lists = posInMulti(doc.defs[di], resolved);
+          if(!lists) continue;
           const s = orderedSpan(lists);
-          if(s >= 0 && (bSpan < 0 || s < bSpan)) bSpan = s;
+          if(s >= 0 && (bSpan < 0 || s < bSpan)){
+            bSpan = s;
+            if(bSpan === N - 1) break;   // צמוד — אין מה לשפר
+          }
         }
       }
+      // אף מופע לא עמד במרחק המותר — לא תוצאה.
+      if(tSpan < 0 && bSpan < 0) continue;
     }
     const tStrong = p.tMin >= STRONG_MATCH, bStrong = p.bMin >= STRONG_MATCH;
     let tier;
@@ -1864,9 +1919,8 @@ function runSearchPass(ix, resolved, titleOnly){
     else if(p.tFull && tStrong)                  tier = 2;   // בכותרת
     else if(p.tFull)                             tier = 3;   // בכותרת אך התאמה חלשה
     else if(p.bFull && bStrong && bSpan === N-1) tier = 4;   // צמודות בהגדרה אחת
-    else if(p.bFull && bStrong && bSpan >= 0)    tier = 5;   // לפי הסדר בהגדרה אחת
-    else if(p.bFull && bStrong)                  tier = 6;   // בגוף הערך
-    else                                         tier = 7;
+    else if(p.bFull && bStrong && bSpan >= 0)    tier = 5;   // בהגדרה אחת, במרחק מותר
+    else                                         tier = 6;   // התאמה חלשה בגוף
     const prox = (tSpan >= 0 ? (N-1)/(1+tSpan) : 0) * 12 + (bSpan >= 0 ? (N-1)/(1+bSpan) : 0) * 4;
     out.push({ ei: p.d, tier: tier, score: p.base + prox });
   }
@@ -1942,7 +1996,13 @@ function runEngine(ix, rawQuery, alsoContent){
       }
     }
   }
-  if(!merged.size) return { results: [], words: words, resolved: firstResolved || [], note: 'none' };
+  if(!merged.size){
+    // כל המילים קיימות במילון, אבל לא נמצאו יחד במרחק המותר —
+    // זה מצב שונה מ"אין כזו מילה", וכדאי להסביר אותו למשתמש.
+    const allResolve = firstResolved && firstResolved.length === words.length;
+    return { results: [], words: words, resolved: firstResolved || [],
+             note: (words.length > 1 && allResolve) ? 'toofar' : 'none' };
+  }
   const results = Array.from(merged.values())
     .sort((a, b) => a.tier !== b.tier ? a.tier - b.tier : b.score - a.score);
   return { results: results, words: words, resolved: firstResolved,
@@ -2462,6 +2522,7 @@ let currentSearchQuery   = "";
 let currentSearchResults = [];
 let currentSearchPage    = 1;
 let currentMatchTokens   = null;   // Set של הטוקנים שהתאימו — משמש להדגשה
+let currentSearchNote    = null;   // 'toofar' וכו' — להסבר במסך ריק
 let currentResolved      = null;   // תוצאת פענוח מילות החיפוש (לחישוב ההגדרה המתאימה)
 
 function escapeHtml(s){
@@ -2586,6 +2647,15 @@ function renderSearchResults(titleOnly){
       fadeContent('<div class="search-no-results">' +
         '<div class="spinner" style="margin:0 auto 12px;width:28px;height:28px"></div>' +
         'מחפש בתוכן ההגדרות…</div>');
+    }else if(currentSearchNote === 'toofar'){
+      const ws = currentSearchQuery.trim().split(/\s+/).filter(Boolean);
+      fadeContent('<div class="search-no-results">' +
+        'כל המילים קיימות במילון, אבל הן לא מופיעות יחד — ' +
+        'החיפוש דורש מרחק של עד ' + MAX_WORD_GAP + ' מילים ביניהן.' +
+        '<div class="search-hint-words">נסה פחות מילים:' +
+        ws.map(w => '<button type="button" class="search-hint-word" onclick="searchFor(\'' +
+                    escapeAttr(w) + '\')">' + escapeHtml(w) + '</button>').join('') +
+        '</div></div>');
     }else{
       fadeContent('<div class="search-no-results">לא נמצאו תוצאות עבור "<strong>' +
         escapeHtml(currentSearchQuery) + '</strong>"</div>');
@@ -2666,6 +2736,7 @@ function runSearch(query){
   }
 
   const r = runEngine(searchIx, query, searchOptAlsoContent);
+  currentSearchNote = r.note || null;
   currentMatchTokens = collectMatchTokens(searchIx, r.resolved);
   currentResolved    = r.resolved;
   // ההגדרה המתאימה מחושבת עצלנית — רק ל-20 התוצאות שמוצגות בפועל,
@@ -2692,6 +2763,12 @@ function fillDefIndexes(from, count){
 }
 
 // ─── כפתור "חפש" וקיצור Enter ───
+// לחיצה על מילה מוצעת במסך "לא נמצאו תוצאות"
+window.searchFor = function(w){
+  const inp = document.getElementById('search');
+  if(inp) inp.value = w;
+  runSearch(w);
+};
 function doSearch(){
   const q = document.getElementById('search').value.trim();
   if(q){ clearTimeout(searchDebounceTimer); runSearch(q); }
