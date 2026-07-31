@@ -245,9 +245,21 @@ def convert_docx_to_hierarchical(filename):
     }
 
     print(f"🔄 מעבד את {os.path.basename(filename)}...")
-    print(f"   (מעבד את כל הפסקאות, ללא דילוג)")
 
-    for i, para in enumerate(doc.paragraphs):
+    # ── חומר פתיחה: כל מה שלפני הערך הראשון (שער, דברי פתיחה) לא נכנס לאתר ──
+    paras = doc.paragraphs
+    first_entry = None
+    for i, para in enumerate(paras):
+        if get_heading_level(para) == 2 and clean_text_display(para.text):
+            first_entry = i
+            break
+    if first_entry is None:
+        raise SystemExit("ABORT: לא נמצאה אף כותרת 'כותרת 2' במסמך — אין ערכים להמיר.")
+    if first_entry:
+        skipped = sum(1 for p in paras[:first_entry] if clean_text_display(p.text))
+        print(f"   ⏭  דילוג על חומר פתיחה: {skipped} פסקאות עד לערך הראשון")
+
+    for i, para in enumerate(paras[first_entry:], start=first_entry):
         raw_text = clean_text_display(para.text)
         if not raw_text:
             continue
@@ -255,26 +267,10 @@ def convert_docx_to_hierarchical(filename):
         html_text = para_to_html(para)
         heading_level = get_heading_level(para)
 
-        # Heading 1 = מדור חדש
+        # Heading 1 מתעלמים ממנו בשלב זה — כל הערכים במדור אחד.
+        # (בעתיד H1 ישמש ל'נושאי-על'.)
         if heading_level == 1:
-            # שמירת מדור קודם
-            if current_section:
-                if current_term:
-                    if pending_content:
-                        current_term["definition"].append(pending_content)
-                        pending_content = ""
-                    current_section["terms"].append(current_term)
-                    current_term = None
-                if current_section is not misc_section:
-                    data["sections"].append(current_section)
-            
-            section_counter += 1
-            current_section = {
-                "id": f"s_{section_counter}",
-                "name": raw_text,
-                "terms": []
-            }
-            print(f"   📁 מדור {section_counter}: {raw_text}")
+            continue
         
         # Heading 2 = ערך חדש
         elif heading_level == 2:

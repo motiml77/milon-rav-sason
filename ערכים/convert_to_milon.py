@@ -16,6 +16,7 @@ import sys
 from datetime import date
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import refs as _R
 
 INPUT_JS = os.path.join(os.path.dirname(__file__), "data.js")
 OUTPUT_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data.json")
@@ -390,6 +391,18 @@ for section in raw["sections"]:
     stats["topics"] += 1
 
 # ---------- שלב 2: סריקת הפניות ומילוי related ----------
+# פותר ההפניות המקיף (refs.py) רץ *בנוסף* לזה הישן, ואיחוד התוצאות.
+# כך אפשר רק להרוויח קישורים, לא לאבד. הישן קורא רק [...]; החדש קורא גם
+# הפניות שאינן בסוגריים, ומטפל בדו-משמעות של המקף בשם הערך.
+_all_terms = [e["term"] for t in out["topics"] for e in t["entries"]]
+_ref_index = _R.build_index(_all_terms)
+_ref_keys = sorted(_ref_index.keys(), key=len, reverse=True)
+_name_to_id = {}
+for t in out["topics"]:
+    for e in t["entries"]:
+        _name_to_id.setdefault(e["term"], e["id"])
+
+_stats_new = 0
 for topic in out["topics"]:
     for entry in topic["entries"]:
         refs = []
@@ -397,10 +410,19 @@ for topic in out["topics"]:
             for rid in extract_references(d["text"], term_index, entry["id"]):
                 if rid not in refs:
                     refs.append(rid)
+        before = len(refs)
+        for d in entry["definitions"]:
+            for nm in _R.find_references(d["text"], _ref_index, _ref_keys, entry["term"]):
+                rid = _name_to_id.get(nm)
+                if rid and rid != entry["id"] and rid not in refs:
+                    refs.append(rid)
+        _stats_new += len(refs) - before
         entry["related"] = refs
         if refs:
             stats["entries_with_refs"] += 1
             stats["refs_found"] += len(refs)
+
+print(f"OK: הפניות — {_stats_new} קישורים נוספים שהפותר הישן פספס")
 
 # הערה: data.json הוסר ב-Phase 1 (lazy loading). הערכים נשמרים ב-entries/<id>.json
 # (in-memory הדאטה ב-`out` עדיין משמש להלן ליצירת terms.json + search-index.json + entries/*)
