@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "www": "node build-www.mjs",
+    "www": "node ../scripts/build-www.mjs www",
     "sync": "npm run www && npx cap sync android",
     "apk": "npm run sync && node build-apk.mjs"
   },
