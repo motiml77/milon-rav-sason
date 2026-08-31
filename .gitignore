@@ -30,3 +30,6 @@ data.json
 
 # גיבוי זמני של update.py
 ערכים/.update-backup/
+
+# APK בנוי — נוצר ע"י app/build-apk.bat
+dist/

@@ -1,0 +1,18 @@
+{
+  "appId": "il.org.mlh.milon.ravsason",
+  "appName": "מילון פנימיות התורה",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#4a2f17",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    },
+    "StatusBar": { "style": "LIGHT", "backgroundColor": "#4a2f17" },
+    "Keyboard": { "resize": "body", "resizeOnFullScreen": true }
+  }
+}
