@@ -1590,6 +1590,9 @@
         <button class="tool-btn" id="bookmarks-page-btn" title="הסימניות שלי">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         </button>
+        <button class="tool-btn" id="newtab-btn" title="פתח לשונית חדשה" aria-label="פתח לשונית חדשה">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h13a2 2 0 0 1 2 2v4"/><path d="M3 5v12a2 2 0 0 0 2 2h6"/><path d="M18 15v6M15 18h6"/></svg>
+        </button>
         <button class="tool-btn" id="font-btn" title="גודל טקסט">
           <span style="font-weight:700;font-size:13px;">א<sup style="font-size:9px;">+</sup></span>
         </button>
@@ -2987,6 +2990,7 @@ function updateBookmarkCount(){
   }
 }
 document.getElementById('bookmarks-page-btn').addEventListener('click', () => setPage('bookmarks'));
+document.getElementById('newtab-btn').addEventListener('click', () => window.newTab());
 
 window.onToggleBookmark = function(eid, btn){
   const now = toggleBookmark(eid);
