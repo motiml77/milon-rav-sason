@@ -47,6 +47,26 @@ function createWindow(){
 
   // בדיקה אוטומטית: MILON_QUERY=<שאילתה> מריץ חיפוש בתוך האפליקציה
   // הארוזה ומדפיס את התוצאות — כך אפשר לאמת שהמנוע עובד גם אחרי אריזה.
+  // MILON_SUGGEST=<שאילתה> פותח את לשונית ההצעות ומצלם אותה
+  if (process.env.MILON_SUGGEST) {
+    win.webContents.once('did-finish-load', () => {
+      setTimeout(async () => {
+        try {
+          await win.webContents.executeJavaScript(
+            `(async () => { await ensureSearchIndex();
+               runSearch(${JSON.stringify(process.env.MILON_SUGGEST)});
+               await new Promise(r => setTimeout(r, 400));
+               openSuggestTab(${JSON.stringify(process.env.MILON_SUGGEST)}); })()`);
+          await new Promise(r => setTimeout(r, 900));
+          const img = await win.webContents.capturePage();
+          fs.writeFileSync(process.env.MILON_SHOT || 'suggest.png', img.toPNG());
+          console.log('SUGGEST_OK');
+        } catch (e) { console.log('SUGGEST_FAIL ' + e.message); }
+        app.quit();
+      }, 3500);
+    });
+  }
+
   if (process.env.MILON_QUERY) {
     win.webContents.once('did-finish-load', () => {
       setTimeout(async () => {
