@@ -1402,6 +1402,57 @@
   }
   .related-newtab:hover{ background: var(--gold); color: var(--cream); }
 
+  /* ─── ערכים קשורים בהקשר ─── */
+  .ctx-block{
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--gold);
+  }
+  .ctx-head{
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .ctx-title{
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 15px;
+    letter-spacing: 0.03em;
+  }
+  .ctx-sub{ color: var(--ink-faint); font-size: 12px; }
+  .ctx-list{ display: flex; flex-wrap: wrap; gap: 8px; }
+  .ctx-item{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid var(--gold);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 7px 13px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: right;
+    transition: background 0.15s, color 0.15s;
+  }
+  .ctx-item:hover{ background: var(--gold-deep); color: var(--cream); }
+  .ctx-count{
+    background: var(--gold);
+    color: var(--cream);
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 17px;
+    height: 17px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ctx-item:hover .ctx-count{ background: var(--cream); color: var(--gold-deep); }
+
   .sr-only{
     position: absolute; width: 1px; height: 1px;
     padding: 0; margin: -1px; overflow: hidden;
@@ -1609,7 +1660,7 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-08-13-204712"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-09-01-125130"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 const DATA_VERSION = SEARCH_URL.split('?v=')[1] || '';
 // גרסת הקוד — יש להעלות אותה כששינוי בקוד משנה את מבנה האינדקס הבנוי בזיכרון,
@@ -2724,6 +2775,80 @@ function makeSnippet(text, matchTokens, maxLen){
   return (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
 }
 
+// ═══ ערכים קשורים בהקשר ═══
+// מבוסס *רק* על הפניות "ראה ערך" שהמחבר כתב בעצמו — לא ניחוש ולא ניקוד.
+// נבנה כשכבת תצוגה נפרדת מתחת לתוצאות, ובכוונה אינו משפיע על הדירוג:
+// החיפוש הלקסיקלי מדויק במיוחד בכוונות של איתור, ואין סיבה לסכן אותו.
+let _inboundLinks = null;
+function inboundLinks(){
+  if(_inboundLinks) return _inboundLinks;
+  _inboundLinks = new Map();
+  if(!searchData) return _inboundLinks;
+  for(const e of searchData.entries){
+    for(const t of (e.r || [])){
+      let a = _inboundLinks.get(t);
+      if(!a) _inboundLinks.set(t, a = []);
+      a.push(e.i);
+    }
+  }
+  return _inboundLinks;
+}
+
+// 10 תוצאות הזינו הקשר רק ב-9 מתוך 12 שאילתות בדיקה — בשאילתות רחבות
+// ("אור", "נשמה", "תורה") עשר הראשונות היו ערכים מבודדים. 25 נותן כיסוי מלא.
+const CTX_FROM_TOP = 25;   // כמה תוצאות מזינות את ההקשר
+const CTX_MAX      = 8;    // כמה ערכים הקשריים להציג
+
+function contextualEntries(results){
+  if(!searchData || !searchById || !results.length) return [];
+  const seed = results.slice(0, CTX_FROM_TOP);
+  const already = new Set(results.map(r => r.id));   // לא לחזור על מה שכבר בתוצאות
+  const inb = inboundLinks();
+  const score = new Map();   // id -> { w: משקל מצטבר, n: כמה תוצאות שונות מקשרות }
+  // קישור מהתוצאה הראשונה שווה יותר מקישור מהתוצאה ה-25
+  const bump = (id, rank) => {
+    if(already.has(id)) return;
+    let rec = score.get(id);
+    if(!rec) score.set(id, rec = { w: 0, n: 0 });
+    rec.w += 1 / (1 + rank / 8);
+    rec.n += 1;
+  };
+  seed.forEach((r, rank) => {
+    const rec = searchById[r.id];
+    if(!rec) return;
+    for(const t of (rec.entry.r || [])) bump(t, rank);       // הערך מפנה אליו
+    for(const src of (inb.get(r.id) || [])) bump(src, rank);  // הוא מפנה לערך
+  });
+  // סף איכות: קישור בודד מתוצאה נמוכה (משקל 0.25) הוא רעש.
+  // 0.5 = או קישור מתוך שמונה התוצאות הראשונות, או שני קישורים ומעלה.
+  return Array.from(score.entries())
+    .filter(pair => pair[1].w >= 0.5 || pair[1].n >= 2)
+    .sort((a, b) => b[1].w - a[1].w)
+    .slice(0, CTX_MAX)
+    .map(pair => {
+      const rec = searchById[pair[0]];
+      return rec ? { id: pair[0], term: rec.entry.t, n: pair[1].n } : null;
+    })
+    .filter(Boolean);
+}
+
+function renderContextual(results){
+  const ctx = contextualEntries(results);
+  if(!ctx.length) return '';
+  return '<div class="ctx-block">' +
+    '<div class="ctx-head">' +
+      '<span class="ctx-title">ערכים קשורים בהקשר</span>' +
+      '<span class="ctx-sub">לפי הפניות "ראה ערך" שבתוך הערכים שנמצאו</span>' +
+    '</div><div class="ctx-list">' +
+    ctx.map(c =>
+      '<button type="button" class="ctx-item" onclick="goToEntryByEntryId(\'' + escapeAttr(c.id) + '\')" ' +
+      'onmouseenter="prefetchEntry(\'' + escapeAttr(c.id) + '\')">' +
+      '<span class="ctx-term">' + escapeHtml(c.term) + '</span>' +
+      (c.n > 1 ? '<span class="ctx-count" title="מספר הערכים בתוצאות שמקושרים אליו">' + c.n + '</span>' : '') +
+      '</button>').join('') +
+    '</div></div>';
+}
+
 function renderSearchResults(titleOnly){
   const total = currentSearchResults.length;
   const totalPages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
@@ -2795,6 +2920,7 @@ function renderSearchResults(titleOnly){
         escapeHtml(currentSearchQuery) + '</strong>"' +
         (titleOnly ? ' <span style="color:var(--gold);font-size:0.85em">(מחפש גם בתוכן…)</span>' : '') +
       '</div>' + items + pagination +
+      (titleOnly ? '' : renderContextual(currentSearchResults)) +
     '</div>');
 }
 

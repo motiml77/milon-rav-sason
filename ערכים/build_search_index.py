@@ -63,6 +63,9 @@ def build_payload(topics_list, version):
                 "t": entry["term"],
                 "p": p,
                 "d": definition_texts(entry),
+                # קישורי "ראה ערך" — נחוצים למדור ההקשרי בתוצאות החיפוש,
+                # שאחרת היה מחייב טעינת 680 קבצי ערכים.
+                "r": [r for r in (entry.get("related") or []) if r],
             })
     return {"v": version, "topics": topic_titles, "entries": entries_out}
 

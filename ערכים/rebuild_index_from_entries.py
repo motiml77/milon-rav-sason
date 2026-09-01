@@ -43,6 +43,7 @@ def main():
                 "id": full["id"],
                 "term": full["term"],
                 "definitions": full.get("definitions", []),
+                "related": full.get("related", []),
             })
         topics.append({
             "id": t["id"],
