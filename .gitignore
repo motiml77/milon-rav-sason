@@ -37,3 +37,6 @@ dist/
 # חומרי ביניים של תיוג ה-LLM — נוצרים מחדש ע"י make_batches.py
 ערכים/tags/batches/
 ערכים/tags/__pycache__/
+
+# תלויות npm בשורש — לא חלק מהאתר
+node_modules/

@@ -2962,6 +2962,7 @@ function inboundLinks(){
 // ("אור", "נשמה", "תורה") עשר הראשונות היו ערכים מבודדים. 25 נותן כיסוי מלא.
 const CTX_FROM_TOP = 25;   // כמה תוצאות מזינות את ההקשר
 const CTX_MAX      = 8;    // כמה ערכים הקשריים להציג
+const CTX_MIN_LINKS = 2;   // הצעה חייבת לנבוע מלפחות שתי תוצאות שונות
 
 function contextualEntries(results){
   if(!searchData || !searchById || !results.length) return [];
@@ -2983,10 +2984,10 @@ function contextualEntries(results){
     for(const t of (rec.entry.r || [])) bump(t, rank);       // הערך מפנה אליו
     for(const src of (inb.get(r.id) || [])) bump(src, rank);  // הוא מפנה לערך
   });
-  // סף איכות: קישור בודד מתוצאה נמוכה (משקל 0.25) הוא רעש.
-  // 0.5 = או קישור מתוך שמונה התוצאות הראשונות, או שני קישורים ומעלה.
+  // סף איכות: הצעה חייבת לנבוע מ**לפחות שתי** תוצאות שונות.
+  // ערך שרק תוצאה אחת מקשרת אליו הוא צירוף מקרים, לא הקשר.
   return Array.from(score.entries())
-    .filter(pair => pair[1].w >= 0.5 || pair[1].n >= 2)
+    .filter(pair => pair[1].n >= CTX_MIN_LINKS)
     .sort((a, b) => b[1].w - a[1].w)
     .slice(0, CTX_MAX)
     .map(pair => {
@@ -3070,6 +3071,11 @@ window.openSuggestTab = function(q){
   pushNav(st);
 };
 
+// האם הניסוח החלופי הוא למעשה שם הערך עצמו
+function sameTerm(a, b){
+  return tokenize(a).join(' ') === tokenize(b).join(' ');
+}
+
 // מילות ההדגשה של ניסוח חלופי, לשימוש בתקצירי תוצאות המילים הנרדפות
 const _synHl = new Map();
 function synHighlight(alt){
@@ -3146,13 +3152,22 @@ function renderSearchResults(titleOnly){
       'onmouseenter="prefetchEntry(\'' + escapeHtml(r.id) + '\')">' +
       '<div class="search-result-head">' +
         '<div class="search-result-term">' + highlightTokens(r.term, mt) +
-          (r.viaSyn ? ' <span class="search-syn-badge">גם: ' + escapeHtml(r.viaSyn) + '</span>' : '') +
+          // כל תוצאת נרדפוּת מסומנת — אחרת ערך שלא מכיל את מילות החיפוש
+          // מופיע בלי הסבר. כשהניסוח זהה לשם הערך, "גם: יסוד דאבא" על ערך
+          // בשם "יסוד דאבא" הוא כפילות, ולכן תווית כללית במקומה.
+          (r.viaSyn
+            ? ' <span class="search-syn-badge">' +
+              (sameTerm(r.viaSyn, r.term) ? 'מונח נרדף' : 'גם: ' + escapeHtml(r.viaSyn)) +
+              '</span>' : '') +
         '</div>' +
         '<div class="search-result-topic">' + escapeHtml(r.topicTitle || '') + '</div>' +
       '</div>' +
       (previewHtml ? '<div class="search-result-preview">' + defLabel + previewHtml + '</div>' : '') +
     '</div>';
   }).join('');
+
+  // כמה הצעות באמת יש — קובע אם להראות את הכפתור בכלל
+  const ctxCount = titleOnly ? 0 : contextualEntries(currentSearchResults).length;
 
   const pagination = totalPages > 1 ?
     '<div class="search-pagination">' +
@@ -3167,10 +3182,12 @@ function renderSearchResults(titleOnly){
         escapeHtml(currentSearchQuery) + '</strong>"' +
         (titleOnly ? ' <span style="color:var(--gold);font-size:0.85em">(מחפש גם בתוכן…)</span>' : '') +
       '</div>' + items + pagination +
-      (titleOnly || !currentSearchResults.length ? '' :
+      // הכפתור מוצג רק כשבאמת יש מה להציע. אחרי העלאת הסף ל-2 קישורים
+      // חלק מהחיפושים לא מייצרים הצעות כלל, וכפתור שמוביל לעמוד ריק הוא תקלה.
+      (titleOnly || !currentSearchResults.length || !ctxCount ? '' :
         '<div class="suggest-cta">' +
           '<button type="button" class="suggest-btn" onclick="openSuggestTab()">' +
-            'הצעות בהקשר — בלשונית נפרדת ↗' +
+            'הצעות בהקשר (' + ctxCount + ') — בלשונית נפרדת ↗' +
           '</button>' +
           '<div class="suggest-cta-note">תוצאות החיפוש שלמעלה מדויקות. ההצעות הן שכבה נפרדת, ולא משפיעות עליהן.</div>' +
         '</div>') +

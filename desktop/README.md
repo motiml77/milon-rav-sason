@@ -30,9 +30,11 @@ printf 'electron.exe' > node_modules/electron/path.txt   # בלי שורה חד�
 `signAndEditExecutable: false`, והאייקון נצרב ל-exe ידנית:
 
 ```bash
-RC="$LOCALAPPDATA/electron-builder/Cache/winCodeSign/451528595/rcedit-x64.exe"
+# מספר גרסת המטמון משתנה בין התקנות — למצוא אותו, לא לקבע אותו
+RC=$(find "$LOCALAPPDATA/electron-builder/Cache/winCodeSign" -name rcedit-x64.exe | head -1)
 "$RC" release/win-unpacked/MilonRavSason.exe --set-icon build/icon.ico \
   --set-version-string "ProductName" "מילון פנימיות התורה" \
+  --set-version-string "FileDescription" "מילון פנימיות התורה" \
   --set-file-version "1.0.0" --set-product-version "1.0.0"
 ./node_modules/.bin/electron-builder.cmd --win nsis --prepackaged release/win-unpacked
 ```
