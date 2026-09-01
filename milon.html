@@ -279,6 +279,19 @@
     letter-spacing: 0.04em;
     flex-shrink: 0;
   }
+  /* תוצאה שהגיעה דרך ניסוח נרדף — נבדלת ויזואלית מהתוצאות המדויקות */
+  .search-syn-badge{
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    background: transparent;
+    border: 1px solid var(--cream-3);
+    border-radius: 10px;
+    padding: 1px 8px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
   .search-result-deflabel{
     display: inline-block;
     font-size: 11px;
@@ -1740,7 +1753,7 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-09-01-161524"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-09-01-172521"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 const DATA_VERSION = SEARCH_URL.split('?v=')[1] || '';
 // גרסת הקוד — יש להעלות אותה כששינוי בקוד משנה את מבנה האינדקס הבנוי בזיכרון,
@@ -2141,7 +2154,43 @@ function runSearchPass(ix, resolved, titleOnly){
 }
 
 // חיפוש ראשי. מחזיר { results:[{ei,tier,score}], words, resolved, note }
-function runEngine(ix, rawQuery, alsoContent){
+// ═══ הרחבת מילים נרדפות ═══
+// חיפוש "שכינה" יביא גם ערכים שכתוב בהם "נוקבא". ההרחבה היא *נספח בלבד*:
+// היא מוסיפה בסוף הרשימה רק ערכים שהחיפוש המקורי לא מצא כלל, ואף פעם
+// לא משנה את הסדר או הדירוג של תוצאה קיימת.
+const SYN_TIER = 90;           // גבוה מכל דרגה אמיתית — תמיד ממוין אחרון
+const SYN_MAX_ALT = 4;         // כמה ניסוחים חלופיים לנסות
+const SYN_WHEN_FEWER_THAN = 25;  // מרחיבים רק כשהתוצאות דלות
+const SYN_MAX_TIER = 2;          // רק התאמות כותרת חזקות
+const SYN_MAX_EXTRAS = 12;       // תקרה קשיחה לנספח
+let _synCache = new Map();     // ניסוח חלופי -> תוצאות; מתאפס עם אינדקס חדש
+let _synMap = null;
+function synMap(){
+  if(_synMap) return _synMap;
+  _synMap = new Map();
+  const groups = (searchData && searchData.syn) || [];
+  groups.forEach((g, gi) => {
+    for(const phrase of g){
+      const k = tokenize(phrase).join(' ');
+      if(k && !_synMap.has(k)) _synMap.set(k, gi);
+    }
+  });
+  return _synMap;
+}
+// מחזיר ניסוחים חלופיים לשאילתה, רק אם *כל* השאילתה היא מושג מוכר
+function synonymAlternatives(rawQuery){
+  const groups = (searchData && searchData.syn) || [];
+  if(!groups.length) return [];
+  const key = tokenize(rawQuery).join(' ');
+  if(!key) return [];
+  const gi = synMap().get(key);
+  if(gi === undefined) return [];
+  return groups[gi]
+    .filter(p => tokenize(p).join(' ') !== key)
+    .slice(0, SYN_MAX_ALT);
+}
+
+function runEngine(ix, rawQuery, alsoContent, noSyn){
   const qFlags = [];
   const all = tokenize(rawQuery, qFlags);
   // מילים שהוקלדו עם גרשיים — יטופלו כקיצור (התאמה מדויקת)
@@ -2218,6 +2267,39 @@ function runEngine(ix, rawQuery, alsoContent){
   }
   const results = Array.from(merged.values())
     .sort((a, b) => a.tier !== b.tier ? a.tier - b.tier : b.score - a.score);
+
+  // נספח מילים נרדפות. הרשימה שלמעלה כבר מוינה וננעלה — כאן רק מוסיפים
+  // בסוף ערכים שלא נמצאו כלל, כך שאף תוצאה קיימת לא מזיזה את מקומה.
+  // מרחיבים *רק* כשהתוצאות דלות. בשאילתה שמחזירה מאות תוצאות הנספח
+  // ממילא ייפול למקום 300 ואיש לא יראה אותו — אז אין טעם לשלם עליו.
+  if(!noSyn && results.length < SYN_WHEN_FEWER_THAN){
+    const alts = synonymAlternatives(rawQuery);
+    if(alts.length){
+      const have = new Set(results.map(r => r.ei));
+      const extras = [];
+      for(const alt of alts){
+        // אותו ניסוח חלופי חוזר בכל הקשה — מטמון חוסך הרצות מנוע מיותרות
+        const ck = alt + '|' + (alsoContent ? 1 : 0);
+        let sub = _synCache.get(ck);
+        if(!sub){
+          sub = runEngine(ix, alt, alsoContent, true).results;   // true = בלי הרחבה נוספת
+          if(_synCache.size > 200) _synCache.clear();
+          _synCache.set(ck, sub);
+        }
+        for(const r of sub){
+          // רק ערכים ש*הכותרת* שלהם היא המושג הנרדף. אחרת "תבונה" היה גורר
+          // כל ערך שמזכיר "בינה" אי-שם בגוף — מאות תוצאות של רעש.
+          if(r.tier > SYN_MAX_TIER) continue;
+          if(have.has(r.ei)) continue;
+          have.add(r.ei);
+          extras.push({ ei: r.ei, tier: SYN_TIER + r.tier, score: r.score, viaSyn: alt });
+        }
+      }
+      extras.sort((a, b) => a.tier !== b.tier ? a.tier - b.tier : b.score - a.score);
+      for(const e of extras.slice(0, SYN_MAX_EXTRAS)) results.push(e);
+    }
+  }
+
   return { results: results, words: words, resolved: firstResolved,
            note: missing.length ? 'missing' : null };
 }
@@ -2354,6 +2436,8 @@ function buildIndexInSlices(items){
       while(!done && performance.now() - t0 < 8) done = builder.step(25);
       if(done){
         searchIx = builder.finish();
+      _synCache = new Map();
+      _synMap = null;
         resolve(searchIx);
         onSearchIndexReady();
       }else{
@@ -2986,6 +3070,21 @@ window.openSuggestTab = function(q){
   pushNav(st);
 };
 
+// מילות ההדגשה של ניסוח חלופי, לשימוש בתקצירי תוצאות המילים הנרדפות
+const _synHl = new Map();
+function synHighlight(alt){
+  if(!searchIx) return null;
+  if(_synHl.has(alt)) return _synHl.get(alt);
+  let out = null;
+  try{
+    const r = runEngine(searchIx, alt, true, true);
+    if(r.resolved) out = { resolved: r.resolved, tokens: collectMatchTokens(searchIx, r.resolved) };
+  }catch(e){}
+  if(_synHl.size > 100) _synHl.clear();
+  _synHl.set(alt, out);
+  return out;
+}
+
 function renderSearchResults(titleOnly){
   const total = currentSearchResults.length;
   const totalPages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
@@ -3025,8 +3124,17 @@ function renderSearchResults(titleOnly){
     if(!titleOnly && searchData && r.ei !== undefined){
       const entry = searchData.entries[r.ei];
       if(entry && entry.d && entry.d.length){
-        const di = (r.defIdx !== undefined && r.defIdx >= 0 && r.defIdx < entry.d.length) ? r.defIdx : 0;
-        previewHtml = highlightTokens(makeSnippet(entry.d[di], mt, 300), mt);
+        // תוצאת מילה נרדפת: מילות השאילתה המקורית *לא* מופיעות בערך —
+        // לכן ממקדים את התקציר ומדגישים לפי הניסוח החלופי שהביא אותה.
+        let mtR = mt, di;
+        if(r.viaSyn){
+          const sr = synHighlight(r.viaSyn);
+          if(sr){ mtR = sr.tokens; di = bestDefinitionFor(searchIx, r.ei, sr.resolved).defIdx; }
+        }
+        if(di === undefined || di < 0 || di >= entry.d.length){
+          di = (r.defIdx !== undefined && r.defIdx >= 0 && r.defIdx < entry.d.length) ? r.defIdx : 0;
+        }
+        previewHtml = highlightTokens(makeSnippet(entry.d[di], mtR, 300), mtR);
         if(entry.d.length > 1){
           defLabel = '<span class="search-result-deflabel">הגדרה ' + (di + 1) + '/' + entry.d.length + '</span>';
         }
@@ -3037,7 +3145,9 @@ function renderSearchResults(titleOnly){
       'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();goToEntryByEntryId(\'' + escapeHtml(r.id) + '\');}" ' +
       'onmouseenter="prefetchEntry(\'' + escapeHtml(r.id) + '\')">' +
       '<div class="search-result-head">' +
-        '<div class="search-result-term">' + highlightTokens(r.term, mt) + '</div>' +
+        '<div class="search-result-term">' + highlightTokens(r.term, mt) +
+          (r.viaSyn ? ' <span class="search-syn-badge">גם: ' + escapeHtml(r.viaSyn) + '</span>' : '') +
+        '</div>' +
         '<div class="search-result-topic">' + escapeHtml(r.topicTitle || '') + '</div>' +
       '</div>' +
       (previewHtml ? '<div class="search-result-preview">' + defLabel + previewHtml + '</div>' : '') +
@@ -3102,7 +3212,7 @@ function runSearch(query){
   currentSearchResults = r.results.map(x => {
     const entry = searchData.entries[x.ei];
     return { id: entry.i, term: entry.t, topicTitle: searchData.topics[entry.p] || '',
-             ei: x.ei, tier: x.tier, defIdx: -1 };
+             ei: x.ei, tier: x.tier, defIdx: -1, viaSyn: x.viaSyn };
   });
   _searchPageTitleOnly = false;
   renderSearchResults(false);
