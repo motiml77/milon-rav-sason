@@ -67,7 +67,14 @@ def build_payload(topics_list, version):
                 # שאחרת היה מחייב טעינת 680 קבצי ערכים.
                 "r": [r for r in (entry.get("related") or []) if r],
             })
-    return {"v": version, "topics": topic_titles, "entries": entries_out}
+    payload = {"v": version, "topics": topic_titles, "entries": entries_out}
+    # קבוצות ניסוחים לאותו מושג — משמשות להרחבת שאילתה בלבד.
+    # אם הקובץ חסר, החיפוש עובד בדיוק כמו קודם.
+    syn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tags", "synonyms.json")
+    if os.path.exists(syn):
+        with open(syn, encoding="utf-8") as f:
+            payload["syn"] = json.load(f).get("groups", [])
+    return payload
 
 
 def build_terms(title, subtitle, topics_list):

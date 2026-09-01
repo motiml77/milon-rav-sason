@@ -19,6 +19,14 @@ import shutil
 import subprocess
 import sys
 
+# קונסולת Windows בעברית היא cp1255 ולא יודעת להדפיס תווי מסגרת ו-Unicode.
+# בלי זה הסקריפט קורס על print בלבד, עוד לפני שעשה משהו.
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
