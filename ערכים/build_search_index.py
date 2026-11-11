@@ -45,19 +45,26 @@ def definition_texts(entry):
     return out
 
 
-def build_payload(topics_list, version):
+def build_payload(topics_list, version, primary=None, titles=None):
     """
     topics_list: [{id, title, subtitle, entries:[{id, term, definitions, ...}]}]
+    primary:     {entry id -> שם הנושא הראשי שלו}. ערך יכול להשתייך לכמה נושאים
+                 במפתח; באינדקס החיפוש הוא מופיע פעם אחת, עם הנושא הראשון שלו.
+    titles:      סדר הנושאים הרצוי (אחרת — לפי סדר ההופעה).
     מחזיר את המבנה שנכתב ל-search-index.json.
     """
-    topic_titles = []
+    topic_titles = list(titles or [])
     entries_out = []
+    seen = set()
     for topic in topics_list:
-        title = topic.get("title", "")
-        if title not in topic_titles:
-            topic_titles.append(title)
-        p = topic_titles.index(title)
         for entry in topic.get("entries", []):
+            if entry["id"] in seen:          # אותו ערך תחת כמה נושאים — פעם אחת בלבד
+                continue
+            seen.add(entry["id"])
+            title = (primary or {}).get(entry["id"], topic.get("title", ""))
+            if title not in topic_titles:
+                topic_titles.append(title)
+            p = topic_titles.index(title)
             entries_out.append({
                 "i": entry["id"],
                 "t": entry["term"],
@@ -94,6 +101,25 @@ def build_terms(title, subtitle, topics_list):
             }
             for t in topics_list
         ],
+    }
+
+
+def build_terms_v2(title, subtitle, flat_entries, sections, topics):
+    """
+    terms.json בפורמט המפתח: מדורים -> נושאים (כותרות-על) -> ערכים.
+
+    ערך יכול להופיע בכמה נושאים, ולכן השמות נשמרים פעם אחת ב-names
+    והנושאים מחזיקים מזהים בלבד:
+        names:    {id: שם הערך}            — בסדר המילון
+        sections: [{title, topics:[id..]}] — המדורים
+        topics:   [{id, title, section, ids:[..]}]
+    """
+    return {
+        "title": title,
+        "subtitle": subtitle,
+        "names": {e["id"]: e["term"] for e in flat_entries},
+        "sections": sections,
+        "topics": topics,
     }
 
 

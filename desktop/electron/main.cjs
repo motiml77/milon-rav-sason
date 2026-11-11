@@ -25,14 +25,18 @@ function saveBounds(b){
 function createWindow(){
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const saved = loadBounds();
-  const w = saved?.width  || Math.min(1280, Math.round(width * 0.78));
-  const h = saved?.height || Math.round(height * 0.88);
+  let w = saved?.width  || Math.min(1280, Math.round(width * 0.78));
+  let h = saved?.height || Math.round(height * 0.88);
+  // MILON_SIZE=400x850 — חלון בגודל נתון לבדיקות (למשל רוחב של טלפון)
+  const TESTING = !!(process.env.MILON_SCRIPT || process.env.MILON_SHOT || process.env.MILON_QUERY || process.env.MILON_SUGGEST);
+  const forced = /^(\d+)x(\d+)$/.exec(process.env.MILON_SIZE || '');
+  if (forced) { w = +forced[1]; h = +forced[2]; }
 
   const win = new BrowserWindow({
     width: w,
     height: h,
-    x: saved?.x,
-    y: saved?.y,
+    x: forced ? undefined : saved?.x,
+    y: forced ? undefined : saved?.y,
     minWidth: 380,
     minHeight: 480,
     title: 'מילון מונחים בפנימיות התורה',
@@ -86,9 +90,30 @@ function createWindow(){
     });
   }
 
+  // בדיקה אוטומטית כללית: MILON_SCRIPT=<קובץ JS> מריץ את תוכנו בדף (כגוף של
+  // פונקציה אסינכרונית), מדפיס את הערך שהוחזר, ומצלם ל-MILON_SHOT אם הוגדר.
+  if (process.env.MILON_SCRIPT) {
+    win.webContents.once('did-finish-load', () => {
+      setTimeout(async () => {
+        try {
+          const body = fs.readFileSync(process.env.MILON_SCRIPT, 'utf-8');
+          const r = await win.webContents.executeJavaScript('(async () => {' + body + String.fromCharCode(10) + '})()');
+          console.log('SCRIPT_OK ' + JSON.stringify(r));
+          if (process.env.MILON_SHOT) {
+            await new Promise(res => setTimeout(res, Number(process.env.MILON_SHOT_DELAY || 500)));
+            const img = await win.webContents.capturePage();
+            fs.writeFileSync(process.env.MILON_SHOT, img.toPNG());
+            console.log('SHOT_OK ' + process.env.MILON_SHOT);
+          }
+        } catch (e) { console.log('SCRIPT_FAIL ' + (e && e.message)); }
+        app.quit();
+      }, 1500);
+    });
+  }
+
   // בדיקה אוטומטית: MILON_SHOT=<קובץ> מצלם את החלון אחרי הטעינה ויוצא.
   // מאפשר לאמת רינדור בלי צילום מסך של מערכת ההפעלה.
-  if (process.env.MILON_SHOT) {
+  if (process.env.MILON_SHOT && !process.env.MILON_SCRIPT) {
     win.webContents.once('did-finish-load', () => {
       setTimeout(async () => {
         try {
@@ -106,7 +131,7 @@ function createWindow(){
   const persist = () => {
     clearTimeout(t);
     t = setTimeout(() => {
-      if (!win.isMinimized() && !win.isMaximized()) saveBounds(win.getBounds());
+      if (!TESTING && !win.isMinimized() && !win.isMaximized()) saveBounds(win.getBounds());
     }, 400);
   };
   win.on('move', persist);

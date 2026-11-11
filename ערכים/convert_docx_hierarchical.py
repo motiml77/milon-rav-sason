@@ -202,6 +202,46 @@ def para_to_html(para):
 
     return html_content
 
+def parse_index(paras, upto):
+    """
+    קורא את ה'מפתח' שבראש המסמך: מדורים -> כותרות-על -> שמות ערכים.
+
+    המבנה בוורד:
+        סגנון 'מפתח - מדור'       ->  מדור            (למשל "ספירות, פרצופים ועולמות")
+        סגנון 'מפתח - כותרת על'   ->  כותרת-על        (למשל "כתר, חכמה, בינה ודעת")
+        שורה רגילה "שם ערך<TAB>מספר עמוד"  ->  ערך ששייך לכותרת-העל שמעליו
+
+    ערך יכול להופיע תחת כמה כותרות-על. מספרי העמודים לא נשמרים.
+    מחזיר רשימה ריקה אם אין מפתח — ואז האתר מציג מדור אחד, כמו קודם.
+    """
+    index, cur_sec, cur_grp = [], None, None
+    for para in paras[:upto]:
+        if get_heading_level(para):
+            break                         # כותרת אמיתית ("ערכים ומושגים") — המפתח נגמר
+        style = (para.style.name if para.style else '') or ''
+        text = para.text.strip()
+        if not text or 'מפתח' not in style and cur_grp is None:
+            continue
+        if 'מפתח' in style and 'מדור' in style:
+            cur_sec = {"name": clean_text_display(text), "groups": []}
+            index.append(cur_sec)
+            cur_grp = None
+        elif 'מפתח' in style and 'כותרת' in style:
+            if cur_sec is None:
+                cur_sec = {"name": "", "groups": []}
+                index.append(cur_sec)
+            cur_grp = {"name": clean_text_display(text), "terms": []}
+            cur_sec["groups"].append(cur_grp)
+        elif 'מפתח' in style:
+            continue                      # כותרת המפתח עצמה
+        elif cur_grp is not None:
+            # "שם הערך<TAB>123" -> "שם הערך"
+            name = re.sub(r'\s*\d+\s*$', '', para.text).strip()
+            name = clean_text_display(name)
+            if name:
+                cur_grp["terms"].append(name)
+    return [s for s in index if s["groups"]]
+
 def convert_docx_to_hierarchical(filename):
     """
     ממיר מסמך DOCX למבנה היררכי: מדורים -> ערכים
@@ -236,6 +276,7 @@ def convert_docx_to_hierarchical(filename):
     term_counter = 0
     pending_content = ""
     source_attachments = 0  # מונה כמה מקורות חוברו לתוכן קודם
+    closed_by_h1 = []       # כותרות H1 שהופיעו אחרי תחילת הערכים
 
     # מדור לאיסוף ערכים שאינם תחת כותרת Heading 1
     misc_section = {
@@ -267,9 +308,17 @@ def convert_docx_to_hierarchical(filename):
         html_text = para_to_html(para)
         heading_level = get_heading_level(para)
 
-        # Heading 1 מתעלמים ממנו בשלב זה — כל הערכים במדור אחד.
-        # (בעתיד H1 ישמש ל'נושאי-על'.)
+        # Heading 1 אינו מדור (הסיווג לנושאים בא מה'מפתח' שבראש המסמך), אבל הוא
+        # *סוגר* את הערך הפתוח: מה שבא אחריו עד ה-H2 הבא אינו שייך לערך.
+        # בלי זה, 'ביבליוגרפיה' ו'הערות ושאלות' שבסוף המסמך נדבקו לערך האחרון.
         if heading_level == 1:
+            if current_term and current_section:
+                if pending_content:
+                    current_term["definition"].append(pending_content)
+                    pending_content = ""
+                current_section["terms"].append(current_term)
+                current_term = None
+            closed_by_h1.append(raw_text)
             continue
         
         # Heading 2 = ערך חדש
@@ -365,6 +414,17 @@ def convert_docx_to_hierarchical(filename):
         print(f"   📁 מדור שונות: {len(misc_section['terms'])} ערכים יתומים")
 
     data["metadata"]["source_attachments"] = source_attachments
+
+    # ── המפתח (סיווג לנושאים) ──
+    data["index"] = parse_index(paras, first_entry)
+    if data["index"]:
+        n_grp = sum(len(s["groups"]) for s in data["index"])
+        n_ln = sum(len(g["terms"]) for s in data["index"] for g in s["groups"])
+        print(f"   📑 מפתח: {len(data['index'])} מדורים, {n_grp} כותרות-על, {n_ln} שורות")
+    else:
+        print("   ⚠ לא נמצא מפתח בראש המסמך — כל הערכים יוצגו במדור אחד")
+    if closed_by_h1:
+        print(f"   ⏭  חלקים שאינם ערכים ולא נכנסו לאתר: {', '.join(closed_by_h1)}")
     print(f"\n   ✓ עובדו {total_paragraphs} פסקאות")
     print(f"   ✓ חוברו {source_attachments} ציוני מקור לתוכן הקודם")
     

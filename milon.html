@@ -1667,6 +1667,198 @@
     .entry-term{ font-size: 22pt; }
     a{ color: #000; text-decoration: none; }
   }
+  /* ═══ סרגל צד: מדורים ← נושאים ← ערכים ═══ */
+  .nav-home{
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px; margin-bottom: 12px;
+    cursor: pointer; user-select: none;
+    font-weight: 700; font-size: 14px; color: var(--gold-deep);
+    border: 1px dashed var(--gold-deep);
+    background: rgba(255,255,255,0.35);
+  }
+  .nav-home:hover{ background: rgba(212,176,106,0.3); color: var(--ink); }
+  .nav-section{ margin-bottom: 14px; }
+  .nav-section-title{
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;
+    color: var(--gold-deep);
+    padding: 6px 4px 5px; margin-bottom: 6px;
+    border-bottom: 1px solid var(--gold);
+  }
+  .nav .topic{ margin-bottom: 4px; }
+  .nav .topic-head{ padding: 7px 10px; gap: 8px; }
+  .nav .topic-head::before{ display: none; }
+  .nav .topic-title{ font-size: 14.5px; line-height: 1.3; }
+  .nav .topic-count{ flex-shrink: 0; }
+  .nav-more{ font-size: 12px; color: var(--ink-faint); padding: 6px 12px; font-style: italic; }
+  .nav-filter-all{
+    display: block; width: 100%;
+    margin: 0 0 8px; padding: 8px 12px;
+    background: var(--ink); color: var(--cream);
+    border: none; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 700; text-align: right;
+  }
+  .nav-filter-all:hover{ background: var(--wood-dark); }
+
+  /* ═══ דף הבית: מפתח הנושאים ═══ */
+  .home{ padding-top: 24px; }
+  .home-hero{ text-align: center; }
+  .home-title{
+    font-size: clamp(30px, 4.6vw, 50px);
+    font-weight: 900; line-height: 1.1; color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .home-stats{
+    margin-top: 14px;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--gold-deep);
+  }
+  .home-search-btn{
+    display: none;
+    align-items: center; justify-content: center; gap: 8px;
+    margin: 18px auto 0; padding: 10px 22px;
+    width: min(100%, 420px);
+    background: rgba(255,255,255,0.7);
+    border: 1.5px solid var(--gold-deep); border-radius: 999px;
+    color: var(--ink-faint); font-family: inherit; font-size: 16px;
+    cursor: pointer;
+  }
+  .home-section{ margin: 0 0 30px; }
+  .home-section-title{
+    display: flex; align-items: center; gap: 12px;
+    font-size: 22px; font-weight: 900; color: var(--ink); line-height: 1.25;
+    padding-bottom: 8px; margin-bottom: 10px;
+    border-bottom: 2px double var(--gold-deep);
+  }
+  .home-section-num{
+    flex: 0 0 auto; width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ink); color: var(--gold-bright);
+    font-size: 15px; font-weight: 700; border-radius: 50%;
+  }
+  .home-section-count{
+    margin-right: auto; flex: 0 0 auto;
+    font-size: 12px; font-weight: 700; color: var(--ink-faint);
+    letter-spacing: 0.04em; white-space: nowrap;
+  }
+  .home-topic{
+    border: 1px solid var(--cream-3);
+    background: rgba(255,255,255,0.45);
+    margin-bottom: 6px;
+  }
+  .home-topic.open{ border-color: var(--gold-deep); background: rgba(255,255,255,0.72); }
+  .home-topic-head{
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; cursor: pointer; user-select: none;
+  }
+  .home-topic-head:hover{ background: rgba(212,176,106,0.22); }
+  .home-topic-caret{
+    flex: 0 0 auto;
+    color: var(--gold-deep);
+    transition: transform 0.15s;
+  }
+  .home-topic.open .home-topic-caret{ transform: rotate(-90deg); }
+  .home-topic-title{ flex: 1 1 auto; min-width: 0; font-size: 17px; font-weight: 700; line-height: 1.3; }
+  .home-topic-count{
+    flex: 0 0 auto;
+    background: var(--gold); color: var(--cream);
+    font-size: 11px; font-weight: 700;
+    padding: 2px 9px; border-radius: 999px;
+  }
+  .home-entries{
+    display: none;
+    padding: 8px 14px 14px;
+    columns: 2; column-gap: 26px;
+    border-top: 1px dashed var(--gold);
+  }
+  .home-topic.open .home-entries{ display: block; }
+  .home-entry{
+    break-inside: avoid;
+    padding: 5px 8px 5px 4px;
+    font-size: 15px; line-height: 1.4; color: var(--ink-soft);
+    cursor: pointer;
+    border-right: 2px solid transparent;
+  }
+  .home-entry:hover, .home-entry:focus-visible{
+    color: var(--crimson); border-right-color: var(--crimson);
+    background: rgba(139,46,28,0.06);
+  }
+  .home-all{ text-align: center; margin: 8px 0 30px; }
+  .home-all-btn, .home-back{
+    background: transparent; border: none;
+    color: var(--gold-deep);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer; padding: 6px 10px;
+  }
+  .home-all-btn{ border: 1.5px dashed var(--gold-deep); padding: 9px 22px; }
+  .home-all-btn:hover{ background: var(--gold-deep); color: var(--cream); }
+  .home-back:hover{ color: var(--crimson); }
+  /* כותרות הנושאים ארוכות ("עבודת ה' – קדושה, דבקות, יראה…") — 64px שובר אותן */
+  .topic-landing-title{ font-size: clamp(28px, 4.2vw, 46px); line-height: 1.15; }
+
+  /* ═══ הנושאים שהערך שייך אליהם ═══ */
+  .entry-topics{ display: flex; flex-wrap: wrap; gap: 6px; }
+  .entry-topic-chip{
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--ink-soft);
+    font-family: inherit; font-size: 12.5px;
+    padding: 2px 10px; border-radius: 999px;
+    cursor: pointer;
+  }
+  .entry-topic-chip:hover{ background: var(--gold-deep); color: var(--cream); border-color: var(--gold-deep); }
+  .entry-topic-chip.current{ border-color: var(--gold-deep); color: var(--gold-deep); font-weight: 700; }
+  .entry-topic-chip.current:hover{ color: var(--cream); }
+
+  /* ═══ נושאים שתואמים את החיפוש — שורה נפרדת מעל התוצאות ═══ */
+  .search-topics{ display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; }
+  .search-topics-label{ font-size: 12px; font-weight: 700; color: var(--ink-faint); letter-spacing: 0.04em; }
+  .search-topic-chip{
+    background: rgba(184,137,58,0.1);
+    border: 1px solid var(--gold-deep);
+    color: var(--gold-deep);
+    font-family: inherit; font-size: 13.5px; font-weight: 700;
+    padding: 3px 12px; border-radius: 999px;
+    cursor: pointer;
+  }
+  .search-topic-chip:hover{ background: var(--gold-deep); color: var(--cream); }
+  .search-topic-chip small{ font-weight: 400; opacity: 0.8; margin-right: 4px; }
+
+  /* ═══ חיפוש מהסרגל העליון (מובייל) ═══ */
+  .topsearch{
+    display: none;
+    flex: 1 1 auto; min-width: 0;
+    align-items: center; gap: 8px;
+    height: 38px; padding: 0 12px 0 4px;
+    background: rgba(255,255,255,0.8);
+    border: 1.5px solid var(--gold-deep); border-radius: 999px;
+  }
+  .topsearch svg{ flex: 0 0 auto; color: var(--ink-faint); }
+  .topsearch input{
+    flex: 1 1 auto; min-width: 0;
+    border: none; background: transparent; outline: none;
+    font-family: inherit; font-size: 16px; color: var(--ink);
+    direction: rtl;
+    -webkit-appearance: none; appearance: none;
+  }
+  .topsearch input::-webkit-search-cancel-button{ display: none; }
+  .topsearch-close{
+    flex: 0 0 auto; width: 30px; height: 30px;
+    border: none; border-radius: 50%;
+    background: transparent; color: var(--ink-soft);
+    font-size: 22px; line-height: 1; cursor: pointer;
+  }
+  .topbar.searching .breadcrumb, .topbar.searching .toolbar{ display: none; }
+  .topbar.searching .topsearch{ display: flex; }
+  #topsearch-btn{ display: none; }
+  @media (max-width: 860px){
+    #topsearch-btn{ display: inline-flex; }
+    .home{ padding-top: 4px; }
+    .home-entries{ columns: 1; }
+    .home-section-title{ font-size: 19px; gap: 9px; }
+    .home-topic-title{ font-size: 16px; }
+    .home-topic-head{ padding: 12px 12px; }
+    .home-search-btn{ display: flex; }
+  }
 </style>
 </head>
 <body data-font="md">
@@ -1723,7 +1915,7 @@
   <div class="splitter" id="splitter" title="גרור, או השתמש בחיצים, כדי לשנות פרופורציה" role="separator" aria-orientation="vertical" tabindex="0" aria-label="שינוי רוחב הסרגל"></div>
 
   <main class="main">
-    <div class="topbar">
+    <div class="topbar" id="topbar">
       <button class="nav-toggle" id="nav-toggle" type="button" title="רשימת הערכים" aria-label="פתח את רשימת הערכים" aria-controls="sidebar" aria-expanded="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
@@ -1731,6 +1923,9 @@
         <span>אוצר המונחים</span>
       </div>
       <div class="toolbar">
+        <button class="tool-btn" id="topsearch-btn" type="button" title="חיפוש" aria-label="חיפוש במילון">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
         <button class="tool-btn" id="bookmarks-page-btn" title="הסימניות שלי">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         </button>
@@ -1740,6 +1935,11 @@
         <button class="tool-btn" id="font-btn" title="גודל טקסט">
           <span style="font-weight:700;font-size:13px;">א<sup style="font-size:9px;">+</sup></span>
         </button>
+      </div>
+      <div class="topsearch" id="topsearch" role="search">
+        <button type="button" class="topsearch-close" id="topsearch-close" aria-label="סגור חיפוש">×</button>
+        <input type="search" id="search-top" placeholder="חיפוש במילון…" autocomplete="off" enterkeyhint="search" aria-label="חיפוש במילון"/>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       </div>
     </div>
 
@@ -1753,12 +1953,13 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-09-01-172521"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-11-11-160418"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 const DATA_VERSION = SEARCH_URL.split('?v=')[1] || '';
 // גרסת הקוד — יש להעלות אותה כששינוי בקוד משנה את מבנה האינדקס הבנוי בזיכרון,
 // אחרת משתמש חוזר יטען מ-IndexedDB מבנה שנבנה ע"י גרסה ישנה.
-const INDEX_CODE_VERSION = 'v4-abbrev-fuzzy';
+// להעלות בכל שינוי ב-tokenize / בפורמט האינדקס — אחרת ייטען אינדקס שמור ישן
+const INDEX_CODE_VERSION = 'v5-packed';
 
 let data          = null;   // terms.json — הסרגל הצדדי
 let searchData    = null;   // search-index.json — { topics, entries }
@@ -1766,6 +1967,9 @@ let searchIx      = null;   // האינדקס ההפוך הבנוי בזיכרו
 let searchById    = null;   // id → { entry, idx }
 let currentTopic  = null;
 let currentEntry  = null;
+let currentView   = 'home';   // home | topic | entry | page — לאן חוזרים כשמנקים את החיפוש
+const ALL_TOPIC_ID = '__all';
+let entryIndex = new Map();   // id → { entry:{id,term}, topics:[נושאים שהערך שייך אליהם] }
 const entryCache    = new Map();
 const entryInflight = new Map();   // מונע סופת בקשות בריחוף על רשימת 653 הערכים
 
@@ -1820,7 +2024,7 @@ function tokenize(s, flags){
   while(i < n){
     const c = s.charCodeAt(i);
     if(!isWordCode(c)){ i++; continue; }
-    let j = i + 1, sof = isSofitCode(c), up = c >= 65 && c <= 90, gersh = false;
+    let j = i + 1, sof = isSofitCode(c) ? 1 : 0, up = c >= 65 && c <= 90, gersh = false;
     while(j < n){
       const d = s.charCodeAt(j);
       if(isGershCode(d)){
@@ -1829,13 +2033,19 @@ function tokenize(s, flags){
         break;
       }
       if(!isWordCode(d)) break;
-      if(isSofitCode(d)) sof = true;
+      if(isSofitCode(d)) sof++;
       if(d >= 65 && d <= 90) up = true;
       j++;
     }
     let t = s.slice(i, j);
     if(gersh) t = t.replace(GERSH_RE, '');
-    if(sof) t = t.replace(SOF_RE, ch => SOF_MAP[ch]);
+    if(sof){
+      // כמעט תמיד האות הסופית היא האחרונה במילה — חיתוך והדבקה זולים בהרבה
+      // מ-replace עם פונקציה, וזה רץ על כל מילה שנייה בקורפוס.
+      const L = t.length - 1;
+      if(sof === 1 && isSofitCode(t.charCodeAt(L))) t = t.slice(0, L) + SOF_MAP[t[L]];
+      else t = t.replace(SOF_RE, ch => SOF_MAP[ch]);
+    }
     if(up)  t = t.toLowerCase();
     out.push(t);
     if(flags) flags.push(gersh);
@@ -1890,16 +2100,36 @@ const PROX_TOPK = 120;       // כמה מועמדים מקבלים ניתוח ק
 // שאילתה רבת-מילים שמילותיה מפוזרות רחוק מזו לא נחשבת התאמה בכלל —
 // זה מה שמונע תוצאה שנראית שגויה למרות שהמילים "קיימות" בערך.
 const MAX_WORD_GAP = 5;
+// ערך ששמו *נפתח* במילות החיפוש עצמן ("שכינה – …" לחיפוש "שכינה") קודם לערך
+// שהמילה רק מופיעה בהמשך שמו ("הלכה – שכינה"). במילון, זה הערך שמחפשים.
+const HEAD_BONUS = 40;
 
 // ─── בניית אינדקס (ניתנת לפיצול למנות כדי לא לתקוע את הדפדפן) ───
+// האינדקס נבנה לצורה "ארוזה": מערכים מטיפוס קבוע בלבד. לזה שני רווחים —
+//   1. אפשר לשמור אותו ב-IndexedDB כמו שהוא, ובביקור הבא לדלג לגמרי על הבנייה
+//      (טוקניזציה של כל המילון — החלק היקר ביותר בעליית החיפוש).
+//   2. סריקת הקרבה רצה על Uint32Array רציף במקום על מערכי JS.
+// packed = { vocabList, abbrev, toks, streamEnd, docFirst, tT, tTo, tB, tBo, sortedIds }
+//   toks       כל מזהי המילים ברצף: לכל ערך — הכותרת ואז כל הגדרה
+//   streamEnd  סוף כל רצף (כותרת/הגדרה) בתוך toks
+//   docFirst   לכל ערך — מספר הרצף של הכותרת שלו (ועוד איבר סוגר)
+//   tT/tB      רשימות הופעה (ערך, מספר הופעות) לכותרת ולגוף; tTo/tBo — ההיסטים לפי מילה
 function createIndexBuilder(items){
   const abbrev = new Set();   // טוקנים שמקורם בקיצור עם גרשיים
-  const vocab = new Map(), vocabList = [], docs = [];
+  const vocab = new Map(), vocabList = [];
+  const toks = [], streamEnd = [], docFirst = [];
   let at = 0;
-  function intern(tok){
-    let id = vocab.get(tok);
-    if(id === undefined){ id = vocabList.length; vocab.set(tok, id); vocabList.push(tok); }
-    return id;
+  function pushStream(text){
+    const flags = [];
+    const ts = tokenize(text, flags);
+    for(let k = 0; k < ts.length; k++){
+      const tok = ts[k];
+      let id = vocab.get(tok);
+      if(id === undefined){ id = vocabList.length; vocab.set(tok, id); vocabList.push(tok); }
+      toks.push(id);
+      if(flags[k]) abbrev.add(tok);
+    }
+    streamEnd.push(toks.length);
   }
   return {
     total: items.length,
@@ -1908,52 +2138,84 @@ function createIndexBuilder(items){
       const end = Math.min(items.length, at + count);
       for(; at < end; at++){
         const e = items[at];
-        const tf = [];
-        const titleToks = tokenize(e.t, tf);
-        const title = titleToks.map(intern);
-        for(let k = 0; k < titleToks.length; k++) if(tf[k]) abbrev.add(titleToks[k]);
-        const defs = (e.d || []).map(txt => {
-          const df = [];
-          const dt = tokenize(txt, df);
-          for(let k = 0; k < dt.length; k++) if(df[k]) abbrev.add(dt[k]);
-          return dt.map(intern);
-        });
-        let len = title.length;
-        for(const ds of defs) len += ds.length;
-        docs.push({ title: title, defs: defs, len: len || 1, titleLen: title.length || 1 });
+        docFirst.push(streamEnd.length);
+        pushStream(e.t);
+        const d = e.d || [];
+        for(let k = 0; k < d.length; k++) pushStream(d[k]);
       }
       return at >= items.length;
     },
     finish(){
-      const nV = vocabList.length, nD = docs.length;
-      const tfTitle = new Array(nV), tfBody = new Array(nV);
-      for(let i = 0; i < nV; i++){ tfTitle[i] = []; tfBody[i] = []; }
-      // טכניקת "המסמך האחרון שנראה" — חוסכת הקצאת Map לכל מסמך
-      const lastT = new Int32Array(nV).fill(-1), lastB = new Int32Array(nV).fill(-1);
-      for(let d = 0; d < nD; d++){
-        const doc = docs[d];
-        for(const id of doc.title){
-          const arr = tfTitle[id];
-          if(lastT[id] !== d){ lastT[id] = d; arr.push(d, 1); } else arr[arr.length-1]++;
-        }
-        for(const ds of doc.defs) for(const id of ds){
-          const arr = tfBody[id];
-          if(lastB[id] !== d){ lastB[id] = d; arr.push(d, 1); } else arr[arr.length-1]++;
-        }
+      docFirst.push(streamEnd.length);
+      const nV = vocabList.length, nD = items.length;
+      const T = Uint32Array.from(toks), SE = Uint32Array.from(streamEnd), DF = Uint32Array.from(docFirst);
+      // רשימות הופעה בשני מעברים: ספירה ואז מילוי. "המסמך האחרון שנראה" חוסך Map לכל מסמך.
+      function postings(isTitle){
+        const cnt = new Uint32Array(nV + 1), last = new Int32Array(nV).fill(-1);
+        const each = cb => {
+          for(let d = 0; d < nD; d++){
+            const s0 = DF[d], s1 = isTitle ? s0 + 1 : DF[d + 1];
+            const a = isTitle ? (s0 ? SE[s0 - 1] : 0) : SE[s0], b = SE[s1 - 1];
+            for(let k = a; k < b; k++) cb(T[k], d);
+          }
+        };
+        each((id, d) => { if(last[id] !== d){ last[id] = d; cnt[id + 1]++; } });
+        for(let i = 0; i < nV; i++) cnt[i + 1] += cnt[i];          // cnt = היסט בזוגות
+        const off = new Uint32Array(nV + 1);
+        for(let i = 0; i <= nV; i++) off[i] = cnt[i] * 2;
+        const data = new Uint32Array(off[nV]);
+        const fill = new Uint32Array(nV);
+        last.fill(-1);
+        each((id, d) => {
+          if(last[id] !== d){ last[id] = d; const p = off[id] + fill[id] * 2; data[p] = d; data[p + 1] = 1; fill[id]++; }
+          else data[off[id] + (fill[id] - 1) * 2 + 1]++;
+        });
+        return { off: off, data: data };
       }
-      const skelMap = new Map();
-      for(let id = 0; id < nV; id++){
-        const sk = skeleton(vocabList[id]);
-        let a = skelMap.get(sk); if(!a) skelMap.set(sk, a = []); a.push(id);
-      }
-      const sortedIds = vocabList.map((_, i) => i)
-        .sort((a, b) => vocabList[a] < vocabList[b] ? -1 : vocabList[a] > vocabList[b] ? 1 : 0);
-      const sortedTokens = sortedIds.map(i => vocabList[i]);
-      let sum = 0; for(const d of docs) sum += d.len;
-      return { vocab, vocabList, skelMap, tfTitle, tfBody, docs, sortedTokens, sortedIds,
-               abbrev: abbrev, avgLen: sum / (nD || 1), nDocs: nD };
+      const pt = postings(true), pb = postings(false);
+      const order = new Array(nV);
+      for(let i = 0; i < nV; i++) order[i] = i;
+      order.sort((a, b) => vocabList[a] < vocabList[b] ? -1 : vocabList[a] > vocabList[b] ? 1 : 0);
+      return indexFromPacked({
+        vocabList: vocabList, abbrev: Array.from(abbrev),
+        toks: T, streamEnd: SE, docFirst: DF,
+        tT: pt.data, tTo: pt.off, tB: pb.data, tBo: pb.off,
+        sortedIds: Uint32Array.from(order)
+      });
     }
   };
+}
+// בונה את מבני העבודה (Map-ים ותצוגות) מעל האינדקס הארוז. זול: בלי טוקניזציה.
+function indexFromPacked(p){
+  const vocabList = p.vocabList, nV = vocabList.length;
+  const vocab = new Map();
+  for(let i = 0; i < nV; i++) vocab.set(vocabList[i], i);
+  const SE = p.streamEnd, DF = p.docFirst, nD = DF.length - 1;
+  const docs = new Array(nD);
+  let sum = 0;
+  for(let d = 0; d < nD; d++){
+    const s0 = DF[d], s1 = DF[d + 1];
+    const a = s0 ? SE[s0 - 1] : 0;
+    const title = p.toks.subarray(a, SE[s0]);
+    const defs = [];
+    for(let st = s0 + 1; st < s1; st++) defs.push(p.toks.subarray(SE[st - 1], SE[st]));
+    const len = (SE[s1 - 1] - a) || 1;
+    docs[d] = { title: title, defs: defs, len: len, titleLen: title.length || 1 };
+    sum += len;
+  }
+  const skelMap = new Map();
+  for(let id = 0; id < nV; id++){
+    const sk = skeleton(vocabList[id]);
+    let a = skelMap.get(sk); if(!a) skelMap.set(sk, a = []); a.push(id);
+  }
+  const sortedIds = p.sortedIds, sortedTokens = new Array(nV);
+  for(let i = 0; i < nV; i++) sortedTokens[i] = vocabList[sortedIds[i]];
+  return { vocab: vocab, vocabList: vocabList, skelMap: skelMap,
+           tT: p.tT, tTo: p.tTo, tB: p.tB, tBo: p.tBo,
+           docs: docs, sortedTokens: sortedTokens, sortedIds: sortedIds,
+           abbrev: new Set(p.abbrev), avgLen: sum / (nD || 1), nDocs: nD,
+           mask: new Uint16Array(nV),      // לוח סימון לסריקת הקרבה (ראה posInMulti)
+           packed: p };
 }
 function buildIndexSync(items){
   const b = createIndexBuilder(items);
@@ -1999,20 +2261,61 @@ function resolveWord(ix, w, exactOnly){
   return q;
 }
 
+// מילת חיפוש כפי שהמשתמש הקליד אותה. מעבר ל-resolveWord: כשאין למילה שום התאמה
+// של ממש (לכל היותר דמיון בכתיב מלא/חסר), מוסיפים שתי השערות —
+//   1. אות שימוש שצורפה למילה מהמילון: "בצמצום", "והנסירה", "שבספירות".
+//      (האינדקס יודע למצוא את "הצמצום" כשמחפשים "צמצום"; זה הכיוון ההפוך.)
+//   2. שגיאת הקלדה של אות אחת — רק כשלמילה אין *שום* התאמה: עד שלוש מילים קרובות,
+//      כהתאמה חלשה. כולן נכנסות יחד, והמסמכים שבהם אחת מהן יושבת ליד שאר מילות
+//      החיפוש הם שמכריעים מה הייתה הכוונה — לא ניחוש לפי שכיחות בלבד.
+// המפה מסומנת guess=true: מי שקורא יכול לחזור מההשערה אם היא לא הובילה לכלום.
+const QUERY_PREFIXES = PREFIXES.slice().sort((a, b) => a.length - b.length);
+const Q_FUZZY = 0.7, FUZZY_MAX = 3, FUZZY_MAX_WIDE = 16;
+function resolveQueryWord(ix, w, exactOnly, wide){
+  const qmap = resolveWord(ix, w, exactOnly);
+  if(exactOnly || w.length < 3) return qmap;
+  let best = 0;
+  for(const v of qmap.values()) if(v > best) best = v;
+  if(best >= Q_STEMCUT) return qmap;
+  const unknown = qmap.size === 0;
+  if(w.length >= 4){
+    for(const p of QUERY_PREFIXES){
+      if(!w.startsWith(p)) continue;
+      const rest = w.slice(p.length);
+      if(rest.length < 3 || !ix.vocab.has(rest)) continue;
+      const factor = 0.95 - 0.05 * p.length;        // אות אחת 0.90, שתיים 0.85, שלוש 0.80
+      for(const pair of resolveWord(ix, rest, false)){
+        const nv = pair[1] * factor, cur = qmap.get(pair[0]);
+        if(cur === undefined || cur < nv) qmap.set(pair[0], nv);
+      }
+      qmap.guess = true;
+    }
+  }
+  if(unknown){
+    // בשאילתה של כמה מילים שאר המילים מסננות את הניחושים, ולכן אפשר להרחיב אותם
+    for(const c of fuzzyCandidates(ix, w, wide ? FUZZY_MAX_WIDE : FUZZY_MAX)){
+      const id = ix.vocab.get(c);
+      if(qmap.has(id)) continue;
+      qmap.set(id, Q_FUZZY);
+      (qmap.fuzzyIds || (qmap.fuzzyIds = new Set())).add(id);
+      qmap.guess = true;
+    }
+  }
+  return qmap;
+}
+
 // ─── תיקון שגיאת כתיב: מחזיר את מילת האוצר הקרובה ביותר במרחק עריכה 1 ───
 // עלות: ~28*len בדיקות Map. רץ רק כשאין תוצאות בכלל.
 const HEB_LETTERS = 'אבגדהוזחטיכלמנסעפצקרשת';
-function fuzzyFix(ix, w){
-  if(w.length < 3) return w;
-  if(ix.vocab.has(w)) return w;
-  let best = null, bestDf = 0;
+// כל מילות האוצר במרחק עריכה 1 מ-w, מהנפוצה לנדירה
+function fuzzyCandidates(ix, w, max){
+  const found = new Map();        // מילה → שכיחות
   const consider = cand => {
-    if(cand === w || cand.length < 2) return;
+    if(cand === w || cand.length < 2 || found.has(cand)) return;
     const id = ix.vocab.get(cand);
     if(id === undefined) return;
     // העדף את המילה הנפוצה יותר — סביר יותר שזו הכוונה
-    const df = (ix.tfTitle[id].length >> 1) * 8 + (ix.tfBody[id].length >> 1);
-    if(df > bestDf){ bestDf = df; best = cand; }
+    found.set(cand, ((ix.tTo[id + 1] - ix.tTo[id]) >> 1) * 8 + ((ix.tBo[id + 1] - ix.tBo[id]) >> 1));
   };
   for(let i = 0; i < w.length; i++) consider(w.slice(0, i) + w.slice(i + 1));          // מחיקה
   for(let i = 0; i < w.length; i++)
@@ -2021,7 +2324,19 @@ function fuzzyFix(ix, w){
     for(const ch of HEB_LETTERS) consider(w.slice(0, i) + ch + w.slice(i));            // הוספה
   for(let i = 0; i + 1 < w.length; i++)                                                // החלפת סדר
     consider(w.slice(0, i) + w[i+1] + w[i] + w.slice(i + 2));
-  return best || w;
+  return Array.from(found.entries()).filter(e => e[1] > 0)
+              .sort((a, b) => b[1] - a[1]).slice(0, max).map(e => e[0]);
+}
+function fuzzyFix(ix, w){
+  if(w.length < 3) return w;
+  if(ix.vocab.has(w)) return w;
+  return fuzzyCandidates(ix, w, 1)[0] || w;
+}
+// צורת תצוגה של טוקן: מחזיר אות סופית שקופלה בטוקניזציה ("שלומ" → "שלום")
+const UNSOF = { 'כ':'ך', 'מ':'ם', 'נ':'ן', 'פ':'ף', 'צ':'ץ' };
+function displayTok(t){
+  const last = t[t.length - 1];
+  return (t.length > 2 && UNSOF[last]) ? t.slice(0, -1) + UNSOF[last] : t;
 }
 
 // מחזיר את המרחק הקטן ביותר בין המילה הראשונה לאחרונה ברצף תקין,
@@ -2050,7 +2365,27 @@ function orderedSpan(lists){
 // קודם נעשו N סריקות נפרדות לכל הגדרה — צוואר בקבוק מרגע שהקרבה הפכה
 // לתנאי סינון שנבדק לכל מועמד ולא רק ל-120 הראשונים.
 // מחזיר null אם חסרה מילה, כדי לדלג על חישוב הקרבה כליל.
-function posInMulti(stream, resolved){
+// גרסת לוח הסימון: mask[id] הוא מפת סיביות — אילו ממילות החיפוש מתאימות למילה id.
+// במקום N בדיקות Map לכל מילה בטקסט יש גישה אחת למערך, ורוב ההגדרות נפסלות
+// במעבר הראשון (לא כל המילים נמצאות) בלי להקצות שום דבר.
+function posInMulti(stream, mask, n){
+  const full = (1 << n) - 1, len = stream.length;
+  let seen = 0;
+  for(let i = 0; i < len; i++){
+    const m = mask[stream[i]];
+    if(m){ seen |= m; if(seen === full) break; }
+  }
+  if(seen !== full) return null;
+  const out = new Array(n);
+  for(let w = 0; w < n; w++) out[w] = [];
+  for(let i = 0; i < len; i++){
+    const m = mask[stream[i]];
+    if(m) for(let w = 0; w < n; w++) if(m & (1 << w)) out[w].push(i);
+  }
+  return out;
+}
+// הגרסה האיטית — רק לשאילתה חריגה של יותר מ-16 מילים (אין מספיק סיביות בלוח)
+function posInMultiSlow(stream, resolved){
   const n = resolved.length;
   const out = new Array(n);
   for(let w = 0; w < n; w++) out[w] = [];
@@ -2078,16 +2413,16 @@ function runSearchPass(ix, resolved, titleOnly){
     const bt = new Map(), bb = new Map();
     for(const pair of qmap){
       const id = pair[0], qv = pair[1];
-      const pt = ix.tfTitle[id];
-      for(let k = 0; k < pt.length; k += 2){
+      const pt = ix.tT;
+      for(let k = ix.tTo[id], kEnd = ix.tTo[id + 1]; k < kEnd; k += 2){
         const d = pt[k], sc = qv * (1 + Math.log(1 + pt[k+1]) * 0.3);
         const cur = bt.get(d);
         if(cur === undefined) bt.set(d, [qv, sc]);
         else { if(cur[0] < qv) cur[0] = qv; if(cur[1] < sc) cur[1] = sc; }
       }
       if(!titleOnly){
-        const pb = ix.tfBody[id];
-        for(let k = 0; k < pb.length; k += 2){
+        const pb = ix.tB;
+        for(let k = ix.tBo[id], kEnd = ix.tBo[id + 1]; k < kEnd; k += 2){
           const d = pb[k], sc = qv * (1 + Math.log(1 + pb[k+1]) * 0.3);
           const cur = bb.get(d);
           if(cur === undefined) bb.set(d, [qv, sc]);
@@ -2111,6 +2446,11 @@ function runSearchPass(ix, resolved, titleOnly){
   }
   pre.sort((a, b) => b.base - a.base);
   const out = [];
+  // לוח הסימון לסריקת הקרבה: סיבית w דולקת בכל מילה שמתאימה למילת החיפוש ה-w
+  const useMask = N > 1 && N <= 16;
+  const mask = ix.mask;
+  if(useMask) for(let w = 0; w < N; w++) for(const id of resolved[w].qmap.keys()) mask[id] |= (1 << w);
+  const scan = useMask ? (stream => posInMulti(stream, mask, N)) : (stream => posInMultiSlow(stream, resolved));
   for(let i = 0; i < pre.length; i++){
     const p = pre[i], doc = ix.docs[p.d];
     let tSpan = -1, bSpan = -1;
@@ -2121,12 +2461,12 @@ function runSearchPass(ix, resolved, titleOnly){
       // רב-מילים: הקרבה היא תנאי סינון, ולכן נחשבת לכל מועמד ולא רק ל-120
       // הראשונים. קבוצת המועמדים אחרי חיתוך AND קטנה, כך שזה זול.
       if(p.tFull){
-        const tl = posInMulti(doc.title, resolved);
+        const tl = scan(doc.title);
         if(tl) tSpan = orderedSpan(tl);
       }
       if(p.bFull){
         for(let di = 0; di < doc.defs.length; di++){
-          const lists = posInMulti(doc.defs[di], resolved);
+          const lists = scan(doc.defs[di]);
           if(!lists) continue;
           const s = orderedSpan(lists);
           if(s >= 0 && (bSpan < 0 || s < bSpan)){
@@ -2148,8 +2488,16 @@ function runSearchPass(ix, resolved, titleOnly){
     else if(p.bFull && bStrong && bSpan >= 0)    tier = 5;   // בהגדרה אחת, במרחק מותר
     else                                         tier = 6;   // התאמה חלשה בגוף
     const prox = (tSpan >= 0 ? (N-1)/(1+tSpan) : 0) * 12 + (bSpan >= 0 ? (N-1)/(1+bSpan) : 0) * 4;
-    out.push({ ei: p.d, tier: tier, score: p.base + prox });
+    let head = 0;
+    if(p.tFull && doc.title.length >= N){
+      head = HEAD_BONUS;
+      for(let w = 0; w < N; w++){
+        if(resolved[w].qmap.get(doc.title[w]) !== Q_EXACT){ head = 0; break; }
+      }
+    }
+    out.push({ ei: p.d, tier: tier, score: p.base + prox + head });
   }
+  if(useMask) for(let w = 0; w < N; w++) for(const id of resolved[w].qmap.keys()) mask[id] = 0;
   return out;
 }
 
@@ -2204,6 +2552,12 @@ function runEngine(ix, rawQuery, alsoContent, noSyn){
 
   // ניסוחים חלופיים: איחוד מילים סמוכות ("אין סוף" → "אינסוף")
   const variants = [words];
+  // מילות קישור ("עם", "של", "על") מושמטות מהחיפוש כי הן בכל מקום — אבל בצירוף כמו
+  // "עם ישראל" הן חלק מהשם. לכן מריצים גם את הצירוף המלא: מי שמכיל אותו כלשונו
+  // מקבל ציון גבוה יותר, ושאר התוצאות נשארות כפי שהיו.
+  if(all.length > words.length && all.length >= 2 && all.length <= 8 && words.length < all.length){
+    variants.push(all);
+  }
   if(words.length > 1 && words.length <= 5){
     for(let i = 0; i < words.length - 1; i++){
       if(ix.vocab.has(words[i] + words[i+1])){
@@ -2224,15 +2578,25 @@ function runEngine(ix, rawQuery, alsoContent, noSyn){
 
   const merged = new Map();
   let firstResolved = null, missing = [];
-  for(const wl of variants.slice(0, 4)){
-    const resolved = [], miss = [];
-    for(const w of wl){
-      const qmap = resolveWord(ix, w, typedAbbrev.has(w));
-      if(qmap.size) resolved.push({ w: w, qmap: qmap }); else miss.push(w);
+  for(const wl of variants.slice(0, 5)){
+    let slots = wl.map(w => ({ w: w, qmap: resolveQueryWord(ix, w, typedAbbrev.has(w), wl.length > 1) }));
+    let resolved = slots.filter(x => x.qmap.size);
+    let pass = null;
+    // אם אחת המילים פוענחה רק כהשערה (אות שימוש / שגיאת הקלדה) וההשערה לא הובילה
+    // לשום תוצאה יחד עם שאר המילים — חוזרים להתנהגות הבסיסית: מילה שאינה במילון
+    // מושמטת, ומחפשים את השאר.
+    if(slots.some(x => x.qmap.guess)){
+      pass = resolved.length ? runSearchPass(ix, resolved, titleOnly) : [];
+      if(!pass.length){
+        slots = slots.map(x => x.qmap.guess ? { w: x.w, qmap: resolveWord(ix, x.w, false) } : x);
+        resolved = slots.filter(x => x.qmap.size);
+        pass = null;
+      }
     }
+    const miss = slots.filter(x => !x.qmap.size).map(x => x.w);
     if(!resolved.length) continue;
     if(!firstResolved){ firstResolved = resolved; missing = miss; }
-    for(const r of runSearchPass(ix, resolved, titleOnly)){
+    for(const r of (pass || runSearchPass(ix, resolved, titleOnly))){
       const cur = merged.get(r.ei);
       if(!cur || r.tier < cur.tier || (r.tier === cur.tier && r.score > cur.score)) merged.set(r.ei, r);
     }
@@ -2252,8 +2616,12 @@ function runEngine(ix, rawQuery, alsoContent, noSyn){
         if(merged.size){
           const res = Array.from(merged.values())
             .sort((a, b) => a.tier !== b.tier ? a.tier - b.tier : b.score - a.score);
+          const pairs = [];
+          for(let i = 0; i < words.length; i++){
+            if(fixed[i] !== words[i]) pairs.push({ from: displayTok(words[i]), to: displayTok(fixed[i]) });
+          }
           return { results: res, words: fixed, resolved: resolved,
-                   note: 'didyoumean:' + fixed.join(' ') };
+                   note: 'didyoumean:' + fixed.join(' '), info: { fixed: pairs, missing: [] } };
         }
       }
     }
@@ -2300,8 +2668,27 @@ function runEngine(ix, rawQuery, alsoContent, noSyn){
     }
   }
 
+  // מה לומר למשתמש: איזו מילה תוקנה (ולמה), ואיזו לא נמצאה כלל.
+  // "תוקנה" נקבע לפי התוצאה הראשונה: רק אם היא התאימה דרך ניחוש שגיאת ההקלדה.
+  let info = null;
+  const pairs = [];
+  const top = results.length ? ix.docs[results[0].ei] : null;
+  if(top && firstResolved){
+    const streams = [top.title].concat(top.defs);
+    for(const slot of firstResolved){
+      const fz = slot.qmap.fuzzyIds;
+      if(!fz) continue;
+      let hit = -1;
+      for(let si = 0; si < streams.length && hit < 0; si++){
+        const st = streams[si];
+        for(let i = 0; i < st.length; i++) if(slot.qmap.has(st[i])){ hit = st[i]; break; }
+      }
+      if(hit >= 0 && fz.has(hit)) pairs.push({ from: displayTok(slot.w), to: displayTok(ix.vocabList[hit]) });
+    }
+  }
+  if(pairs.length || missing.length) info = { fixed: pairs, missing: missing.map(displayTok) };
   return { results: results, words: words, resolved: firstResolved,
-           note: missing.length ? 'missing' : null };
+           note: pairs.length ? 'didyoumean' : (missing.length ? 'missing' : null), info: info };
 }
 
 // איזו הגדרה התאימה + היכן — מחושב רק עבור התוצאות המוצגות בפועל
@@ -2332,10 +2719,11 @@ function bestDefinitionFor(ix, ei, resolved){
 let titleIx = null, titleList = null;
 function buildTitleIndex(){
   if(titleIx || !data) return;
-  titleList = [];
-  for(const t of data.topics){
-    for(const e of t.entries) titleList.push({ id: e.id, t: e.term, topicTitle: t.title, d: [] });
-  }
+  // כל ערך פעם אחת, גם אם הוא מופיע במפתח תחת כמה נושאים
+  titleList = data.all.map(e => {
+    const r = entryIndex.get(e.id);
+    return { id: e.id, t: e.term, topicTitle: (r && r.topics[0]) ? r.topics[0].title : '', d: [] };
+  });
   titleIx = buildIndexSync(titleList);
 }
 function searchTitlesOnly(rawQuery){
@@ -2351,6 +2739,7 @@ function searchTitlesOnly(rawQuery){
 const IDB_NAME = 'milon-cache';
 const IDB_STORE = 'data';
 const IDB_KEY = 'search-payload';
+const IDB_IX_KEY = 'search-index-packed';   // האינדקס הבנוי — חוסך את הבנייה בביקור חוזר
 const CACHE_STAMP = DATA_VERSION + '|' + INDEX_CODE_VERSION;
 
 function idbOpen(){
@@ -2386,6 +2775,7 @@ function idbPut(db, key, val){
 
 // ─── טעינה + בנייה של האינדקס המלא ───
 let searchIndexPromise = null;
+let indexLoadedFrom = '';        // 'cache' | 'built' — לאבחון
 let searchIndexFailed  = false;
 
 function ensureSearchIndex(){
@@ -2410,7 +2800,26 @@ function ensureSearchIndex(){
     searchData = payload;
     searchById = {};
     payload.entries.forEach((e, i) => { searchById[e.i] = { entry: e, idx: i }; });
+    // ביקור חוזר: האינדקס הבנוי כבר שמור — טוענים אותו במקום לבנות מחדש
+    if(db){
+      try{
+        const c = await idbGet(db, IDB_IX_KEY);
+        if(c && c.stamp === CACHE_STAMP && c.packed && c.packed.docFirst &&
+           c.packed.docFirst.length === payload.entries.length + 1){
+          searchIx = indexFromPacked(c.packed);
+          indexLoadedFrom = 'cache';
+        }
+      }catch(e){ searchIx = null; }
+    }
+    if(searchIx){
+      _synCache = new Map();
+      _synMap = null;
+      onSearchIndexReady();
+      return searchIx;
+    }
     await buildIndexInSlices(payload.entries);
+    indexLoadedFrom = 'built';
+    if(db) idbPut(db, IDB_IX_KEY, { stamp: CACHE_STAMP, packed: searchIx.packed }).catch(() => {});
     return searchIx;
   })().catch(err => {
     console.error('search index failed:', err);
@@ -2474,6 +2883,7 @@ async function load(){
     const res = await fetch(TERMS_URL + (DATA_VERSION ? '?v=' + DATA_VERSION : ''));
     if(!res.ok) throw new Error('טעינת רשימת הערכים נכשלה (' + res.status + ')');
     data = await res.json();
+    normalizeTerms(data);
   }catch(err){
     console.error('load() failed:', err);
     document.getElementById('content').innerHTML =
@@ -2485,67 +2895,175 @@ async function load(){
   renderNav();
   buildTitleIndex();   // חיפוש כותרות עובד מיד
 
-  if(data.topics.length){
-    currentTopic = data.topics[0].id;
-    const firstTopic = document.querySelector('.topic');
-    const firstHead  = document.querySelector('.topic-head');
-    if(firstTopic) firstTopic.classList.add('open');
-    if(firstHead){ firstHead.classList.add('active'); firstHead.setAttribute('aria-expanded','true'); }
-    // אם נשמרו לשוניות מהפעם הקודמת — משחזרים אותן במקום לנחות על המדור הראשון
-    if(!restoreTabs()){
-      renderTopicLanding(data.topics[0], 0);
-      // מסך הפתיחה עצמו הוא לשונית — בלי זה הלשונית הראשונה נוצרת רק בניווט הראשון
-      touchTab({ k: 'topic', t: data.topics[0].id });
-    }
+  // אם נשמרו לשוניות מהפעם הקודמת — משחזרים אותן; אחרת נוחתים על מפתח הנושאים.
+  // מסך הפתיחה עצמו הוא לשונית — בלי זה הלשונית הראשונה נוצרת רק בניווט הראשון.
+  if(!restoreTabs()){
+    renderHome();
+    touchTab({ k: 'home' });
   }
   ensureSearchIndex().catch(() => {});
 }
 
-function renderNav(){
-  document.getElementById('nav').innerHTML = data.topics.map((t) => `
+// ═══ מבנה הנתונים של המפתח ═══
+// terms.json: names {id: שם}, sections [{title, topics:[id]}], topics [{id, title, section, ids}].
+// ערך יכול להשתייך לכמה נושאים, ולכן השמות נשמרים פעם אחת והנושאים מחזיקים מזהים.
+function sortKey(term){ return term.replace(/^[^א-תA-Za-z0-9]+/, ''); }
+function normalizeTerms(d){
+  if(d.names){
+    for(const t of d.topics){
+      t.entries = (t.ids || []).filter(id => d.names[id] !== undefined)
+                               .map(id => ({ id: id, term: d.names[id] }));
+      t.subtitle = (d.sections[t.section] || {}).title || '';
+    }
+    d.all = Object.keys(d.names).map(id => ({ id: id, term: d.names[id] }));
+  }else{
+    // פורמט ישן (לפני המפתח): רשימת נושאים שטוחה, בלי מדורים
+    d.sections = [{ title: '', topics: d.topics.map(t => t.id) }];
+    const seen = new Set();
+    d.all = [];
+    for(const t of d.topics){
+      t.section = 0;
+      for(const e of t.entries) if(!seen.has(e.id)){ seen.add(e.id); d.all.push(e); }
+    }
+  }
+  entryIndex = new Map();
+  for(const e of d.all) entryIndex.set(e.id, { entry: e, topics: [] });
+  for(const t of d.topics) for(const e of t.entries){
+    const r = entryIndex.get(e.id);
+    if(r && r.topics.indexOf(t) < 0) r.topics.push(t);
+  }
+  // "כל הערכים" — נושא מדומה, ממוין א״ב. אינו חלק מהמפתח ואינו נחשב נושא של ערך.
+  const sorted = d.all.slice().sort((a, b) => sortKey(a.term).localeCompare(sortKey(b.term), 'he'));
+  d.allTopic = { id: ALL_TOPIC_ID, title: 'כל הערכים', subtitle: 'לפי סדר א״ב', section: -1, entries: sorted };
+  d.topicById = new Map(d.topics.map(t => [t.id, t]));
+  d.topicById.set(ALL_TOPIC_ID, d.allTopic);
+}
+function getTopic(id){ return (data && data.topicById && data.topicById.get(id)) || null; }
+
+// ═══ סרגל הצד: מדורים ← נושאים ← ערכים ═══
+// רשימת הערכים של נושא נבנית רק כשפותחים אותו. קודם נבנו כל הקישורים מראש
+// (כ-1,200 אלמנטים עם מאזינים), וזה מה שעיכב את עליית הדף.
+function navTopicHtml(t){
+  return `
     <div class="topic" data-topic="${escapeHtml(t.id)}">
-      <div class="topic-head" role="button" tabindex="0" aria-expanded="false"
-           onclick="selectTopic('${escapeAttr(t.id)}')"
-           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectTopic('${escapeAttr(t.id)}');}">
-        <div>
-          <div class="topic-title">${escapeHtml(t.title)}</div>
-          <div class="topic-subtitle">${escapeHtml(t.subtitle)}</div>
-        </div>
+      <div class="topic-head" role="button" tabindex="0" aria-expanded="false" data-kb
+           onclick="selectTopic('${escapeAttr(t.id)}')">
+        <div class="topic-title">${escapeHtml(t.title)}</div>
         <div class="topic-count">${t.entries.length}</div>
       </div>
-      <div class="entries">
-        ${t.entries.map((e, i) => `
-          <div class="entry-link ${isBookmarked(e.id) ? 'bookmarked' : ''}" role="link" tabindex="0"
-               data-entry="${escapeHtml(e.id)}" data-num="${i+1}."
-               onclick="event.stopPropagation(); goToEntry('${escapeAttr(t.id)}','${escapeAttr(e.id)}')"
-               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();goToEntry('${escapeAttr(t.id)}','${escapeAttr(e.id)}');}"
-               onmouseenter="prefetchEntry('${escapeAttr(e.id)}')"
-               onfocus="prefetchEntry('${escapeAttr(e.id)}')">${escapeHtml(e.term)}</div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
+      <div class="entries"></div>
+    </div>`;
+}
+function navEntryHtml(topicId, e, i){
+  return `<div class="entry-link${isBookmarked(e.id) ? ' bookmarked' : ''}${e.id === currentEntry && topicId === currentTopic ? ' active' : ''}" role="link" tabindex="0" data-kb
+       data-entry="${escapeHtml(e.id)}" data-num="${i+1}."
+       onclick="event.stopPropagation(); goToEntry('${escapeAttr(topicId)}','${escapeAttr(e.id)}')"
+       onmouseenter="prefetchEntry('${escapeAttr(e.id)}')">${escapeHtml(e.term)}</div>`;
+}
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.dataset.mode = 'tree';
+  nav.innerHTML =
+    `<div class="nav-home" role="link" tabindex="0" data-kb onclick="goHome()">☰ מפתח הנושאים</div>` +
+    data.sections.map(sec => {
+      const topics = sec.topics.map(getTopic).filter(Boolean);
+      return `<div class="nav-section">` +
+        (sec.title ? `<div class="nav-section-title">${escapeHtml(sec.title)}</div>` : '') +
+        topics.map(navTopicHtml).join('') + `</div>`;
+    }).join('') +
+    `<div class="nav-section">` + navTopicHtml(data.allTopic) + `</div>`;
+}
+function setTopicOpen(el, open){
+  if(open){
+    const box = el.querySelector('.entries');
+    if(box && !box.dataset.filled){
+      const t = getTopic(el.dataset.topic);
+      if(t) box.innerHTML = t.entries.map((e, i) => navEntryHtml(t.id, e, i)).join('');
+      box.dataset.filled = '1';
+    }
+  }
+  el.classList.toggle('open', open);
+  const head = el.querySelector('.topic-head');
+  if(head) head.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+// מקום אחד שמעדכן את מצב הסרגל: איזה נושא פתוח ואיזה ערך מסומן
+function syncNav(topicId, entryId, toggle){
+  document.querySelectorAll('#nav .topic').forEach(el => {
+    const mine = el.dataset.topic === topicId;
+    setTopicOpen(el, mine ? (toggle ? !el.classList.contains('open') : true) : false);
+    const head = el.querySelector('.topic-head');
+    if(head) head.classList.toggle('active', mine);
+  });
+  let target = null;
+  document.querySelectorAll('#nav .entry-link').forEach(el => {
+    const tp = el.closest('.topic');
+    const on = !!entryId && el.dataset.entry === entryId && (!tp || tp.dataset.topic === topicId);
+    el.classList.toggle('active', on);
+    if(on && !target) target = el;
+  });
+  // מביאים את הנושא/הערך הפעיל לתוך שדה הראייה של הסרגל (עם 42 נושאים הוא לרוב מחוץ למסך)
+  if(!target && topicId) target = document.querySelector('#nav .topic-head.active');
+  if(target && target.scrollIntoView && !toggle){
+    try{ target.scrollIntoView({ block: 'nearest' }); }catch(e){}
+  }
+}
+function markPage(p){
+  currentPage = p;
+  document.querySelectorAll('.page-btn').forEach(b => b.classList.toggle('active', b.dataset.page === p));
+}
+
+// ─── סינון הסרגל בזמן הקלדה: רשימה שטוחה של שמות ערכים תואמים ───
+// קודם כל הקשה עברה על כל קישורי הסרגל ושינתה להם display — מאות כתיבות DOM
+// להקשה. עכשיו נבנית רשימה קצרה אחת, וההתאמה מנורמלת (אותיות סופיות, ניקוד).
+const NAV_FILTER_MAX = 60;
+function renderNavFilter(q){
+  const nav = document.getElementById('nav');
+  if(!data || !nav) return;
+  const nq = tokenize(q).join(' ');
+  if(!nq){ restoreNavTree(); return; }
+  const exact = [], starts = [], word = [], inner = [];
+  for(const e of data.all){
+    if(e.norm === undefined) e.norm = tokenize(e.term).join(' ');
+    const at = e.norm.indexOf(nq);
+    if(at < 0) continue;
+    if(e.norm === nq) exact.push(e);
+    else if(at === 0) starts.push(e);
+    else if(e.norm[at - 1] === ' ') word.push(e);
+    else inner.push(e);
+  }
+  const hits = exact.concat(starts, word, inner);
+  nav.dataset.mode = 'filter';
+  nav.innerHTML =
+    `<button type="button" class="nav-filter-all" onclick="doSearch()">כל התוצאות עבור "${escapeHtml(q)}" ←</button>` +
+    `<div class="nav-section-title">${hits.length ? 'ערכים ששמם תואם (' + hits.length + ')' : 'אין ערך בשם הזה — החיפוש המלא בודק גם את התוכן'}</div>` +
+    hits.slice(0, NAV_FILTER_MAX).map(e =>
+      `<div class="entry-link" role="link" tabindex="0" data-kb data-entry="${escapeHtml(e.id)}"
+            onclick="goToEntryByEntryId('${escapeAttr(e.id)}')"
+            onmouseenter="prefetchEntry('${escapeAttr(e.id)}')">${escapeHtml(e.term)}</div>`).join('') +
+    (hits.length > NAV_FILTER_MAX ? `<div class="nav-more">ועוד ${hits.length - NAV_FILTER_MAX} — דייק את החיפוש</div>` : '');
+}
+function restoreNavTree(){
+  const nav = document.getElementById('nav');
+  if(!data || !nav || nav.dataset.mode !== 'filter') return;
+  renderNav();
+  if(currentView === 'entry' || currentView === 'topic') syncNav(currentTopic, currentView === 'entry' ? currentEntry : null);
 }
 
 // מלבד escapeHtml — גם גרש בודד חייב בריחה, כי הוא סוגר את מחרוזת ה-onclick
 function escapeAttr(s){ return escapeHtml(s).replace(/'/g, '&#39;'); }
 
-function selectTopic(id){
-  const ti = data.topics.findIndex(t => t.id === id);
-  const topic = data.topics[ti];
-  const wasOpen = document.querySelector(`.topic[data-topic="${id}"]`).classList.contains('open');
-  document.querySelectorAll('.topic').forEach(el => {
-    const open = el.dataset.topic === id ? !wasOpen : false;
-    el.classList.toggle('open', open);
-    const head = el.querySelector('.topic-head');
-    head.classList.toggle('active', el.dataset.topic === id);
-    head.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-  document.querySelectorAll('.entry-link').forEach(el => el.classList.remove('active'));
+// keepOpen=true: הגענו מדף הבית / מתגית בערך — תמיד מציגים את הנושא.
+// בלי זה (לחיצה בסרגל): לחיצה שנייה על אותו נושא סוגרת אותו.
+function selectTopic(id, keepOpen){
+  const topic = getTopic(id);
+  if(!topic){ goHome(); return; }
+  rememberHomeScroll();
+  if(currentPage !== 'dictionary') markPage('dictionary');
   currentTopic = id;
   currentEntry = null;
+  syncNav(id, null, !keepOpen);
   pushNav({ k: 'topic', t: id });
-  renderTopicLanding(topic, ti);
+  renderTopicLanding(topic);
 }
 
 // ─── Prefetch בלי להציג; משמש ל-hover/related/neighbors ───
@@ -2556,8 +3074,8 @@ window.prefetchEntry = function(id){
 
 // קדם-טען את הערכים הסמוכים (לפני/אחרי) ואת הקשורים
 function prefetchNeighbors(topicId, ei){
-  const topic = data.topics.find(t => t.id === topicId);
-  if(!topic) return;
+  const topic = getTopic(topicId);
+  if(!topic || ei < 0) return;
   // הקודם והבא ברשימה
   if(ei > 0) prefetchEntry(topic.entries[ei-1].id);
   if(ei < topic.entries.length-1) prefetchEntry(topic.entries[ei+1].id);
@@ -2576,40 +3094,35 @@ function prefetchRelatedFromDom(){
 }
 
 async function goToEntry(topicId, entryId){
-  // במובייל — סגור את המגירה ברגע שנבחר ערך
+  // במובייל — סגור את המגירה ואת שורת החיפוש ברגע שנבחר ערך
   if(typeof setNavOpen === 'function') setNavOpen(false);
-  // עדכן סרגל
-  if(currentTopic !== topicId){
-    document.querySelectorAll('.topic').forEach(el => {
-      el.classList.toggle('open', el.dataset.topic === topicId);
-      el.querySelector('.topic-head').classList.toggle('active', el.dataset.topic === topicId);
-    });
-  }else{
-    document.querySelector(`.topic[data-topic="${topicId}"]`).classList.add('open');
-  }
+  if(typeof setTopSearch === 'function') setTopSearch(false);
+  const rec = entryIndex.get(entryId);
+  if(!rec){ goHome(); return; }      // ערך שכבר אינו במילון (לשונית או קישור ישן)
+  // ההקשר — הנושא שממנו הגיעו — נשמר רק אם הערך באמת שייך אליו.
+  // אחרת (מזהה נושא ישן, תוצאת חיפוש) נבחר הנושא הראשון של הערך.
+  let topic = getTopic(topicId);
+  if(!topic || !topic.entries.some(e => e.id === entryId)) topic = rec.topics[0] || data.allTopic;
+  topicId = topic.id;
+  rememberHomeScroll();
+  if(currentPage !== 'dictionary') markPage('dictionary');
+  currentView  = 'entry';
   currentTopic = topicId;
   currentEntry = entryId;
   pushNav({ k: 'entry', t: topicId, e: entryId });
-  document.querySelectorAll('.entry-link').forEach(el => {
-    el.classList.toggle('active', el.dataset.entry === entryId);
-  });
+  syncNav(topicId, entryId);
 
-  // טעינה אופטימית: אם הערך בקאש → רינדור מיידי בלי ספינר ובלי fade-in
-  if(entryCache.has(entryId)){
-    const entry = entryCache.get(entryId);
-    const ti = data.topics.findIndex(t => t.id === topicId);
-    const topic = data.topics[ti];
+  const show = entry => {
     const ei = topic.entries.findIndex(e => e.id === entryId);
-    renderEntryPage(topic, ti, entry, ei);
-    prefetchNeighbors(topicId, ei);
-    return;
-  }
+    renderEntryPage(topic, data.topics.indexOf(topic), entry, ei);
+    prefetchNeighbors(topicId, ei);   // קדם-טען את הסמוכים
+  };
+  // טעינה אופטימית: אם הערך בקאש → רינדור מיידי בלי ספינר ובלי fade-in
+  if(entryCache.has(entryId)){ show(entryCache.get(entryId)); return; }
 
   // ספינר מתעכב — אם הטעינה מהירה, לא יוצג כלל (מונע פליק)
-  let spinnerShown = false;
   const spinnerTimer = setTimeout(() => {
     if(currentEntry !== entryId) return;
-    spinnerShown = true;
     fadeContent(`<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-text">טוען…</div></div>`);
   }, 90);
 
@@ -2617,11 +3130,7 @@ async function goToEntry(topicId, entryId){
     const entry = await loadEntry(entryId);
     clearTimeout(spinnerTimer);
     if(currentEntry !== entryId) return;
-    const ti = data.topics.findIndex(t => t.id === topicId);
-    const topic = data.topics[ti];
-    const ei = topic.entries.findIndex(e => e.id === entryId);
-    renderEntryPage(topic, ti, entry, ei);
-    prefetchNeighbors(topicId, ei);   // קדם-טען את הסמוכים
+    show(entry);
   }catch(err){
     clearTimeout(spinnerTimer);
     console.error('Failed to load entry:', err);
@@ -2656,21 +3165,110 @@ function fadeContent(html){
   document.getElementById('scroll').scrollTop = 0;
 }
 
-function renderTopicLanding(topic, ti){
-  setBreadcrumb(['אוצר המונחים', topic.title]);
-  
+// ═══ דף הבית: מפתח הנושאים (מדורים ← נושאים ← ערכים) ═══
+const homeOpen = new Set();   // נושאים שנפתחו בדף הבית — נשמר כשחוזרים אליו
+let _homeScroll = 0;
+function rememberHomeScroll(){
+  if(currentView !== 'home') return;
+  const sc = document.getElementById('scroll');
+  if(sc) _homeScroll = sc.scrollTop || 0;
+}
+function homeEntriesHtml(t){
+  return t.entries.map(e =>
+    `<div class="home-entry" role="link" tabindex="0" data-kb
+          onclick="goToEntry('${escapeAttr(t.id)}','${escapeAttr(e.id)}')"
+          onmouseenter="prefetchEntry('${escapeAttr(e.id)}')">${escapeHtml(e.term)}</div>`).join('');
+}
+function homeTopicHtml(t){
+  const open = homeOpen.has(t.id);
+  return `
+    <div class="home-topic${open ? ' open' : ''}" data-topic="${escapeHtml(t.id)}">
+      <div class="home-topic-head" role="button" tabindex="0" data-kb aria-expanded="${open ? 'true' : 'false'}"
+           onclick="toggleHomeTopic('${escapeAttr(t.id)}', this)">
+        <svg class="home-topic-caret" aria-hidden="true" width="11" height="11" viewBox="0 0 10 10"><path d="M7 1 3 5l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="home-topic-title">${escapeHtml(t.title)}</span>
+        <span class="home-topic-count">${t.entries.length}</span>
+      </div>
+      <div class="home-entries">${open ? homeEntriesHtml(t) : ''}</div>
+    </div>`;
+}
+window.toggleHomeTopic = function(id, head){
+  const t = getTopic(id);
+  const box = head && head.parentNode;
+  if(!t || !box) return;
+  const open = !homeOpen.has(id);
+  if(open) homeOpen.add(id); else homeOpen.delete(id);
+  const list = box.querySelector('.home-entries');
+  if(open && list && !list.innerHTML) list.innerHTML = homeEntriesHtml(t);   // נבנה רק בפתיחה הראשונה
+  box.classList.toggle('open', open);
+  head.setAttribute('aria-expanded', open ? 'true' : 'false');
+};
+function renderHome(restoreScroll){
+  if(!data) return;
+  currentView = 'home';
+  setBreadcrumb(['אוצר המונחים', 'מפתח הנושאים']);
+  const real = data.sections.filter(sec => !sec.auto);
+  const nTopics = real.reduce((n, sec) => n + sec.topics.length, 0);
+  let num = 0;
+  const sections = data.sections.map(sec => {
+    const topics = sec.topics.map(getTopic).filter(Boolean);
+    if(!topics.length) return '';
+    const badge = sec.auto ? '✦' : (HEB_NUM[num++] || num);
+    return `
+      <section class="home-section">
+        <h2 class="home-section-title">
+          <span class="home-section-num" aria-hidden="true">${badge}</span>
+          <span>${escapeHtml(sec.title || 'ערכים')}</span>
+          <span class="home-section-count">${topics.length === 1 ? 'נושא אחד' : topics.length + ' נושאים'}</span>
+        </h2>
+        <div class="home-topics">${topics.map(homeTopicHtml).join('')}</div>
+      </section>`;
+  }).join('');
+  fadeContent(`
+    <div class="home">
+      <div class="home-hero">
+        <div class="topic-landing-eyebrow">מפתח הנושאים</div>
+        <h1 class="home-title">${escapeHtml(data.title || 'מילון מונחים בפנימיות התורה')}</h1>
+        <div class="topic-landing-subtitle">${escapeHtml(data.subtitle || '')}</div>
+        <div class="home-stats">${data.all.length} ערכים · ${nTopics} נושאים · ${real.length} מדורים</div>
+        <button type="button" class="home-search-btn" onclick="setTopSearch(true)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <span>חיפוש במילון…</span>
+        </button>
+        <div class="topic-landing-rule"></div>
+      </div>
+      ${sections}
+      <div class="home-all">
+        <button type="button" class="home-all-btn" onclick="selectTopic('${ALL_TOPIC_ID}', true)">כל ${data.all.length} הערכים לפי סדר א״ב</button>
+      </div>
+    </div>
+  `);
+  if(restoreScroll && _homeScroll){
+    const sc = document.getElementById('scroll');
+    if(sc) sc.scrollTop = _homeScroll;
+  }
+}
+window.goHome = function(){
+  if(typeof setNavOpen === 'function') setNavOpen(false);
+  setPage('dictionary');
+};
+
+function renderTopicLanding(topic){
+  currentView = 'topic';
+  const sec = data.sections[topic.section];
+  const secTitle = (sec && sec.title) || topic.subtitle || '';
+  setBreadcrumb(secTitle ? ['אוצר המונחים', secTitle, topic.title] : ['אוצר המונחים', topic.title]);
   fadeContent(`
     <div class="topic-landing">
-      <div class="topic-landing-eyebrow">שער ${HEB_NUM_BIG[ti] || ti+1}</div>
+      <div class="topic-landing-eyebrow">${escapeHtml(secTitle || 'אוצר המונחים')}</div>
       <h1 class="topic-landing-title">${escapeHtml(topic.title)}</h1>
-      <div class="topic-landing-subtitle">${escapeHtml(topic.subtitle)}</div>
+      <div class="topic-landing-subtitle">${topic.entries.length} ערכים</div>
       <div class="topic-landing-rule"></div>
-      <div class="topic-landing-hint">בחר ערך מן הרשימה</div>
+      <button type="button" class="home-back" onclick="goHome()">→ חזרה למפתח הנושאים</button>
       <div class="entry-grid">
         ${topic.entries.map((e, i) => `
-          <div class="entry-card" role="link" tabindex="0"
+          <div class="entry-card" role="link" tabindex="0" data-kb
                onclick="goToEntry('${escapeAttr(topic.id)}','${escapeAttr(e.id)}')"
-               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToEntry('${escapeAttr(topic.id)}','${escapeAttr(e.id)}');}"
                onmouseenter="prefetchEntry('${escapeAttr(e.id)}')">
             <div class="entry-card-num">ערך ${HEB_NUM[i] || (i+1)}</div>
             <div class="entry-card-term">${escapeHtml(e.term)}</div>
@@ -2767,7 +3365,7 @@ function renderEntryPage(topic, ti, entry, ei){
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
           </button>
         </h1>
-        <div class="entry-topic-label">${escapeHtml(topic.title)} · ${escapeHtml(topic.subtitle)}</div>
+        <div class="entry-topics">${entryTopicsHtml(entry.id, topic)}</div>
       </header>
       ${entry.definitions.map((d, i) => {
         // אם הטקסט מתחיל ב-[ (הפניה / הערה) — לא נחיל את ה-drop-cap האדום
@@ -2806,11 +3404,17 @@ function renderEntryPage(topic, ti, entry, ei){
 }
 
 function findEntry(id){
-  for(const t of data.topics){
-    const e = t.entries.find(x => x.id === id);
-    if(e) return {topic: t, entry: e};
-  }
-  return null;
+  const r = entryIndex.get(id);
+  if(!r) return null;
+  return { topic: r.topics[0] || data.allTopic, entry: r.entry, topics: r.topics };
+}
+// כל הנושאים שהערך משובץ בהם במפתח — לחיצה פותחת את הנושא
+function entryTopicsHtml(entryId, current){
+  const rec = entryIndex.get(entryId);
+  const list = (rec && rec.topics.length) ? rec.topics : [current];
+  return list.map(t =>
+    `<button type="button" class="entry-topic-chip${t === current ? ' current' : ''}" title="${escapeAttr(t.subtitle || '')}"
+             onclick="selectTopic('${escapeAttr(t.id)}', true)">${escapeHtml(t.title)}</button>`).join('');
 }
 function goToEntryByEntryId(eid){
   const found = findEntry(eid);
@@ -3256,7 +3860,12 @@ window.searchFor = function(w){
 };
 function doSearch(){
   const q = document.getElementById('search').value.trim();
-  if(q){ clearTimeout(searchDebounceTimer); runSearch(q); }
+  if(!q) return;
+  clearTimeout(searchDebounceTimer);
+  runSearch(q);
+  // במובייל שדה החיפוש נמצא בתוך המגירה, והתוצאות מוצגות מאחוריה —
+  // בלי לסגור אותה המשתמש מקיש "חפש" ולא רואה שום דבר קורה.
+  if(isMobile() && document.body.classList.contains('nav-open')) setNavOpen(false);
 }
 document.getElementById('search').addEventListener('keydown', e => {
   if(e.key === 'Enter'){ e.preventDefault(); doSearch(); }
@@ -3268,26 +3877,70 @@ const searchInputEl = document.getElementById('search');
 searchInputEl.addEventListener('focus', () => ensureSearchIndex(), { once: true });
 searchInputEl.addEventListener('input', e => {
   const q = e.target.value.trim();
-  // סינון הסרגל (פידבק מיידי)
-  document.querySelectorAll('.entry-link').forEach(el => {
-    el.style.display = !q || el.textContent.includes(q) ? 'flex' : 'none';
-  });
-  if(q) document.querySelectorAll('.topic').forEach(el => el.classList.add('open'));
+  // סינון הסרגל (פידבק מיידי): שמות ערכים תואמים
+  renderNavFilter(q);
 
   // חיפוש המסך הראשי (debounced)
   clearTimeout(searchDebounceTimer);
   if(!q){
     // ריק → חזור למסך הקודם
     currentSearchQuery = "";
-    if(currentEntry){
-      goToEntryByEntryId(currentEntry);
-    }else if(currentTopic && data && data.topics){
-      const t = data.topics.find(x => x.id === currentTopic);
-      if(t) renderTopicLanding(t, data.topics.indexOf(t));
-    }
+    if(!data) return;
+    if(currentView === 'entry' && currentEntry) goToEntry(currentTopic, currentEntry);
+    else if(currentView === 'topic' && getTopic(currentTopic)) renderTopicLanding(getTopic(currentTopic));
+    else renderHome();
     return;
   }
   searchDebounceTimer = setTimeout(() => runSearch(q), 250);
+});
+
+// ═══ חיפוש מהסרגל העליון (מובייל) ═══
+// במובייל שדה החיפוש הראשי חבוי בתוך המגירה. כאן שדה שני, תמיד בהישג יד,
+// שמזין את אותו שדה ראשי — כך שיש מנגנון חיפוש אחד ולא שניים.
+const topbarEl       = document.getElementById('topbar');
+const topSearchInput = document.getElementById('search-top');
+function setTopSearch(open){
+  if(!topbarEl || !topSearchInput || !topbarEl.classList) return;
+  if(open === topbarEl.classList.contains('searching')) return;
+  topbarEl.classList.toggle('searching', open);
+  if(open){
+    topSearchInput.value = searchInputEl.value;
+    ensureSearchIndex().catch(() => {});
+    setTimeout(() => topSearchInput.focus(), 30);
+  }
+}
+window.setTopSearch = setTopSearch;
+(function(){
+  const openBtn  = document.getElementById('topsearch-btn');
+  const closeBtn = document.getElementById('topsearch-close');
+  if(!openBtn || !closeBtn || !topSearchInput) return;
+  const clear = () => {
+    topSearchInput.value = '';
+    if(searchInputEl.value){
+      searchInputEl.value = '';
+      searchInputEl.dispatchEvent(new Event('input'));
+    }
+    setTopSearch(false);
+  };
+  openBtn.addEventListener('click', () => setTopSearch(true));
+  closeBtn.addEventListener('click', clear);
+  topSearchInput.addEventListener('input', () => {
+    searchInputEl.value = topSearchInput.value;
+    searchInputEl.dispatchEvent(new Event('input'));
+  });
+  topSearchInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){ e.preventDefault(); doSearch(); topSearchInput.blur(); }
+    else if(e.key === 'Escape'){ clear(); }
+  });
+})();
+
+// Enter / רווח מפעילים כל אלמנט לחיץ שמסומן data-kb — במקום onkeydown לכל אלמנט
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target && e.target.closest ? e.target.closest('[data-kb]') : null;
+  if(!el || el !== e.target) return;
+  e.preventDefault();
+  el.click();
 });
 
 // ─── כפתור הגדרות + פופאובר (position:fixed — מעל כל שכבה) ───
@@ -3410,8 +4063,11 @@ function resetSearchState(){
   currentSearchQuery   = '';
   currentSearchResults = [];
   currentSearchPage    = 1;
-  // החזר את הסרגל למצב מלא (אם הוא סונן)
-  document.querySelectorAll('.entry-link').forEach(el => { el.style.display = ''; });
+  // החזר את הסרגל למצב מלא (אם הוא סונן), וסגור את שורת החיפוש העליונה
+  restoreNavTree();
+  const top = document.getElementById('search-top');
+  if(top) top.value = '';
+  if(typeof setTopSearch === 'function') setTopSearch(false);
   // סגור פופאובר הגדרות אם פתוח
   const pop = document.getElementById('search-popover');
   const btn = document.getElementById('search-settings-btn');
@@ -3422,10 +4078,19 @@ function resetSearchState(){
 // Page switching (about/contact)
 let currentPage = 'dictionary';
 function setPage(p){
-  if(p !== currentPage) pushNav({ k: 'page', p: p });
-  currentPage = p;
+  rememberHomeScroll();
+  if(p === 'dictionary'){
+    // "המילון" = מפתח הנושאים. נדחף גם כשכבר נמצאים במילון (למשל מתוך ערך).
+    // (לא לפני שהנתונים נטענו: דחיפה בעליית הדף הייתה דורסת את הלשוניות השמורות)
+    let cur = null;
+    try{ cur = history.state; }catch(e){}
+    if(data && !(cur && cur.k === 'home')) pushNav({ k: 'home' });
+  }else if(p !== currentPage){
+    pushNav({ k: 'page', p: p });
+  }
+  markPage(p);
   resetSearchState();   // ← תמיד מאפס חיפוש במעבר עמוד
-  document.querySelectorAll('.page-btn').forEach(b => b.classList.toggle('active', b.dataset.page === p));
+  if(p !== 'dictionary') currentView = 'page';
   if(p === 'about'){
     setBreadcrumb(['אוצר המונחים', 'אודות']);
     fadeContent(renderAbout());
@@ -3436,20 +4101,12 @@ function setPage(p){
     setBreadcrumb(['אוצר המונחים', 'סימניות']);
     fadeContent(renderBookmarks());
   }else{
-    // ─── חזרה לעמוד הראשי של המילון: איפוס מלא + הצגת המדור הראשון ───
+    // ─── חזרה לעמוד הראשי של המילון: מפתח הנושאים ───
     currentEntry = null;
-    if(data && data.topics && data.topics.length){
-      const t = data.topics[0];
-      currentTopic = t.id;
-      // סגור את כל המדורים, פתח רק את הראשון
-      document.querySelectorAll('.topic').forEach(el => {
-        el.classList.toggle('open', el.dataset.topic === t.id);
-        const head = el.querySelector('.topic-head');
-        if(head) head.classList.toggle('active', el.dataset.topic === t.id);
-      });
-      // הסר סימון של ערך פעיל
-      document.querySelectorAll('.entry-link').forEach(el => el.classList.remove('active'));
-      renderTopicLanding(t, 0);
+    currentTopic = null;
+    if(data){
+      syncNav(null, null);
+      renderHome(_navLock);   // בחזרה דרך "אחורה" — משחזרים את מיקום הגלילה
     }
   }
 }
@@ -3700,13 +4357,19 @@ function pushNav(st, replace){
 function applyNav(st){
   _navLock = true;
   try{
-    if(!st || !st.k){
+    if(!st || !st.k || st.k === 'home'){
       setPage('dictionary');
-    }else if(st.k === 'entry' && st.t && st.e){
+    }else if(st.k === 'entry' && st.e){
       goToEntry(st.t, st.e);
-    }else if(st.k === 'topic' && st.t && data){
-      const ti = data.topics.findIndex(t => t.id === st.t);
-      if(ti >= 0){ currentTopic = st.t; currentEntry = null; renderTopicLanding(data.topics[ti], ti); }
+    }else if(st.k === 'topic'){
+      // מזהה נושא שכבר לא קיים (לשונית שנשמרה לפני עדכון המפתח) → דף הבית
+      const t = getTopic(st.t);
+      if(t){
+        if(currentPage !== 'dictionary') markPage('dictionary');
+        currentTopic = t.id; currentEntry = null;
+        syncNav(t.id, null);
+        renderTopicLanding(t);
+      }else setPage('dictionary');
     }else if(st.k === 'suggest' && st.q){
       currentEntry = null;
       renderSuggestPage(st.q);
@@ -3730,19 +4393,19 @@ let activeTab = 0;
 let _tabLock = false;
 
 function tabTitle(st){
-  if(!st || !st.k) return 'המילון';
+  if(!st || !st.k || st.k === 'home') return 'מפתח הנושאים';
   if(st.k === 'entry'){
     const f = findEntry(st.e);
-    return f ? f.entry.term : 'ערך';
+    return f ? f.entry.term : 'מפתח הנושאים';
   }
   if(st.k === 'topic'){
-    const t = data && data.topics.find(x => x.id === st.t);
-    return t ? t.title : 'מדור';
+    const t = getTopic(st.t);
+    return t ? t.title : 'מפתח הנושאים';
   }
   if(st.k === 'search') return 'חיפוש: ' + st.q;
   if(st.k === 'suggest') return 'הצעות: ' + st.q;
-  if(st.k === 'page') return ({about:'אודות', contact:'צור קשר', bookmarks:'סימניות'})[st.p] || 'המילון';
-  return 'המילון';
+  if(st.k === 'page') return ({about:'אודות', contact:'צור קשר', bookmarks:'סימניות'})[st.p] || 'מפתח הנושאים';
+  return 'מפתח הנושאים';
 }
 
 function saveTabs(){
@@ -3795,7 +4458,7 @@ window.closeTab = function(i){
 };
 
 window.newTab = function(){
-  const st = (data && data.topics.length) ? { k: 'topic', t: data.topics[0].id } : { k: 'page', p: 'dictionary' };
+  const st = { k: 'home' };
   tabs.push({ st: st, title: tabTitle(st) });
   activeTab = tabs.length - 1;
   _tabLock = true;
