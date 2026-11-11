@@ -290,38 +290,106 @@ def load_id_map():
     m.setdefault("byTerm", {})
     return m
 
+def _content_sig(first_def):
+    """חתימת תוכן של ערך: תחילת ההגדרה הראשונה, אותיות בלבד."""
+    txt, _src = split_source(first_def or "")
+    txt = HTML_TAG.sub('', txt or "")
+    return re.sub(r'[^0-9A-Za-z֐-׿]+', '', txt)[:120]
+
+
+def _retired_pool(by_term, live_keys):
+    """
+    ערכים שהיו באתר בריצה הקודמת ושמם אינו מופיע עוד בוורד — מועמדים ל'שינוי שם'.
+    קוראים אותם מ-entries/<id>.json, שעדיין מכיל את הפלט של הריצה הקודמת.
+    """
+    ent_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'entries')
+    live_ids = {by_term[k] for k in live_keys if k in by_term}
+    pool, pooled = [], set()
+    for key, eid in by_term.items():
+        if key in live_keys or eid in live_ids or eid in pooled:
+            continue
+        pooled.add(eid)
+        path = os.path.join(ent_dir, eid + '.json')
+        if not os.path.exists(path):
+            continue                      # נעלם כבר לפני כמה ריצות — אין עם מה להשוות
+        try:
+            with open(path, encoding='utf-8') as f:
+                old = json.load(f)
+        except (OSError, ValueError):
+            continue
+        defs = old.get("definitions") or []
+        pool.append({"key": key, "id": eid, "term": old.get("term", ""),
+                     "fold": _R.fold_key(old.get("term", "")),
+                     "sig": _content_sig(defs[0].get("text", "") if defs else "")})
+    return pool
+
+
+def _find_rename(term, first_def, pool):
+    """
+    האם הערך ה'חדש' הזה הוא בעצם ערך קיים ששמו שונה? מחזיר רשומה מה-pool או None.
+    מקבלים רק זיהוי חד-משמעי:
+      1. אותו שם אחרי קיפול פיסוק/רווחים/ו' החיבור
+      2. אותה הגדרה ראשונה (התוכן לא השתנה, רק הכותרת)
+      3. שם אחד הוא הרחבה של השני — ורק אם יש מועמד יחיד כזה
+    """
+    fold = _R.fold_key(term)
+    sig = _content_sig(first_def)
+    strong = [p for p in pool if (fold and p["fold"] == fold) or (len(sig) >= 40 and p["sig"] == sig)]
+    if len(strong) == 1:
+        return strong[0]
+    if strong:
+        return None
+    ext = [p for p in pool if fold and p["fold"] and
+           (p["fold"].startswith(fold + ' ') or fold.startswith(p["fold"] + ' '))]
+    return ext[0] if len(ext) == 1 else None
+
+
 def assign_stable_ids(raw_sections):
     """
     ממפה כל ערך למזהה קבוע. מחזיר (id_map, stats).
-    ערך שכבר קיבל מזהה בעבר — שומר אותו. ערך חדש מקבל את המספר הפנוי הבא.
-    מספר של ערך שנמחק לא ממוחזר לעולם.
+    ערך שכבר קיבל מזהה בעבר — שומר אותו. ערך ששמו שונה בוורד (אבל הוא אותו ערך)
+    יורש את המזהה הישן, כדי שסימניות וקישורים לא יישברו. ערך חדש באמת מקבל את
+    המספר הפנוי הבא. מספר של ערך שנמחק לא ממוחזר לעולם.
     """
     m = load_id_map()
     by_term = m["byTerm"]
     used = set(by_term.values())
     kept = added = 0
-    seen_keys = set()
     occ = {}
+    todo = []                 # (key, term)
     for section in raw_sections:
         for term in section["terms"]:
             base = _norm_key(term["term"])
             if not base:
                 continue
-            # במסמך יש 4 שמות שחוזרים כשני ערכים נפרדים — ממספרים אותם
+            # שמות שחוזרים כשני ערכים נפרדים — ממספרים אותם
             occ[base] = occ.get(base, 0) + 1
             key = base if occ[base] == 1 else f"{base}#{occ[base]}"
-            seen_keys.add(key)
-            if key in by_term:
-                kept += 1
-            else:
-                while f"t_{m['next']}" in used:
-                    m["next"] += 1
-                by_term[key] = f"t_{m['next']}"
-                used.add(by_term[key])
-                m["next"] += 1
-                added += 1
+            todo.append((key, term))
+    seen_keys = {k for k, _ in todo}
+    pool = _retired_pool(by_term, seen_keys)
+    renamed = []
+    for key, term in todo:
+        if key in by_term:
+            kept += 1
+            continue
+        defs = term.get("definition") or []
+        hit = _find_rename(term["term"], defs[0] if defs else "", pool)
+        if hit:
+            pool.remove(hit)
+            del by_term[hit["key"]]            # המפתח הישן עובר, לא משתכפל
+            by_term[key] = hit["id"]
+            renamed.append((hit["term"], term["term"], hit["id"]))
+            continue
+        while f"t_{m['next']}" in used:
+            m["next"] += 1
+        by_term[key] = f"t_{m['next']}"
+        used.add(by_term[key])
+        m["next"] += 1
+        added += 1
     retired = [k for k in by_term if k not in seen_keys]
-    return m, {"kept": kept, "added": added, "retired": len(retired)}
+    return m, {"kept": kept, "added": added, "retired": len(retired),
+               "renamed": renamed, "gone": [p["term"] for p in pool]}
 
 _id_map, _id_stats = assign_stable_ids(raw["sections"])
 _ID_BY_TERM = _id_map["byTerm"]
@@ -424,6 +492,111 @@ for topic in out["topics"]:
 
 print(f"OK: הפניות — {_stats_new} קישורים נוספים שהפותר הישן פספס")
 
+# ====================================================================
+# ---------- סיווג לנושאים לפי ה'מפתח' שבראש קובץ הוורד ----------
+# ====================================================================
+# הערכים עצמם נשארים רשימה אחת (מקור אמת יחיד: כותרות H2). המפתח רק *מצביע*
+# עליהם: מדור -> כותרת-על -> שמות ערכים, וערך יכול להופיע בכמה כותרות-על.
+# שם במפתח מותאם לערך בשלוש דרגות, כי המפתח נכתב ביד ואינו זהה תו-בתו:
+#   1. שם מנורמל זהה   2. מפתח מקופל זהה (רווחים, פיסוק, ו' החיבור)
+#   3. השם במפתח הוא תחילית של שם ערך אחד ויחיד (או להיפך)
+_flat = [e for t in out["topics"] for e in t["entries"]]
+_fold_to_id = {}
+for _e in _flat:
+    _fold_to_id.setdefault(_R.fold_key(_e["term"]), _e["id"])
+_fold_keys = list(_fold_to_id.keys())
+
+def _resolve_index_name(name):
+    tid = term_index.get(normalize_term(name))
+    if tid:
+        return tid
+    fk = _R.fold_key(name)
+    if not fk:
+        return None
+    if fk in _fold_to_id:
+        return _fold_to_id[fk]
+    longer = [k for k in _fold_keys if k.startswith(fk + ' ')]
+    if len(longer) == 1:
+        return _fold_to_id[longer[0]]
+    shorter = [k for k in _fold_keys if fk.startswith(k + ' ')]
+    if shorter:
+        return _fold_to_id[max(shorter, key=len)]
+    return None
+
+def _topic_ids(titles):
+    """מזהה קבוע לכל נושא (k_N), נשמר ב-id-map.json כדי שלשוניות וקישורים
+    שמורים לא יצביעו על נושא אחר אחרי עדכון וורד."""
+    by = _id_map.setdefault("byTopic", {})
+    nxt = _id_map.setdefault("nextTopic", 1)
+    used = set(by.values())
+    res = []
+    for t in titles:
+        key = _norm_key(t)
+        if key not in by:
+            while f"k_{nxt}" in used:
+                nxt += 1
+            by[key] = f"k_{nxt}"
+            used.add(by[key])
+            nxt += 1
+        res.append(by[key])
+    _id_map["nextTopic"] = nxt
+    return res
+
+_sections, _topics_view, _primary = [], [], {}
+_unresolved, _classified = [], set()
+_UNSORTED_SECTION = "ערכים נוספים"
+_UNSORTED_TOPIC = "ערכים שטרם שובצו במפתח"
+
+_index = raw.get("index") or []
+if _index:
+    _titles = [g["name"] for s in _index for g in s["groups"]]
+    _tids = dict(zip(_titles, _topic_ids(_titles)))
+    for _si, _sec in enumerate(_index):
+        _sections.append({"title": _sec["name"], "topics": []})
+        for _g in _sec["groups"]:
+            _ids = []
+            for _name in _g["terms"]:
+                _eid = _resolve_index_name(_name)
+                if not _eid:
+                    _unresolved.append((_g["name"], _name))
+                    continue
+                if _eid not in _ids:
+                    _ids.append(_eid)
+                _classified.add(_eid)
+                _primary.setdefault(_eid, _g["name"])
+            _topics_view.append({"id": _tids[_g["name"]], "title": _g["name"],
+                                 "section": _si, "ids": _ids})
+            _sections[_si]["topics"].append(_tids[_g["name"]])
+    _left = [e for e in _flat if e["id"] not in _classified]
+    if _left:
+        _tid = _topic_ids([_UNSORTED_TOPIC])[0]
+        _sections.append({"title": _UNSORTED_SECTION, "topics": [_tid], "auto": True})
+        _topics_view.append({"id": _tid, "title": _UNSORTED_TOPIC,
+                             "section": len(_sections) - 1,
+                             "ids": [e["id"] for e in _left]})
+        for e in _left:
+            _primary[e["id"]] = _UNSORTED_TOPIC
+    print(f"OK: מפתח — {len(_index)} מדורים, {len(_titles)} נושאים, "
+          f"{len(_classified)}/{len(_flat)} ערכים משובצים")
+    if _left:
+        print(f"  NOTE: {len(_left)} ערכים קיימים במילון אך אינם מופיעים במפתח "
+              f"(מוצגים תחת '{_UNSORTED_TOPIC}'):")
+        for e in _left:
+            print(f"     · {e['term']}")
+    if _unresolved:
+        print(f"  NOTE: {len(_unresolved)} שורות במפתח לא נמצא להן ערך (H2) מתאים:")
+        for _g, _n in _unresolved:
+            print(f"     · [{_g}] {_n}")
+else:
+    # אין מפתח בוורד — מדור אחד עם כל הערכים, כמו שהיה לפני הסיווג
+    _tid = _topic_ids(["ערכים כלליים"])[0]
+    _sections.append({"title": "", "topics": [_tid]})
+    _topics_view.append({"id": _tid, "title": "ערכים כלליים", "section": 0,
+                         "ids": [e["id"] for e in _flat]})
+    for e in _flat:
+        _primary[e["id"]] = "ערכים כלליים"
+_topic_id_by_title = {t["title"]: t["id"] for t in _topics_view}
+
 # הערה: data.json הוסר ב-Phase 1 (lazy loading). הערכים נשמרים ב-entries/<id>.json
 # (in-memory הדאטה ב-`out` עדיין משמש להלן ליצירת terms.json + search-index.json + entries/*)
 
@@ -432,8 +605,14 @@ with open(ID_MAP_PATH, "w", encoding="utf-8") as f:
     json.dump(_id_map, f, ensure_ascii=False, indent=1, sort_keys=True)
 print(f"OK: id-map.json ({_id_stats['kept']} ids kept, {_id_stats['added']} new, "
       f"{_id_stats['retired']} retired)")
-if _id_stats['retired']:
-    print(f"  NOTE: {_id_stats['retired']} ערכים נעלמו מהוורד — המזהים שלהם לא ימוחזר")
+if _id_stats['renamed']:
+    print(f"  NOTE: {len(_id_stats['renamed'])} ערכים שינו שם — המזהה נשמר (סימניות וקישורים ימשיכו לעבוד):")
+    for _old, _new, _eid in _id_stats['renamed']:
+        print(f"     · {_old}  →  {_new}")
+if _id_stats['gone']:
+    print(f"  NOTE: {len(_id_stats['gone'])} ערכים נעלמו מהוורד — המזהים שלהם לא ימוחזרו:")
+    for _t in _id_stats['gone']:
+        print(f"     · {_t}")
 
 # ====================================================================
 # ---------- search-index.json (פורמט חדש — מודול משותף) ----------
@@ -444,9 +623,10 @@ if _id_stats['retired']:
 from datetime import datetime as _dt
 _VERSION = _dt.now().strftime('%Y-%m-%d-%H%M%S')
 
-from build_search_index import build_payload, build_terms, write_json
+from build_search_index import build_payload, build_terms_v2, write_json
 
-_payload = build_payload(out["topics"], _VERSION)
+_payload = build_payload(out["topics"], _VERSION, primary=_primary,
+                         titles=[t["title"] for t in _topics_view])
 
 # ── בקרת שפיות: ריצה שהפיקה אפס ערכים/הגדרות לא תדרוס את הפלט הקיים ──
 _n_entries = len(_payload["entries"])
@@ -482,8 +662,8 @@ for topic in out["topics"]:
         entry_data = {
             "id":         entry["id"],
             "term":       entry["term"],
-            "topicId":    topic["id"],
-            "topicTitle": topic["title"],
+            "topicId":    _topic_id_by_title.get(_primary.get(entry["id"], ""), topic["id"]),
+            "topicTitle": _primary.get(entry["id"], topic["title"]),
             "definitions": entry["definitions"],
             "related":    entry.get("related", []),
         }
@@ -495,7 +675,8 @@ print(f"OK: entries/*.json ({_entry_count} files)")
 
 # ---------- terms.json (קל — רק שמות ערכים לסרגל) ----------
 TERMS_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "terms.json")
-write_json(TERMS_JSON, build_terms(out["title"], out["subtitle"], out["topics"]))
+write_json(TERMS_JSON, build_terms_v2(out["title"], out["subtitle"], _flat,
+                                      _sections, _topics_view))
 print("OK: terms.json")
 
 # ---------- עדכון גרסת Service Worker + SEARCH_URL ----------

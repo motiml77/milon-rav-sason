@@ -1667,6 +1667,198 @@
     .entry-term{ font-size: 22pt; }
     a{ color: #000; text-decoration: none; }
   }
+  /* ═══ סרגל צד: מדורים ← נושאים ← ערכים ═══ */
+  .nav-home{
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px; margin-bottom: 12px;
+    cursor: pointer; user-select: none;
+    font-weight: 700; font-size: 14px; color: var(--gold-deep);
+    border: 1px dashed var(--gold-deep);
+    background: rgba(255,255,255,0.35);
+  }
+  .nav-home:hover{ background: rgba(212,176,106,0.3); color: var(--ink); }
+  .nav-section{ margin-bottom: 14px; }
+  .nav-section-title{
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;
+    color: var(--gold-deep);
+    padding: 6px 4px 5px; margin-bottom: 6px;
+    border-bottom: 1px solid var(--gold);
+  }
+  .nav .topic{ margin-bottom: 4px; }
+  .nav .topic-head{ padding: 7px 10px; gap: 8px; }
+  .nav .topic-head::before{ display: none; }
+  .nav .topic-title{ font-size: 14.5px; line-height: 1.3; }
+  .nav .topic-count{ flex-shrink: 0; }
+  .nav-more{ font-size: 12px; color: var(--ink-faint); padding: 6px 12px; font-style: italic; }
+  .nav-filter-all{
+    display: block; width: 100%;
+    margin: 0 0 8px; padding: 8px 12px;
+    background: var(--ink); color: var(--cream);
+    border: none; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 700; text-align: right;
+  }
+  .nav-filter-all:hover{ background: var(--wood-dark); }
+
+  /* ═══ דף הבית: מפתח הנושאים ═══ */
+  .home{ padding-top: 24px; }
+  .home-hero{ text-align: center; }
+  .home-title{
+    font-size: clamp(30px, 4.6vw, 50px);
+    font-weight: 900; line-height: 1.1; color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .home-stats{
+    margin-top: 14px;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--gold-deep);
+  }
+  .home-search-btn{
+    display: none;
+    align-items: center; justify-content: center; gap: 8px;
+    margin: 18px auto 0; padding: 10px 22px;
+    width: min(100%, 420px);
+    background: rgba(255,255,255,0.7);
+    border: 1.5px solid var(--gold-deep); border-radius: 999px;
+    color: var(--ink-faint); font-family: inherit; font-size: 16px;
+    cursor: pointer;
+  }
+  .home-section{ margin: 0 0 30px; }
+  .home-section-title{
+    display: flex; align-items: center; gap: 12px;
+    font-size: 22px; font-weight: 900; color: var(--ink); line-height: 1.25;
+    padding-bottom: 8px; margin-bottom: 10px;
+    border-bottom: 2px double var(--gold-deep);
+  }
+  .home-section-num{
+    flex: 0 0 auto; width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ink); color: var(--gold-bright);
+    font-size: 15px; font-weight: 700; border-radius: 50%;
+  }
+  .home-section-count{
+    margin-right: auto; flex: 0 0 auto;
+    font-size: 12px; font-weight: 700; color: var(--ink-faint);
+    letter-spacing: 0.04em; white-space: nowrap;
+  }
+  .home-topic{
+    border: 1px solid var(--cream-3);
+    background: rgba(255,255,255,0.45);
+    margin-bottom: 6px;
+  }
+  .home-topic.open{ border-color: var(--gold-deep); background: rgba(255,255,255,0.72); }
+  .home-topic-head{
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; cursor: pointer; user-select: none;
+  }
+  .home-topic-head:hover{ background: rgba(212,176,106,0.22); }
+  .home-topic-caret{
+    flex: 0 0 auto;
+    color: var(--gold-deep);
+    transition: transform 0.15s;
+  }
+  .home-topic.open .home-topic-caret{ transform: rotate(-90deg); }
+  .home-topic-title{ flex: 1 1 auto; min-width: 0; font-size: 17px; font-weight: 700; line-height: 1.3; }
+  .home-topic-count{
+    flex: 0 0 auto;
+    background: var(--gold); color: var(--cream);
+    font-size: 11px; font-weight: 700;
+    padding: 2px 9px; border-radius: 999px;
+  }
+  .home-entries{
+    display: none;
+    padding: 8px 14px 14px;
+    columns: 2; column-gap: 26px;
+    border-top: 1px dashed var(--gold);
+  }
+  .home-topic.open .home-entries{ display: block; }
+  .home-entry{
+    break-inside: avoid;
+    padding: 5px 8px 5px 4px;
+    font-size: 15px; line-height: 1.4; color: var(--ink-soft);
+    cursor: pointer;
+    border-right: 2px solid transparent;
+  }
+  .home-entry:hover, .home-entry:focus-visible{
+    color: var(--crimson); border-right-color: var(--crimson);
+    background: rgba(139,46,28,0.06);
+  }
+  .home-all{ text-align: center; margin: 8px 0 30px; }
+  .home-all-btn, .home-back{
+    background: transparent; border: none;
+    color: var(--gold-deep);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer; padding: 6px 10px;
+  }
+  .home-all-btn{ border: 1.5px dashed var(--gold-deep); padding: 9px 22px; }
+  .home-all-btn:hover{ background: var(--gold-deep); color: var(--cream); }
+  .home-back:hover{ color: var(--crimson); }
+  /* כותרות הנושאים ארוכות ("עבודת ה' – קדושה, דבקות, יראה…") — 64px שובר אותן */
+  .topic-landing-title{ font-size: clamp(28px, 4.2vw, 46px); line-height: 1.15; }
+
+  /* ═══ הנושאים שהערך שייך אליהם ═══ */
+  .entry-topics{ display: flex; flex-wrap: wrap; gap: 6px; }
+  .entry-topic-chip{
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--ink-soft);
+    font-family: inherit; font-size: 12.5px;
+    padding: 2px 10px; border-radius: 999px;
+    cursor: pointer;
+  }
+  .entry-topic-chip:hover{ background: var(--gold-deep); color: var(--cream); border-color: var(--gold-deep); }
+  .entry-topic-chip.current{ border-color: var(--gold-deep); color: var(--gold-deep); font-weight: 700; }
+  .entry-topic-chip.current:hover{ color: var(--cream); }
+
+  /* ═══ נושאים שתואמים את החיפוש — שורה נפרדת מעל התוצאות ═══ */
+  .search-topics{ display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; }
+  .search-topics-label{ font-size: 12px; font-weight: 700; color: var(--ink-faint); letter-spacing: 0.04em; }
+  .search-topic-chip{
+    background: rgba(184,137,58,0.1);
+    border: 1px solid var(--gold-deep);
+    color: var(--gold-deep);
+    font-family: inherit; font-size: 13.5px; font-weight: 700;
+    padding: 3px 12px; border-radius: 999px;
+    cursor: pointer;
+  }
+  .search-topic-chip:hover{ background: var(--gold-deep); color: var(--cream); }
+  .search-topic-chip small{ font-weight: 400; opacity: 0.8; margin-right: 4px; }
+
+  /* ═══ חיפוש מהסרגל העליון (מובייל) ═══ */
+  .topsearch{
+    display: none;
+    flex: 1 1 auto; min-width: 0;
+    align-items: center; gap: 8px;
+    height: 38px; padding: 0 12px 0 4px;
+    background: rgba(255,255,255,0.8);
+    border: 1.5px solid var(--gold-deep); border-radius: 999px;
+  }
+  .topsearch svg{ flex: 0 0 auto; color: var(--ink-faint); }
+  .topsearch input{
+    flex: 1 1 auto; min-width: 0;
+    border: none; background: transparent; outline: none;
+    font-family: inherit; font-size: 16px; color: var(--ink);
+    direction: rtl;
+    -webkit-appearance: none; appearance: none;
+  }
+  .topsearch input::-webkit-search-cancel-button{ display: none; }
+  .topsearch-close{
+    flex: 0 0 auto; width: 30px; height: 30px;
+    border: none; border-radius: 50%;
+    background: transparent; color: var(--ink-soft);
+    font-size: 22px; line-height: 1; cursor: pointer;
+  }
+  .topbar.searching .breadcrumb, .topbar.searching .toolbar{ display: none; }
+  .topbar.searching .topsearch{ display: flex; }
+  #topsearch-btn{ display: none; }
+  @media (max-width: 860px){
+    #topsearch-btn{ display: inline-flex; }
+    .home{ padding-top: 4px; }
+    .home-entries{ columns: 1; }
+    .home-section-title{ font-size: 19px; gap: 9px; }
+    .home-topic-title{ font-size: 16px; }
+    .home-topic-head{ padding: 12px 12px; }
+    .home-search-btn{ display: flex; }
+  }
 </style>
 </head>
 <body data-font="md">
@@ -1723,7 +1915,7 @@
   <div class="splitter" id="splitter" title="גרור, או השתמש בחיצים, כדי לשנות פרופורציה" role="separator" aria-orientation="vertical" tabindex="0" aria-label="שינוי רוחב הסרגל"></div>
 
   <main class="main">
-    <div class="topbar">
+    <div class="topbar" id="topbar">
       <button class="nav-toggle" id="nav-toggle" type="button" title="רשימת הערכים" aria-label="פתח את רשימת הערכים" aria-controls="sidebar" aria-expanded="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
@@ -1731,6 +1923,9 @@
         <span>אוצר המונחים</span>
       </div>
       <div class="toolbar">
+        <button class="tool-btn" id="topsearch-btn" type="button" title="חיפוש" aria-label="חיפוש במילון">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
         <button class="tool-btn" id="bookmarks-page-btn" title="הסימניות שלי">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         </button>
@@ -1740,6 +1935,11 @@
         <button class="tool-btn" id="font-btn" title="גודל טקסט">
           <span style="font-weight:700;font-size:13px;">א<sup style="font-size:9px;">+</sup></span>
         </button>
+      </div>
+      <div class="topsearch" id="topsearch" role="search">
+        <button type="button" class="topsearch-close" id="topsearch-close" aria-label="סגור חיפוש">×</button>
+        <input type="search" id="search-top" placeholder="חיפוש במילון…" autocomplete="off" enterkeyhint="search" aria-label="חיפוש במילון"/>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       </div>
     </div>
 
@@ -1753,7 +1953,7 @@
 
 <script>
 const TERMS_URL   = "terms.json";
-const SEARCH_URL  = "search-index.json?v=2026-09-01-172521"; // AUTO_VERSION
+const SEARCH_URL  = "search-index.json?v=2026-11-11-091801"; // AUTO_VERSION
 const ENTRY_URL_PREFIX = "entries/";
 const DATA_VERSION = SEARCH_URL.split('?v=')[1] || '';
 // גרסת הקוד — יש להעלות אותה כששינוי בקוד משנה את מבנה האינדקס הבנוי בזיכרון,
@@ -1766,6 +1966,9 @@ let searchIx      = null;   // האינדקס ההפוך הבנוי בזיכרו
 let searchById    = null;   // id → { entry, idx }
 let currentTopic  = null;
 let currentEntry  = null;
+let currentView   = 'home';   // home | topic | entry | page — לאן חוזרים כשמנקים את החיפוש
+const ALL_TOPIC_ID = '__all';
+let entryIndex = new Map();   // id → { entry:{id,term}, topics:[נושאים שהערך שייך אליהם] }
 const entryCache    = new Map();
 const entryInflight = new Map();   // מונע סופת בקשות בריחוף על רשימת 653 הערכים
 
@@ -2332,10 +2535,11 @@ function bestDefinitionFor(ix, ei, resolved){
 let titleIx = null, titleList = null;
 function buildTitleIndex(){
   if(titleIx || !data) return;
-  titleList = [];
-  for(const t of data.topics){
-    for(const e of t.entries) titleList.push({ id: e.id, t: e.term, topicTitle: t.title, d: [] });
-  }
+  // כל ערך פעם אחת, גם אם הוא מופיע במפתח תחת כמה נושאים
+  titleList = data.all.map(e => {
+    const r = entryIndex.get(e.id);
+    return { id: e.id, t: e.term, topicTitle: (r && r.topics[0]) ? r.topics[0].title : '', d: [] };
+  });
   titleIx = buildIndexSync(titleList);
 }
 function searchTitlesOnly(rawQuery){
@@ -2474,6 +2678,7 @@ async function load(){
     const res = await fetch(TERMS_URL + (DATA_VERSION ? '?v=' + DATA_VERSION : ''));
     if(!res.ok) throw new Error('טעינת רשימת הערכים נכשלה (' + res.status + ')');
     data = await res.json();
+    normalizeTerms(data);
   }catch(err){
     console.error('load() failed:', err);
     document.getElementById('content').innerHTML =
@@ -2485,67 +2690,175 @@ async function load(){
   renderNav();
   buildTitleIndex();   // חיפוש כותרות עובד מיד
 
-  if(data.topics.length){
-    currentTopic = data.topics[0].id;
-    const firstTopic = document.querySelector('.topic');
-    const firstHead  = document.querySelector('.topic-head');
-    if(firstTopic) firstTopic.classList.add('open');
-    if(firstHead){ firstHead.classList.add('active'); firstHead.setAttribute('aria-expanded','true'); }
-    // אם נשמרו לשוניות מהפעם הקודמת — משחזרים אותן במקום לנחות על המדור הראשון
-    if(!restoreTabs()){
-      renderTopicLanding(data.topics[0], 0);
-      // מסך הפתיחה עצמו הוא לשונית — בלי זה הלשונית הראשונה נוצרת רק בניווט הראשון
-      touchTab({ k: 'topic', t: data.topics[0].id });
-    }
+  // אם נשמרו לשוניות מהפעם הקודמת — משחזרים אותן; אחרת נוחתים על מפתח הנושאים.
+  // מסך הפתיחה עצמו הוא לשונית — בלי זה הלשונית הראשונה נוצרת רק בניווט הראשון.
+  if(!restoreTabs()){
+    renderHome();
+    touchTab({ k: 'home' });
   }
   ensureSearchIndex().catch(() => {});
 }
 
-function renderNav(){
-  document.getElementById('nav').innerHTML = data.topics.map((t) => `
+// ═══ מבנה הנתונים של המפתח ═══
+// terms.json: names {id: שם}, sections [{title, topics:[id]}], topics [{id, title, section, ids}].
+// ערך יכול להשתייך לכמה נושאים, ולכן השמות נשמרים פעם אחת והנושאים מחזיקים מזהים.
+function sortKey(term){ return term.replace(/^[^א-תA-Za-z0-9]+/, ''); }
+function normalizeTerms(d){
+  if(d.names){
+    for(const t of d.topics){
+      t.entries = (t.ids || []).filter(id => d.names[id] !== undefined)
+                               .map(id => ({ id: id, term: d.names[id] }));
+      t.subtitle = (d.sections[t.section] || {}).title || '';
+    }
+    d.all = Object.keys(d.names).map(id => ({ id: id, term: d.names[id] }));
+  }else{
+    // פורמט ישן (לפני המפתח): רשימת נושאים שטוחה, בלי מדורים
+    d.sections = [{ title: '', topics: d.topics.map(t => t.id) }];
+    const seen = new Set();
+    d.all = [];
+    for(const t of d.topics){
+      t.section = 0;
+      for(const e of t.entries) if(!seen.has(e.id)){ seen.add(e.id); d.all.push(e); }
+    }
+  }
+  entryIndex = new Map();
+  for(const e of d.all) entryIndex.set(e.id, { entry: e, topics: [] });
+  for(const t of d.topics) for(const e of t.entries){
+    const r = entryIndex.get(e.id);
+    if(r && r.topics.indexOf(t) < 0) r.topics.push(t);
+  }
+  // "כל הערכים" — נושא מדומה, ממוין א״ב. אינו חלק מהמפתח ואינו נחשב נושא של ערך.
+  const sorted = d.all.slice().sort((a, b) => sortKey(a.term).localeCompare(sortKey(b.term), 'he'));
+  d.allTopic = { id: ALL_TOPIC_ID, title: 'כל הערכים', subtitle: 'לפי סדר א״ב', section: -1, entries: sorted };
+  d.topicById = new Map(d.topics.map(t => [t.id, t]));
+  d.topicById.set(ALL_TOPIC_ID, d.allTopic);
+}
+function getTopic(id){ return (data && data.topicById && data.topicById.get(id)) || null; }
+
+// ═══ סרגל הצד: מדורים ← נושאים ← ערכים ═══
+// רשימת הערכים של נושא נבנית רק כשפותחים אותו. קודם נבנו כל הקישורים מראש
+// (כ-1,200 אלמנטים עם מאזינים), וזה מה שעיכב את עליית הדף.
+function navTopicHtml(t){
+  return `
     <div class="topic" data-topic="${escapeHtml(t.id)}">
-      <div class="topic-head" role="button" tabindex="0" aria-expanded="false"
-           onclick="selectTopic('${escapeAttr(t.id)}')"
-           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectTopic('${escapeAttr(t.id)}');}">
-        <div>
-          <div class="topic-title">${escapeHtml(t.title)}</div>
-          <div class="topic-subtitle">${escapeHtml(t.subtitle)}</div>
-        </div>
+      <div class="topic-head" role="button" tabindex="0" aria-expanded="false" data-kb
+           onclick="selectTopic('${escapeAttr(t.id)}')">
+        <div class="topic-title">${escapeHtml(t.title)}</div>
         <div class="topic-count">${t.entries.length}</div>
       </div>
-      <div class="entries">
-        ${t.entries.map((e, i) => `
-          <div class="entry-link ${isBookmarked(e.id) ? 'bookmarked' : ''}" role="link" tabindex="0"
-               data-entry="${escapeHtml(e.id)}" data-num="${i+1}."
-               onclick="event.stopPropagation(); goToEntry('${escapeAttr(t.id)}','${escapeAttr(e.id)}')"
-               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();goToEntry('${escapeAttr(t.id)}','${escapeAttr(e.id)}');}"
-               onmouseenter="prefetchEntry('${escapeAttr(e.id)}')"
-               onfocus="prefetchEntry('${escapeAttr(e.id)}')">${escapeHtml(e.term)}</div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
+      <div class="entries"></div>
+    </div>`;
+}
+function navEntryHtml(topicId, e, i){
+  return `<div class="entry-link${isBookmarked(e.id) ? ' bookmarked' : ''}${e.id === currentEntry && topicId === currentTopic ? ' active' : ''}" role="link" tabindex="0" data-kb
+       data-entry="${escapeHtml(e.id)}" data-num="${i+1}."
+       onclick="event.stopPropagation(); goToEntry('${escapeAttr(topicId)}','${escapeAttr(e.id)}')"
+       onmouseenter="prefetchEntry('${escapeAttr(e.id)}')">${escapeHtml(e.term)}</div>`;
+}
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.dataset.mode = 'tree';
+  nav.innerHTML =
+    `<div class="nav-home" role="link" tabindex="0" data-kb onclick="goHome()">☰ מפתח הנושאים</div>` +
+    data.sections.map(sec => {
+      const topics = sec.topics.map(getTopic).filter(Boolean);
+      return `<div class="nav-section">` +
+        (sec.title ? `<div class="nav-section-title">${escapeHtml(sec.title)}</div>` : '') +
+        topics.map(navTopicHtml).join('') + `</div>`;
+    }).join('') +
+    `<div class="nav-section">` + navTopicHtml(data.allTopic) + `</div>`;
+}
+function setTopicOpen(el, open){
+  if(open){
+    const box = el.querySelector('.entries');
+    if(box && !box.dataset.filled){
+      const t = getTopic(el.dataset.topic);
+      if(t) box.innerHTML = t.entries.map((e, i) => navEntryHtml(t.id, e, i)).join('');
+      box.dataset.filled = '1';
+    }
+  }
+  el.classList.toggle('open', open);
+  const head = el.querySelector('.topic-head');
+  if(head) head.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+// מקום אחד שמעדכן את מצב הסרגל: איזה נושא פתוח ואיזה ערך מסומן
+function syncNav(topicId, entryId, toggle){
+  document.querySelectorAll('#nav .topic').forEach(el => {
+    const mine = el.dataset.topic === topicId;
+    setTopicOpen(el, mine ? (toggle ? !el.classList.contains('open') : true) : false);
+    const head = el.querySelector('.topic-head');
+    if(head) head.classList.toggle('active', mine);
+  });
+  let target = null;
+  document.querySelectorAll('#nav .entry-link').forEach(el => {
+    const tp = el.closest('.topic');
+    const on = !!entryId && el.dataset.entry === entryId && (!tp || tp.dataset.topic === topicId);
+    el.classList.toggle('active', on);
+    if(on && !target) target = el;
+  });
+  // מביאים את הנושא/הערך הפעיל לתוך שדה הראייה של הסרגל (עם 42 נושאים הוא לרוב מחוץ למסך)
+  if(!target && topicId) target = document.querySelector('#nav .topic-head.active');
+  if(target && target.scrollIntoView && !toggle){
+    try{ target.scrollIntoView({ block: 'nearest' }); }catch(e){}
+  }
+}
+function markPage(p){
+  currentPage = p;
+  document.querySelectorAll('.page-btn').forEach(b => b.classList.toggle('active', b.dataset.page === p));
+}
+
+// ─── סינון הסרגל בזמן הקלדה: רשימה שטוחה של שמות ערכים תואמים ───
+// קודם כל הקשה עברה על כל קישורי הסרגל ושינתה להם display — מאות כתיבות DOM
+// להקשה. עכשיו נבנית רשימה קצרה אחת, וההתאמה מנורמלת (אותיות סופיות, ניקוד).
+const NAV_FILTER_MAX = 60;
+function renderNavFilter(q){
+  const nav = document.getElementById('nav');
+  if(!data || !nav) return;
+  const nq = tokenize(q).join(' ');
+  if(!nq){ restoreNavTree(); return; }
+  const exact = [], starts = [], word = [], inner = [];
+  for(const e of data.all){
+    if(e.norm === undefined) e.norm = tokenize(e.term).join(' ');
+    const at = e.norm.indexOf(nq);
+    if(at < 0) continue;
+    if(e.norm === nq) exact.push(e);
+    else if(at === 0) starts.push(e);
+    else if(e.norm[at - 1] === ' ') word.push(e);
+    else inner.push(e);
+  }
+  const hits = exact.concat(starts, word, inner);
+  nav.dataset.mode = 'filter';
+  nav.innerHTML =
+    `<button type="button" class="nav-filter-all" onclick="doSearch()">כל התוצאות עבור "${escapeHtml(q)}" ←</button>` +
+    `<div class="nav-section-title">${hits.length ? 'ערכים ששמם תואם (' + hits.length + ')' : 'אין ערך בשם הזה — החיפוש המלא בודק גם את התוכן'}</div>` +
+    hits.slice(0, NAV_FILTER_MAX).map(e =>
+      `<div class="entry-link" role="link" tabindex="0" data-kb data-entry="${escapeHtml(e.id)}"
+            onclick="goToEntryByEntryId('${escapeAttr(e.id)}')"
+            onmouseenter="prefetchEntry('${escapeAttr(e.id)}')">${escapeHtml(e.term)}</div>`).join('') +
+    (hits.length > NAV_FILTER_MAX ? `<div class="nav-more">ועוד ${hits.length - NAV_FILTER_MAX} — דייק את החיפוש</div>` : '');
+}
+function restoreNavTree(){
+  const nav = document.getElementById('nav');
+  if(!data || !nav || nav.dataset.mode !== 'filter') return;
+  renderNav();
+  if(currentView === 'entry' || currentView === 'topic') syncNav(currentTopic, currentView === 'entry' ? currentEntry : null);
 }
 
 // מלבד escapeHtml — גם גרש בודד חייב בריחה, כי הוא סוגר את מחרוזת ה-onclick
 function escapeAttr(s){ return escapeHtml(s).replace(/'/g, '&#39;'); }
 
-function selectTopic(id){
-  const ti = data.topics.findIndex(t => t.id === id);
-  const topic = data.topics[ti];
-  const wasOpen = document.querySelector(`.topic[data-topic="${id}"]`).classList.contains('open');
-  document.querySelectorAll('.topic').forEach(el => {
-    const open = el.dataset.topic === id ? !wasOpen : false;
-    el.classList.toggle('open', open);
-    const head = el.querySelector('.topic-head');
-    head.classList.toggle('active', el.dataset.topic === id);
-    head.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-  document.querySelectorAll('.entry-link').forEach(el => el.classList.remove('active'));
+// keepOpen=true: הגענו מדף הבית / מתגית בערך — תמיד מציגים את הנושא.
+// בלי זה (לחיצה בסרגל): לחיצה שנייה על אותו נושא סוגרת אותו.
+function selectTopic(id, keepOpen){
+  const topic = getTopic(id);
+  if(!topic){ goHome(); return; }
+  rememberHomeScroll();
+  if(currentPage !== 'dictionary') markPage('dictionary');
   currentTopic = id;
   currentEntry = null;
+  syncNav(id, null, !keepOpen);
   pushNav({ k: 'topic', t: id });
-  renderTopicLanding(topic, ti);
+  renderTopicLanding(topic);
 }
 
 // ─── Prefetch בלי להציג; משמש ל-hover/related/neighbors ───
@@ -2556,8 +2869,8 @@ window.prefetchEntry = function(id){
 
 // קדם-טען את הערכים הסמוכים (לפני/אחרי) ואת הקשורים
 function prefetchNeighbors(topicId, ei){
-  const topic = data.topics.find(t => t.id === topicId);
-  if(!topic) return;
+  const topic = getTopic(topicId);
+  if(!topic || ei < 0) return;
   // הקודם והבא ברשימה
   if(ei > 0) prefetchEntry(topic.entries[ei-1].id);
   if(ei < topic.entries.length-1) prefetchEntry(topic.entries[ei+1].id);
@@ -2576,40 +2889,35 @@ function prefetchRelatedFromDom(){
 }
 
 async function goToEntry(topicId, entryId){
-  // במובייל — סגור את המגירה ברגע שנבחר ערך
+  // במובייל — סגור את המגירה ואת שורת החיפוש ברגע שנבחר ערך
   if(typeof setNavOpen === 'function') setNavOpen(false);
-  // עדכן סרגל
-  if(currentTopic !== topicId){
-    document.querySelectorAll('.topic').forEach(el => {
-      el.classList.toggle('open', el.dataset.topic === topicId);
-      el.querySelector('.topic-head').classList.toggle('active', el.dataset.topic === topicId);
-    });
-  }else{
-    document.querySelector(`.topic[data-topic="${topicId}"]`).classList.add('open');
-  }
+  if(typeof setTopSearch === 'function') setTopSearch(false);
+  const rec = entryIndex.get(entryId);
+  if(!rec){ goHome(); return; }      // ערך שכבר אינו במילון (לשונית או קישור ישן)
+  // ההקשר — הנושא שממנו הגיעו — נשמר רק אם הערך באמת שייך אליו.
+  // אחרת (מזהה נושא ישן, תוצאת חיפוש) נבחר הנושא הראשון של הערך.
+  let topic = getTopic(topicId);
+  if(!topic || !topic.entries.some(e => e.id === entryId)) topic = rec.topics[0] || data.allTopic;
+  topicId = topic.id;
+  rememberHomeScroll();
+  if(currentPage !== 'dictionary') markPage('dictionary');
+  currentView  = 'entry';
   currentTopic = topicId;
   currentEntry = entryId;
   pushNav({ k: 'entry', t: topicId, e: entryId });
-  document.querySelectorAll('.entry-link').forEach(el => {
-    el.classList.toggle('active', el.dataset.entry === entryId);
-  });
+  syncNav(topicId, entryId);
 
-  // טעינה אופטימית: אם הערך בקאש → רינדור מיידי בלי ספינר ובלי fade-in
-  if(entryCache.has(entryId)){
-    const entry = entryCache.get(entryId);
-    const ti = data.topics.findIndex(t => t.id === topicId);
-    const topic = data.topics[ti];
+  const show = entry => {
     const ei = topic.entries.findIndex(e => e.id === entryId);
-    renderEntryPage(topic, ti, entry, ei);
-    prefetchNeighbors(topicId, ei);
-    return;
-  }
+    renderEntryPage(topic, data.topics.indexOf(topic), entry, ei);
+    prefetchNeighbors(topicId, ei);   // קדם-טען את הסמוכים
+  };
+  // טעינה אופטימית: אם הערך בקאש → רינדור מיידי בלי ספינר ובלי fade-in
+  if(entryCache.has(entryId)){ show(entryCache.get(entryId)); return; }
 
   // ספינר מתעכב — אם הטעינה מהירה, לא יוצג כלל (מונע פליק)
-  let spinnerShown = false;
   const spinnerTimer = setTimeout(() => {
     if(currentEntry !== entryId) return;
-    spinnerShown = true;
     fadeContent(`<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-text">טוען…</div></div>`);
   }, 90);
 
@@ -2617,11 +2925,7 @@ async function goToEntry(topicId, entryId){
     const entry = await loadEntry(entryId);
     clearTimeout(spinnerTimer);
     if(currentEntry !== entryId) return;
-    const ti = data.topics.findIndex(t => t.id === topicId);
-    const topic = data.topics[ti];
-    const ei = topic.entries.findIndex(e => e.id === entryId);
-    renderEntryPage(topic, ti, entry, ei);
-    prefetchNeighbors(topicId, ei);   // קדם-טען את הסמוכים
+    show(entry);
   }catch(err){
     clearTimeout(spinnerTimer);
     console.error('Failed to load entry:', err);
@@ -2656,21 +2960,110 @@ function fadeContent(html){
   document.getElementById('scroll').scrollTop = 0;
 }
 
-function renderTopicLanding(topic, ti){
-  setBreadcrumb(['אוצר המונחים', topic.title]);
-  
+// ═══ דף הבית: מפתח הנושאים (מדורים ← נושאים ← ערכים) ═══
+const homeOpen = new Set();   // נושאים שנפתחו בדף הבית — נשמר כשחוזרים אליו
+let _homeScroll = 0;
+function rememberHomeScroll(){
+  if(currentView !== 'home') return;
+  const sc = document.getElementById('scroll');
+  if(sc) _homeScroll = sc.scrollTop || 0;
+}
+function homeEntriesHtml(t){
+  return t.entries.map(e =>
+    `<div class="home-entry" role="link" tabindex="0" data-kb
+          onclick="goToEntry('${escapeAttr(t.id)}','${escapeAttr(e.id)}')"
+          onmouseenter="prefetchEntry('${escapeAttr(e.id)}')">${escapeHtml(e.term)}</div>`).join('');
+}
+function homeTopicHtml(t){
+  const open = homeOpen.has(t.id);
+  return `
+    <div class="home-topic${open ? ' open' : ''}" data-topic="${escapeHtml(t.id)}">
+      <div class="home-topic-head" role="button" tabindex="0" data-kb aria-expanded="${open ? 'true' : 'false'}"
+           onclick="toggleHomeTopic('${escapeAttr(t.id)}', this)">
+        <svg class="home-topic-caret" aria-hidden="true" width="11" height="11" viewBox="0 0 10 10"><path d="M7 1 3 5l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="home-topic-title">${escapeHtml(t.title)}</span>
+        <span class="home-topic-count">${t.entries.length}</span>
+      </div>
+      <div class="home-entries">${open ? homeEntriesHtml(t) : ''}</div>
+    </div>`;
+}
+window.toggleHomeTopic = function(id, head){
+  const t = getTopic(id);
+  const box = head && head.parentNode;
+  if(!t || !box) return;
+  const open = !homeOpen.has(id);
+  if(open) homeOpen.add(id); else homeOpen.delete(id);
+  const list = box.querySelector('.home-entries');
+  if(open && list && !list.innerHTML) list.innerHTML = homeEntriesHtml(t);   // נבנה רק בפתיחה הראשונה
+  box.classList.toggle('open', open);
+  head.setAttribute('aria-expanded', open ? 'true' : 'false');
+};
+function renderHome(restoreScroll){
+  if(!data) return;
+  currentView = 'home';
+  setBreadcrumb(['אוצר המונחים', 'מפתח הנושאים']);
+  const real = data.sections.filter(sec => !sec.auto);
+  const nTopics = real.reduce((n, sec) => n + sec.topics.length, 0);
+  let num = 0;
+  const sections = data.sections.map(sec => {
+    const topics = sec.topics.map(getTopic).filter(Boolean);
+    if(!topics.length) return '';
+    const badge = sec.auto ? '✦' : (HEB_NUM[num++] || num);
+    return `
+      <section class="home-section">
+        <h2 class="home-section-title">
+          <span class="home-section-num" aria-hidden="true">${badge}</span>
+          <span>${escapeHtml(sec.title || 'ערכים')}</span>
+          <span class="home-section-count">${topics.length === 1 ? 'נושא אחד' : topics.length + ' נושאים'}</span>
+        </h2>
+        <div class="home-topics">${topics.map(homeTopicHtml).join('')}</div>
+      </section>`;
+  }).join('');
+  fadeContent(`
+    <div class="home">
+      <div class="home-hero">
+        <div class="topic-landing-eyebrow">מפתח הנושאים</div>
+        <h1 class="home-title">${escapeHtml(data.title || 'מילון מונחים בפנימיות התורה')}</h1>
+        <div class="topic-landing-subtitle">${escapeHtml(data.subtitle || '')}</div>
+        <div class="home-stats">${data.all.length} ערכים · ${nTopics} נושאים · ${real.length} מדורים</div>
+        <button type="button" class="home-search-btn" onclick="setTopSearch(true)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <span>חיפוש במילון…</span>
+        </button>
+        <div class="topic-landing-rule"></div>
+      </div>
+      ${sections}
+      <div class="home-all">
+        <button type="button" class="home-all-btn" onclick="selectTopic('${ALL_TOPIC_ID}', true)">כל ${data.all.length} הערכים לפי סדר א״ב</button>
+      </div>
+    </div>
+  `);
+  if(restoreScroll && _homeScroll){
+    const sc = document.getElementById('scroll');
+    if(sc) sc.scrollTop = _homeScroll;
+  }
+}
+window.goHome = function(){
+  if(typeof setNavOpen === 'function') setNavOpen(false);
+  setPage('dictionary');
+};
+
+function renderTopicLanding(topic){
+  currentView = 'topic';
+  const sec = data.sections[topic.section];
+  const secTitle = (sec && sec.title) || topic.subtitle || '';
+  setBreadcrumb(secTitle ? ['אוצר המונחים', secTitle, topic.title] : ['אוצר המונחים', topic.title]);
   fadeContent(`
     <div class="topic-landing">
-      <div class="topic-landing-eyebrow">שער ${HEB_NUM_BIG[ti] || ti+1}</div>
+      <div class="topic-landing-eyebrow">${escapeHtml(secTitle || 'אוצר המונחים')}</div>
       <h1 class="topic-landing-title">${escapeHtml(topic.title)}</h1>
-      <div class="topic-landing-subtitle">${escapeHtml(topic.subtitle)}</div>
+      <div class="topic-landing-subtitle">${topic.entries.length} ערכים</div>
       <div class="topic-landing-rule"></div>
-      <div class="topic-landing-hint">בחר ערך מן הרשימה</div>
+      <button type="button" class="home-back" onclick="goHome()">→ חזרה למפתח הנושאים</button>
       <div class="entry-grid">
         ${topic.entries.map((e, i) => `
-          <div class="entry-card" role="link" tabindex="0"
+          <div class="entry-card" role="link" tabindex="0" data-kb
                onclick="goToEntry('${escapeAttr(topic.id)}','${escapeAttr(e.id)}')"
-               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToEntry('${escapeAttr(topic.id)}','${escapeAttr(e.id)}');}"
                onmouseenter="prefetchEntry('${escapeAttr(e.id)}')">
             <div class="entry-card-num">ערך ${HEB_NUM[i] || (i+1)}</div>
             <div class="entry-card-term">${escapeHtml(e.term)}</div>
@@ -2767,7 +3160,7 @@ function renderEntryPage(topic, ti, entry, ei){
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
           </button>
         </h1>
-        <div class="entry-topic-label">${escapeHtml(topic.title)} · ${escapeHtml(topic.subtitle)}</div>
+        <div class="entry-topics">${entryTopicsHtml(entry.id, topic)}</div>
       </header>
       ${entry.definitions.map((d, i) => {
         // אם הטקסט מתחיל ב-[ (הפניה / הערה) — לא נחיל את ה-drop-cap האדום
@@ -2806,11 +3199,17 @@ function renderEntryPage(topic, ti, entry, ei){
 }
 
 function findEntry(id){
-  for(const t of data.topics){
-    const e = t.entries.find(x => x.id === id);
-    if(e) return {topic: t, entry: e};
-  }
-  return null;
+  const r = entryIndex.get(id);
+  if(!r) return null;
+  return { topic: r.topics[0] || data.allTopic, entry: r.entry, topics: r.topics };
+}
+// כל הנושאים שהערך משובץ בהם במפתח — לחיצה פותחת את הנושא
+function entryTopicsHtml(entryId, current){
+  const rec = entryIndex.get(entryId);
+  const list = (rec && rec.topics.length) ? rec.topics : [current];
+  return list.map(t =>
+    `<button type="button" class="entry-topic-chip${t === current ? ' current' : ''}" title="${escapeAttr(t.subtitle || '')}"
+             onclick="selectTopic('${escapeAttr(t.id)}', true)">${escapeHtml(t.title)}</button>`).join('');
 }
 function goToEntryByEntryId(eid){
   const found = findEntry(eid);
@@ -3256,7 +3655,12 @@ window.searchFor = function(w){
 };
 function doSearch(){
   const q = document.getElementById('search').value.trim();
-  if(q){ clearTimeout(searchDebounceTimer); runSearch(q); }
+  if(!q) return;
+  clearTimeout(searchDebounceTimer);
+  runSearch(q);
+  // במובייל שדה החיפוש נמצא בתוך המגירה, והתוצאות מוצגות מאחוריה —
+  // בלי לסגור אותה המשתמש מקיש "חפש" ולא רואה שום דבר קורה.
+  if(isMobile() && document.body.classList.contains('nav-open')) setNavOpen(false);
 }
 document.getElementById('search').addEventListener('keydown', e => {
   if(e.key === 'Enter'){ e.preventDefault(); doSearch(); }
@@ -3268,26 +3672,70 @@ const searchInputEl = document.getElementById('search');
 searchInputEl.addEventListener('focus', () => ensureSearchIndex(), { once: true });
 searchInputEl.addEventListener('input', e => {
   const q = e.target.value.trim();
-  // סינון הסרגל (פידבק מיידי)
-  document.querySelectorAll('.entry-link').forEach(el => {
-    el.style.display = !q || el.textContent.includes(q) ? 'flex' : 'none';
-  });
-  if(q) document.querySelectorAll('.topic').forEach(el => el.classList.add('open'));
+  // סינון הסרגל (פידבק מיידי): שמות ערכים תואמים
+  renderNavFilter(q);
 
   // חיפוש המסך הראשי (debounced)
   clearTimeout(searchDebounceTimer);
   if(!q){
     // ריק → חזור למסך הקודם
     currentSearchQuery = "";
-    if(currentEntry){
-      goToEntryByEntryId(currentEntry);
-    }else if(currentTopic && data && data.topics){
-      const t = data.topics.find(x => x.id === currentTopic);
-      if(t) renderTopicLanding(t, data.topics.indexOf(t));
-    }
+    if(!data) return;
+    if(currentView === 'entry' && currentEntry) goToEntry(currentTopic, currentEntry);
+    else if(currentView === 'topic' && getTopic(currentTopic)) renderTopicLanding(getTopic(currentTopic));
+    else renderHome();
     return;
   }
   searchDebounceTimer = setTimeout(() => runSearch(q), 250);
+});
+
+// ═══ חיפוש מהסרגל העליון (מובייל) ═══
+// במובייל שדה החיפוש הראשי חבוי בתוך המגירה. כאן שדה שני, תמיד בהישג יד,
+// שמזין את אותו שדה ראשי — כך שיש מנגנון חיפוש אחד ולא שניים.
+const topbarEl       = document.getElementById('topbar');
+const topSearchInput = document.getElementById('search-top');
+function setTopSearch(open){
+  if(!topbarEl || !topSearchInput || !topbarEl.classList) return;
+  if(open === topbarEl.classList.contains('searching')) return;
+  topbarEl.classList.toggle('searching', open);
+  if(open){
+    topSearchInput.value = searchInputEl.value;
+    ensureSearchIndex().catch(() => {});
+    setTimeout(() => topSearchInput.focus(), 30);
+  }
+}
+window.setTopSearch = setTopSearch;
+(function(){
+  const openBtn  = document.getElementById('topsearch-btn');
+  const closeBtn = document.getElementById('topsearch-close');
+  if(!openBtn || !closeBtn || !topSearchInput) return;
+  const clear = () => {
+    topSearchInput.value = '';
+    if(searchInputEl.value){
+      searchInputEl.value = '';
+      searchInputEl.dispatchEvent(new Event('input'));
+    }
+    setTopSearch(false);
+  };
+  openBtn.addEventListener('click', () => setTopSearch(true));
+  closeBtn.addEventListener('click', clear);
+  topSearchInput.addEventListener('input', () => {
+    searchInputEl.value = topSearchInput.value;
+    searchInputEl.dispatchEvent(new Event('input'));
+  });
+  topSearchInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){ e.preventDefault(); doSearch(); topSearchInput.blur(); }
+    else if(e.key === 'Escape'){ clear(); }
+  });
+})();
+
+// Enter / רווח מפעילים כל אלמנט לחיץ שמסומן data-kb — במקום onkeydown לכל אלמנט
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target && e.target.closest ? e.target.closest('[data-kb]') : null;
+  if(!el || el !== e.target) return;
+  e.preventDefault();
+  el.click();
 });
 
 // ─── כפתור הגדרות + פופאובר (position:fixed — מעל כל שכבה) ───
@@ -3410,8 +3858,11 @@ function resetSearchState(){
   currentSearchQuery   = '';
   currentSearchResults = [];
   currentSearchPage    = 1;
-  // החזר את הסרגל למצב מלא (אם הוא סונן)
-  document.querySelectorAll('.entry-link').forEach(el => { el.style.display = ''; });
+  // החזר את הסרגל למצב מלא (אם הוא סונן), וסגור את שורת החיפוש העליונה
+  restoreNavTree();
+  const top = document.getElementById('search-top');
+  if(top) top.value = '';
+  if(typeof setTopSearch === 'function') setTopSearch(false);
   // סגור פופאובר הגדרות אם פתוח
   const pop = document.getElementById('search-popover');
   const btn = document.getElementById('search-settings-btn');
@@ -3422,10 +3873,19 @@ function resetSearchState(){
 // Page switching (about/contact)
 let currentPage = 'dictionary';
 function setPage(p){
-  if(p !== currentPage) pushNav({ k: 'page', p: p });
-  currentPage = p;
+  rememberHomeScroll();
+  if(p === 'dictionary'){
+    // "המילון" = מפתח הנושאים. נדחף גם כשכבר נמצאים במילון (למשל מתוך ערך).
+    // (לא לפני שהנתונים נטענו: דחיפה בעליית הדף הייתה דורסת את הלשוניות השמורות)
+    let cur = null;
+    try{ cur = history.state; }catch(e){}
+    if(data && !(cur && cur.k === 'home')) pushNav({ k: 'home' });
+  }else if(p !== currentPage){
+    pushNav({ k: 'page', p: p });
+  }
+  markPage(p);
   resetSearchState();   // ← תמיד מאפס חיפוש במעבר עמוד
-  document.querySelectorAll('.page-btn').forEach(b => b.classList.toggle('active', b.dataset.page === p));
+  if(p !== 'dictionary') currentView = 'page';
   if(p === 'about'){
     setBreadcrumb(['אוצר המונחים', 'אודות']);
     fadeContent(renderAbout());
@@ -3436,20 +3896,12 @@ function setPage(p){
     setBreadcrumb(['אוצר המונחים', 'סימניות']);
     fadeContent(renderBookmarks());
   }else{
-    // ─── חזרה לעמוד הראשי של המילון: איפוס מלא + הצגת המדור הראשון ───
+    // ─── חזרה לעמוד הראשי של המילון: מפתח הנושאים ───
     currentEntry = null;
-    if(data && data.topics && data.topics.length){
-      const t = data.topics[0];
-      currentTopic = t.id;
-      // סגור את כל המדורים, פתח רק את הראשון
-      document.querySelectorAll('.topic').forEach(el => {
-        el.classList.toggle('open', el.dataset.topic === t.id);
-        const head = el.querySelector('.topic-head');
-        if(head) head.classList.toggle('active', el.dataset.topic === t.id);
-      });
-      // הסר סימון של ערך פעיל
-      document.querySelectorAll('.entry-link').forEach(el => el.classList.remove('active'));
-      renderTopicLanding(t, 0);
+    currentTopic = null;
+    if(data){
+      syncNav(null, null);
+      renderHome(_navLock);   // בחזרה דרך "אחורה" — משחזרים את מיקום הגלילה
     }
   }
 }
@@ -3700,13 +4152,19 @@ function pushNav(st, replace){
 function applyNav(st){
   _navLock = true;
   try{
-    if(!st || !st.k){
+    if(!st || !st.k || st.k === 'home'){
       setPage('dictionary');
-    }else if(st.k === 'entry' && st.t && st.e){
+    }else if(st.k === 'entry' && st.e){
       goToEntry(st.t, st.e);
-    }else if(st.k === 'topic' && st.t && data){
-      const ti = data.topics.findIndex(t => t.id === st.t);
-      if(ti >= 0){ currentTopic = st.t; currentEntry = null; renderTopicLanding(data.topics[ti], ti); }
+    }else if(st.k === 'topic'){
+      // מזהה נושא שכבר לא קיים (לשונית שנשמרה לפני עדכון המפתח) → דף הבית
+      const t = getTopic(st.t);
+      if(t){
+        if(currentPage !== 'dictionary') markPage('dictionary');
+        currentTopic = t.id; currentEntry = null;
+        syncNav(t.id, null);
+        renderTopicLanding(t);
+      }else setPage('dictionary');
     }else if(st.k === 'suggest' && st.q){
       currentEntry = null;
       renderSuggestPage(st.q);
@@ -3730,19 +4188,19 @@ let activeTab = 0;
 let _tabLock = false;
 
 function tabTitle(st){
-  if(!st || !st.k) return 'המילון';
+  if(!st || !st.k || st.k === 'home') return 'מפתח הנושאים';
   if(st.k === 'entry'){
     const f = findEntry(st.e);
-    return f ? f.entry.term : 'ערך';
+    return f ? f.entry.term : 'מפתח הנושאים';
   }
   if(st.k === 'topic'){
-    const t = data && data.topics.find(x => x.id === st.t);
-    return t ? t.title : 'מדור';
+    const t = getTopic(st.t);
+    return t ? t.title : 'מפתח הנושאים';
   }
   if(st.k === 'search') return 'חיפוש: ' + st.q;
   if(st.k === 'suggest') return 'הצעות: ' + st.q;
-  if(st.k === 'page') return ({about:'אודות', contact:'צור קשר', bookmarks:'סימניות'})[st.p] || 'המילון';
-  return 'המילון';
+  if(st.k === 'page') return ({about:'אודות', contact:'צור קשר', bookmarks:'סימניות'})[st.p] || 'מפתח הנושאים';
+  return 'מפתח הנושאים';
 }
 
 function saveTabs(){
@@ -3795,7 +4253,7 @@ window.closeTab = function(i){
 };
 
 window.newTab = function(){
-  const st = (data && data.topics.length) ? { k: 'topic', t: data.topics[0].id } : { k: 'page', p: 'dictionary' };
+  const st = { k: 'home' };
   tabs.push({ st: st, title: tabTitle(st) });
   activeTab = tabs.length - 1;
   _tabLock = true;
