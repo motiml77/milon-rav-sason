@@ -2058,8 +2058,9 @@
   .pdf-refs a{ color: #2a1a08; text-decoration: none; font-weight: 700; border-bottom: 1px dotted #b8893a; }
   .pdf-toc-sec{ font-size: 1.08em; font-weight: 900; color: #2a1a08; margin: 1em 0 0.15em; }
   .pdf-toc-topic{ font-size: 0.95em; font-weight: 700; color: #8a6018; margin: 0.55em 0 0.1em; }
-  .pdf-toc ul{ list-style: none; columns: 2; column-gap: 2em; font-size: 0.93em; }
-  .pdf-toc li{ break-inside: avoid; padding: 0.1em 0; line-height: 1.45; }
+  .pdf-toc ol{ list-style: none; counter-reset: toc; columns: 2; column-gap: 2.2em; font-size: 0.98em; }
+  .pdf-toc li{ break-inside: avoid; padding: 0.18em 2em 0.18em 0; line-height: 1.45; position: relative; counter-increment: toc; }
+  .pdf-toc li::before{ content: counter(toc) "."; position: absolute; right: 0; width: 1.6em; text-align: left; color: #8a6018; font-weight: 700; font-size: 0.9em; }
   .pdf-toc a{ color: inherit; text-decoration: none; }
   .pdf-end{
     margin-top: 2.4em; padding-top: 0.8em; border-top: 1px solid #d9c59a;
@@ -2070,7 +2071,7 @@
     .pdfb-entries, .pdfb-filter-results{ columns: 1; }
     .pdf-doc{ padding: 22px 18px 30px; font-size: 15px; }
     .pdf-cover-title{ font-size: 2.1em; }
-    .pdf-refs ul, .pdf-toc ul{ columns: 1; }
+    .pdf-refs ul, .pdf-toc ol{ columns: 1; }
     body.pdf-preview #print-root{ padding: 0 0 30px; }
     .pdf-bar{ margin: 0 0 12px; }
   }
@@ -4635,8 +4636,7 @@ function pdfDocHtml(entries, o){
   const title = (o.title || '').trim() || 'לקט ערכים';
   const host = SITE_URL.split('//')[1] || SITE_URL;
   const siteLink = `<a href="${SITE_URL}">${escapeHtml(host)}</a>`;
-  const byTopics = o.order !== 'abc';
-  const hEntry = byTopics ? 'h4' : 'h3';
+  const hEntry = 'h2';
 
   const entryHtml = e => {
     const defs = (e.definitions || []).map((d, i) => `
@@ -4662,48 +4662,12 @@ function pdfDocHtml(entries, o){
       <${hEntry} class="pdf-entry-title">${escapeHtml(e.term)}</${hEntry}>${defs}${refs}
     </article>`;
   };
-  const tocList = list => `<ul>${list.map(e => `<li><a href="#pdfe-${escapeHtml(e.id)}">${escapeHtml(e.term)}</a></li>`).join('')}</ul>`;
+  const tocList = list => `<ol>${list.map(e => `<li><a href="#pdfe-${escapeHtml(e.id)}">${escapeHtml(e.term)}</a></li>`).join('')}</ol>`;
 
-  let body = '', toc = '';
-  if(byTopics){
-    // מדור ← נושא ← ערך. הערכים כבר מסודרים כך (ראה pdfOrdered); כאן רק מקבצים.
-    let curSec = null, curTopic = null, group = [], secNum = 0;
-    const flushToc = () => { if(group.length){ toc += tocList(group); group = []; } };
-    for(const e of entries){
-      const rec = entryIndex.get(e.id);
-      const t = (rec && rec.topics[0]) || data.allTopic;
-      const sec = data.sections[t.section] || { title: '' };
-      if(sec !== curSec){
-        flushToc();
-        curSec = sec; curTopic = null;
-        const name = sec.title || 'ערכים';
-        const eyebrow = sec.auto || !sec.title ? '' : `<span class="pdf-sec-eyebrow">מדור ${HEB_NUM[secNum++] || ''}</span>`;
-        body += `\n    <h2 class="pdf-sec">${eyebrow}${escapeHtml(name)}</h2>`;
-        toc += `<div class="pdf-toc-sec">${escapeHtml(name)}</div>`;
-      }
-      if(t !== curTopic){
-        flushToc();
-        curTopic = t;
-        body += `\n    <h3 class="pdf-topic">${escapeHtml(t.title)}</h3>`;
-        toc += `<div class="pdf-toc-topic">${escapeHtml(t.title)}</div>`;
-      }
-      group.push(e);
-      body += entryHtml(e);
-    }
-    flushToc();
-  }else{
-    let curLetter = null;
-    for(const e of entries){
-      const ch = sortKey(e.term).charAt(0);
-      const letter = (ch >= 'א' && ch <= 'ת') ? ch : '#';
-      if(letter !== curLetter){
-        curLetter = letter;
-        body += `\n    <h2 class="pdf-letter">${escapeHtml(letter)}</h2>`;
-      }
-      body += entryHtml(e);
-    }
-    toc = tocList(entries);
-  }
+  // רק הערכים שנבחרו — בלי כותרות מדור/נושא בין לבין (בלבל בתוכן העניינים).
+  // הסדר עדיין נקבע לפי האפשרות שנבחרה: נושאי המפתח או א״ב.
+  const body = entries.map(entryHtml).join('');
+  const toc = tocList(entries);
 
   const canPrint = typeof window.print === 'function' && typeof window.Capacitor === 'undefined';
   return `
