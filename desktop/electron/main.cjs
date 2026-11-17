@@ -105,6 +105,13 @@ function createWindow(){
             fs.writeFileSync(process.env.MILON_SHOT, img.toPNG());
             console.log('SHOT_OK ' + process.env.MILON_SHOT);
           }
+          // MILON_PDF=<קובץ> — מפיק PDF באותו מנגנון של "שמירה כ-PDF" בדפדפן
+          if (process.env.MILON_PDF) {
+            win.setBackgroundColor('#ffffff');   // אחרת Electron צובע את שולי העמוד בצבע החלון
+            const pdf = await win.webContents.printToPDF({ printBackground: true, preferCSSPageSize: true });
+            fs.writeFileSync(process.env.MILON_PDF, pdf);
+            console.log('PDF_OK ' + pdf.length + ' bytes');
+          }
         } catch (e) { console.log('SCRIPT_FAIL ' + (e && e.message)); }
         app.quit();
       }, 1500);

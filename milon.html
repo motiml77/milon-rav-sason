@@ -1783,6 +1783,11 @@
     background: rgba(139,46,28,0.06);
   }
   .home-all{ text-align: center; margin: 8px 0 30px; }
+  .home-copyright{
+    margin: 0 auto 10px; padding-top: 14px; max-width: 520px;
+    border-top: 1px solid var(--gold);
+    text-align: center; font-size: 13px; line-height: 1.7; color: var(--ink-faint);
+  }
   .home-all-btn, .home-back{
     background: transparent; border: none;
     color: var(--gold-deep);
@@ -1859,6 +1864,249 @@
     .home-topic-head{ padding: 12px 12px; }
     .home-search-btn{ display: flex; }
   }
+  /* ═══ הפקת PDF — מסך בחירת הערכים ═══ */
+  .sidebar-pages{ grid-template-columns: repeat(4, 1fr); }
+  .page-btn{ position: relative; }
+  .pdf-badge{
+    position: absolute; top: 3px; left: 50%; margin-left: 6px;
+    min-width: 17px; height: 17px; padding: 0 4px;
+    display: none; align-items: center; justify-content: center;
+    background: var(--crimson); color: var(--cream);
+    font-size: 10px; font-weight: 700; border-radius: 999px;
+  }
+  .entry-pdf.active svg{ fill: none; }
+  .home-pdf-btn{
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 14px; padding: 7px 18px;
+    background: transparent; border: 1px solid var(--gold); border-radius: 999px;
+    color: var(--gold-deep); font-family: inherit; font-size: 13.5px; font-weight: 700;
+    cursor: pointer;
+  }
+  .home-pdf-btn:hover{ background: var(--gold-deep); color: var(--cream); border-color: var(--gold-deep); }
+  .pdfb-step{
+    display: flex; align-items: center; gap: 10px;
+    font-size: 20px; font-weight: 900; color: var(--ink);
+    margin: 30px 0 12px; padding-bottom: 6px;
+    border-bottom: 2px double var(--gold-deep);
+  }
+  .pdfb-step-num{
+    flex: 0 0 auto; width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ink); color: var(--gold-bright);
+    font-size: 14px; border-radius: 50%;
+  }
+  .pdfb-count{ font-size: 13px; font-weight: 700; color: var(--gold-deep); margin-right: auto; }
+  .pdfb-actions{ display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .pdfb-btn{
+    background: transparent; border: 1.5px solid var(--gold-deep);
+    color: var(--gold-deep); font-family: inherit; font-size: 14px; font-weight: 700;
+    padding: 7px 16px; border-radius: 999px; cursor: pointer;
+  }
+  .pdfb-btn:hover{ background: var(--gold-deep); color: var(--cream); }
+  .pdfb-btn.primary{ background: var(--ink); border-color: var(--ink); color: var(--gold-bright); font-size: 16px; padding: 10px 28px; }
+  .pdfb-btn.primary:hover{ background: var(--crimson); border-color: var(--crimson); color: var(--cream); }
+  .pdfb-btn:disabled{ opacity: 0.45; cursor: default; }
+  .pdfb-btn:disabled:hover{ background: transparent; color: var(--gold-deep); }
+  .pdfb-btn.primary:disabled:hover{ background: var(--ink); color: var(--gold-bright); border-color: var(--ink); }
+  .pdfb-filter{
+    width: 100%; padding: 9px 14px; margin-bottom: 12px;
+    background: rgba(255,255,255,0.7); border: 1.5px solid var(--gold-deep); border-radius: 5px;
+    font-family: inherit; font-size: 16px; color: var(--ink); direction: rtl; outline: none;
+  }
+  .pdfb-filter:focus{ box-shadow: 0 0 0 2px var(--gold-bright); }
+  .pdfb-filter-results[hidden], .pdfb-tree[hidden]{ display: none; }
+  .pdfb-sec-title{
+    font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--gold-deep);
+    margin: 16px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--gold);
+  }
+  .pdfb-topic{ border: 1px solid var(--cream-3); background: rgba(255,255,255,0.45); margin-bottom: 5px; }
+  .pdfb-topic.has-sel{ border-color: var(--gold-deep); background: rgba(255,255,255,0.72); }
+  .pdfb-topic-head{ display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+  .pdfb input[type="checkbox"], .pdfb input[type="radio"]{
+    width: 17px; height: 17px; flex: 0 0 auto; accent-color: var(--gold-deep); cursor: pointer;
+  }
+  .pdfb-topic-title{
+    flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px;
+    font-size: 16px; font-weight: 700; line-height: 1.3; cursor: pointer; user-select: none;
+  }
+  .pdfb-topic-title svg{ flex: 0 0 auto; color: var(--gold-deep); transition: transform 0.15s; }
+  .pdfb-topic.open .pdfb-topic-title svg{ transform: rotate(-90deg); }
+  .pdfb-topic-count{ flex: 0 0 auto; font-size: 12px; font-weight: 700; color: var(--ink-faint); white-space: nowrap; }
+  .pdfb-topic.has-sel .pdfb-topic-count{ color: var(--crimson); }
+  .pdfb-entries{ display: none; padding: 6px 14px 12px; columns: 2; column-gap: 24px; border-top: 1px dashed var(--gold); }
+  .pdfb-topic.open .pdfb-entries{ display: block; }
+  .pdfb-filter-results{ columns: 2; column-gap: 24px; margin-bottom: 12px; }
+  .pdfb-entry{
+    display: flex; align-items: flex-start; gap: 8px; break-inside: avoid;
+    padding: 4px 2px; font-size: 15px; line-height: 1.4; color: var(--ink-soft); cursor: pointer;
+  }
+  .pdfb-entry input{ margin-top: 2px; }
+  .pdfb-entry:hover{ color: var(--ink); }
+  .pdfb-empty{ color: var(--ink-faint); font-style: italic; font-size: 14.5px; padding: 4px 0 8px; }
+  .pdfb-chips{ display: flex; flex-wrap: wrap; gap: 6px; }
+  .pdfb-chip{
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(184,137,58,0.12); border: 1px solid var(--gold);
+    color: var(--ink); font-family: inherit; font-size: 13.5px;
+    padding: 3px 6px 3px 12px; border-radius: 999px;
+  }
+  .pdfb-chip button{
+    width: 20px; height: 20px; border: none; border-radius: 50%;
+    background: transparent; color: var(--crimson); font-size: 16px; line-height: 1; cursor: pointer;
+  }
+  .pdfb-chip button:hover{ background: rgba(139,46,28,0.15); }
+  .pdfb-opts{ display: flex; flex-direction: column; gap: 12px; font-size: 15.5px; }
+  .pdfb-opts label{ display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .pdfb-field{ flex-wrap: wrap; }
+  .pdfb-field input{
+    flex: 1 1 220px; padding: 7px 12px;
+    background: rgba(255,255,255,0.7); border: 1.5px solid var(--gold); border-radius: 5px;
+    font-family: inherit; font-size: 16px; color: var(--ink); direction: rtl; outline: none;
+  }
+  .pdfb-radio{ display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+  .pdfb-go{
+    position: sticky; bottom: 0; z-index: 3;
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    margin: 30px -8px 0; padding: 12px 14px;
+    background: var(--cream); border-top: 2px double var(--gold-deep);
+  }
+  .pdfb-go-status{ font-size: 14px; color: var(--ink-soft); flex: 1 1 180px; }
+  .pdfb-go-status.err{ color: var(--crimson); font-weight: 700; }
+
+  /* ═══ מסמך ה-PDF — תצוגה מקדימה על המסך ═══ */
+  #print-root{ display: none; }
+  body.pdf-preview .page{ display: none !important; }
+  body.pdf-preview #print-root{
+    display: block; position: fixed; inset: 0; z-index: 100;
+    overflow: auto; background: #6f5a40; padding: 0 12px 44px;
+  }
+  .pdf-bar{
+    position: sticky; top: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+    margin: 0 -12px 20px; padding: 10px 16px;
+    background: var(--ink); color: var(--cream);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  }
+  .pdf-bar-info{ flex: 1 1 220px; text-align: center; font-size: 13.5px; opacity: 0.88; line-height: 1.5; }
+  .pdf-bar-btn{
+    font-family: inherit; font-size: 14.5px; font-weight: 700;
+    padding: 8px 20px; border-radius: 999px; cursor: pointer;
+    border: 1.5px solid var(--gold-bright); background: transparent; color: var(--gold-bright);
+  }
+  .pdf-bar-btn.primary{ background: var(--gold-bright); color: var(--ink); }
+  .pdf-doc{
+    width: min(210mm, 100%); margin: 0 auto;
+    background: #fffdf7; color: #1d1205;
+    padding: 17mm 17mm 20mm;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.4);
+    font-family: 'Frank Ruhl Libre', 'David Libre', serif;
+    font-size: 16px; line-height: 1.75;
+    direction: rtl; text-align: right;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .pdf-credit{
+    font-size: 0.74em; color: #8a6e48; text-align: center; line-height: 1.5;
+    padding-bottom: 0.7em; border-bottom: 1px solid #d9c59a;
+  }
+  .pdf-credit a{ color: #8a6018; text-decoration: none; font-weight: 700; direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+  .pdf-cover{ text-align: center; padding: 3em 0 2.4em; }
+  .pdf-cover img{ width: 5.4em; height: auto; margin-bottom: 1.5em; }
+  .pdf-cover-eyebrow{ font-size: 0.86em; letter-spacing: 0.28em; color: #8a6018; font-weight: 700; }
+  .pdf-cover-title{ font-size: 2.9em; font-weight: 900; line-height: 1.15; margin: 0.28em 0 0.2em; color: #2a1a08; overflow-wrap: anywhere; }
+  .pdf-cover-sub{ font-size: 1.12em; font-style: italic; color: #5a3e1e; }
+  .pdf-rule{ width: 55%; height: 1px; margin: 1.7em auto; background: linear-gradient(90deg, transparent, #b8893a 30%, #b8893a 70%, transparent); }
+  .pdf-cover-meta{ font-size: 0.92em; color: #5a3e1e; letter-spacing: 0.05em; }
+  .pdf-h-toc, .pdf-sec{
+    font-size: 1.75em; font-weight: 900; text-align: center; color: #2a1a08; line-height: 1.25;
+    margin: 1.7em 0 0.75em; padding-bottom: 0.35em; border-bottom: 3px double #8a6018;
+  }
+  .pdf-sec-eyebrow{ display: block; font-size: 0.42em; letter-spacing: 0.32em; color: #8a6018; font-weight: 700; margin-bottom: 0.35em; }
+  .pdf-topic{
+    font-size: 1.22em; font-weight: 700; color: #8a6018; line-height: 1.3;
+    margin: 1.6em 0 0.3em; padding: 0.12em 0.7em 0.12em 0; border-right: 4px solid #b8893a;
+  }
+  .pdf-letter{
+    font-size: 1.5em; font-weight: 900; color: #8a6018; text-align: center; line-height: 1.2;
+    margin: 1.5em 0 0.2em;
+  }
+  .pdf-entry{ margin: 0 0 1.7em; }
+  .pdf-entry-title{
+    font-size: 1.38em; font-weight: 900; color: #2a1a08; line-height: 1.3;
+    margin: 1.1em 0 0.5em; padding-bottom: 0.2em; border-bottom: 1px solid #b8893a;
+  }
+  .pdf-def{ margin: 0 0 0.75em; }
+  .pdf-def-text{ text-align: justify; }
+  .pdf-def.new-block{ margin-top: 1em; padding-top: 0.8em; border-top: 1px dotted #c9b182; }
+  .pdf-src{ font-size: 0.82em; color: #8a6018; text-align: left; margin-top: 0.15em; }
+  .pdf-src::before{ content: "✦ "; font-size: 0.8em; }
+  .pdf-doc .quote{
+    display: block; font-family: 'Heebo', sans-serif; font-weight: 300;
+    font-size: 0.92em; line-height: 1.8; color: #4a341a;
+    background: #f7efdc; border-right: 3px solid #b8893a;
+    padding: 0.6em 1em; margin: 0.6em 0; text-align: justify;
+  }
+  .pdf-doc .text-small{ font-size: 0.82em; color: #5a3e1e; opacity: 1; }
+  .pdf-refs{
+    margin-top: 0.9em; padding: 0.55em 0.9em 0.6em;
+    background: #f7efdc; border: 1px solid #dcc79c; border-radius: 4px;
+    font-size: 0.9em;
+  }
+  .pdf-refs-title{ font-weight: 700; color: #8a6018; font-size: 0.92em; letter-spacing: 0.05em; margin-bottom: 0.25em; }
+  .pdf-refs ul{ list-style: none; columns: 2; column-gap: 1.8em; }
+  .pdf-refs li{ break-inside: avoid; position: relative; padding: 0.08em 1em 0.08em 0; line-height: 1.5; color: #5a3e1e; }
+  .pdf-refs li::before{ content: "◂"; position: absolute; right: 0; top: 0.12em; color: #b8893a; font-size: 0.85em; }
+  .pdf-refs a{ color: #2a1a08; text-decoration: none; font-weight: 700; border-bottom: 1px dotted #b8893a; }
+  .pdf-toc-sec{ font-size: 1.08em; font-weight: 900; color: #2a1a08; margin: 1em 0 0.15em; }
+  .pdf-toc-topic{ font-size: 0.95em; font-weight: 700; color: #8a6018; margin: 0.55em 0 0.1em; }
+  .pdf-toc ul{ list-style: none; columns: 2; column-gap: 2em; font-size: 0.93em; }
+  .pdf-toc li{ break-inside: avoid; padding: 0.1em 0; line-height: 1.45; }
+  .pdf-toc a{ color: inherit; text-decoration: none; }
+  .pdf-end{
+    margin-top: 2.4em; padding-top: 0.8em; border-top: 1px solid #d9c59a;
+    text-align: center; font-size: 0.78em; color: #8a6e48; line-height: 1.6;
+  }
+  .pdf-end a{ color: #8a6018; text-decoration: none; direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+  @media (max-width: 860px){
+    .pdfb-entries, .pdfb-filter-results{ columns: 1; }
+    .pdf-doc{ padding: 22px 18px 30px; font-size: 15px; }
+    .pdf-cover-title{ font-size: 2.1em; }
+    .pdf-refs ul, .pdf-toc ul{ columns: 1; }
+    body.pdf-preview #print-root{ padding: 0 0 30px; }
+    .pdf-bar{ margin: 0 0 12px; }
+  }
+
+  /* ═══ מסמך ה-PDF — פריסת הדפסה (A4, כותרת רצה עם כתובת האתר, מספרי עמודים) ═══ */
+  @page pdfdoc{
+    size: A4; margin: 21mm 18mm 19mm;
+    @top-center{
+      content: "מילון מונחים בפנימיות התורה  ·  milon-rav-sason.vercel.app";
+      font-family: 'Frank Ruhl Libre', serif; font-size: 8.5pt; color: #8a6e48;
+    }
+    @bottom-center{
+      content: counter(page);
+      font-family: 'Frank Ruhl Libre', serif; font-size: 9.5pt; color: #5a3e1e;
+    }
+  }
+  @page pdfcover{ size: A4; margin: 15mm 18mm 19mm; }
+  @media print{
+    html, body.pdf-preview{ background: #fff !important; }
+    body.pdf-preview #print-root{ position: static; overflow: visible; background: none; padding: 0; }
+    body.pdf-preview .pdf-bar{ display: none !important; }
+    body.pdf-preview .pdf-doc{
+      width: auto; margin: 0; padding: 0 1.5mm; box-shadow: none; background: #fff;
+      font-size: 11.5pt; line-height: 1.7; page: pdfdoc;
+    }
+    .pdf-cover-page{ page: pdfcover; break-after: page; min-height: 255mm; display: flex; flex-direction: column; }
+    .pdf-cover{ margin: auto 0; padding: 0; }
+    .pdf-toc{ break-after: page; }
+    .pdf-h-toc{ margin-top: 0; }
+    .pdf-sec{ break-before: page; margin-top: 0; }
+    .pdf-sec, .pdf-topic, .pdf-letter, .pdf-entry-title, .pdf-refs-title{ break-after: avoid; }
+    .pdf-def{ orphans: 2; widows: 2; }
+    .pdf-src{ break-before: avoid; }
+    .pdf-refs{ break-inside: avoid; }
+    .pdf-doc a{ color: inherit; }
+  }
 </style>
 </head>
 <body data-font="md">
@@ -1879,6 +2127,11 @@
       <button class="page-btn" data-page="contact" title="צור קשר">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg>
         <span>צור קשר</span>
+      </button>
+      <button class="page-btn" data-page="pdf" title="הפקת קובץ PDF מערכים נבחרים">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+        <span>PDF</span>
+        <span class="pdf-badge" id="pdf-badge"></span>
       </button>
     </div>
     <div class="brand">
@@ -1950,6 +2203,8 @@
     </div>
   </main>
 </div>
+
+<div id="print-root"></div>
 
 <script>
 const TERMS_URL   = "terms.json";
@@ -2893,6 +3148,7 @@ async function load(){
     return;
   }
   renderNav();
+  updatePdfBadge();
   buildTitleIndex();   // חיפוש כותרות עובד מיד
 
   // אם נשמרו לשוניות מהפעם הקודמת — משחזרים אותן; אחרת נוחתים על מפתח הנושאים.
@@ -3235,12 +3491,17 @@ function renderHome(restoreScroll){
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
           <span>חיפוש במילון…</span>
         </button>
+        <div><button type="button" class="home-pdf-btn" onclick="setPage('pdf')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+          <span>הפקת קובץ PDF מערכים נבחרים</span>
+        </button></div>
         <div class="topic-landing-rule"></div>
       </div>
       ${sections}
       <div class="home-all">
         <button type="button" class="home-all-btn" onclick="selectTopic('${ALL_TOPIC_ID}', true)">כל ${data.all.length} הערכים לפי סדר א״ב</button>
       </div>
+      <div class="home-copyright">כל הזכויות שמורות לרב ראובן ששון שליט&quot;א. הדברים הם סיכומים וציטוטים מתוך ספריו.</div>
     </div>
   `);
   if(restoreScroll && _homeScroll){
@@ -3363,6 +3624,13 @@ function renderEntryPage(topic, ti, entry, ei){
                   title="${isBookmarked(entry.id) ? 'הסר מהסימניות' : 'הוסף לסימניות'}"
                   aria-label="${isBookmarked(entry.id) ? 'הסר מהסימניות' : 'הוסף לסימניות'}">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </button>
+          <button class="entry-bookmark entry-pdf ${getPdfSel().has(entry.id) ? 'active' : ''}"
+                  onclick="onTogglePdf('${escapeAttr(entry.id)}', this)"
+                  aria-pressed="${getPdfSel().has(entry.id) ? 'true' : 'false'}"
+                  title="${getPdfSel().has(entry.id) ? 'הסר מקובץ ה-PDF' : 'הוסף לקובץ PDF'}"
+                  aria-label="${getPdfSel().has(entry.id) ? 'הסר מקובץ ה-PDF' : 'הוסף לקובץ PDF'}">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path class="pdf-plus" d="M12 12v6M9 15h6"/></svg>
           </button>
         </h1>
         <div class="entry-topics">${entryTopicsHtml(entry.id, topic)}</div>
@@ -4075,6 +4343,447 @@ function resetSearchState(){
   if(btn) btn.classList.remove('active');
 }
 
+// ════════════════════════════════════════════════════════════════
+//  ─── הפקת PDF מערכים נבחרים ───
+// ════════════════════════════════════════════════════════════════
+// המשתמש בוחר ערכים; נבנה מהם מסמך אחד (שער, תוכן עניינים, מדור ← נושא ← ערך,
+// ובסוף כל ערך רשימת ההפניות שלו), והדפדפן עצמו הופך אותו ל-PDF דרך "הדפסה ←
+// שמירה כ-PDF". כך הטקסט נשאר טקסט אמיתי (ניתן לחיפוש ולהעתקה), בעברית מימין
+// לשמאל ובגופן של האתר — בלי ספריית PDF, שאף אחת מהן אינה מטפלת טוב בעברית.
+//
+// כתובת האתר שמודפסת בראש הקובץ. אם האתר יעבור לכתובת אחרת — לעדכן כאן,
+// וגם בכלל ה-CSS  @page pdfdoc  (הכותרת הרצה בראש כל עמוד).
+const SITE_URL = 'https://milon-rav-sason.vercel.app';
+const PDF_SEL_KEY  = 'milon_pdf_sel_v1';
+const PDF_OPTS_KEY = 'milon_pdf_opts_v1';
+let _pdfSel = null, _pdfOpts = null, _pdfBusy = false, _pdfPrevTitle = '';
+
+function getPdfSel(){
+  if(!_pdfSel){
+    try{ _pdfSel = new Set(JSON.parse(lsGet(PDF_SEL_KEY) || '[]')); }catch(e){ _pdfSel = new Set(); }
+  }
+  return _pdfSel;
+}
+function savePdfSel(){
+  lsSet(PDF_SEL_KEY, JSON.stringify([...getPdfSel()]));
+  updatePdfBadge();
+}
+function pdfOpts(){
+  if(!_pdfOpts){
+    _pdfOpts = { order: 'topics', toc: true, refs: true, title: '' };
+    try{ Object.assign(_pdfOpts, JSON.parse(lsGet(PDF_OPTS_KEY) || '{}')); }catch(e){}
+  }
+  return _pdfOpts;
+}
+window.pdfSetOpt = function(k, v){
+  pdfOpts()[k] = v;
+  lsSet(PDF_OPTS_KEY, JSON.stringify(pdfOpts()));
+  if(k === 'order') pdfRefresh();
+};
+function updatePdfBadge(){
+  const b = document.getElementById('pdf-badge');
+  if(!b) return;
+  const n = getPdfSel().size;
+  b.textContent = n;
+  b.style.display = n > 0 ? 'inline-flex' : 'none';
+}
+
+// הערכים שנבחרו, בסדר שבו יופיעו בקובץ
+function pdfOrdered(){
+  const sel = getPdfSel();
+  if(!data) return [];
+  if(pdfOpts().order === 'abc') return data.allTopic.entries.filter(e => sel.has(e.id)).map(e => e.id);
+  const out = [], seen = new Set();
+  for(const sec of data.sections) for(const tid of sec.topics){
+    const t = getTopic(tid);
+    if(!t) continue;
+    for(const e of t.entries){
+      if(!sel.has(e.id) || seen.has(e.id)) continue;
+      const rec = entryIndex.get(e.id);
+      // ערך שמשובץ בכמה נושאים מופיע בקובץ פעם אחת — תחת הנושא הראשון שלו
+      if(rec && rec.topics[0] !== t) continue;
+      seen.add(e.id); out.push(e.id);
+    }
+  }
+  for(const e of data.all) if(sel.has(e.id) && !seen.has(e.id)) out.push(e.id);
+  return out;
+}
+
+// ─── מסך הבחירה ───
+const PDF_CARET = '<svg aria-hidden="true" width="11" height="11" viewBox="0 0 10 10"><path d="M7 1 3 5l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function pdfEntryCheckHtml(e){
+  return `<label class="pdfb-entry"><input type="checkbox" data-entry="${escapeHtml(e.id)}"${getPdfSel().has(e.id) ? ' checked' : ''}
+            onchange="pdfToggleEntry('${escapeAttr(e.id)}', this.checked)"/><span>${escapeHtml(e.term)}</span></label>`;
+}
+function pdfTopicRowHtml(t){
+  return `
+    <div class="pdfb-topic" data-topic="${escapeHtml(t.id)}">
+      <div class="pdfb-topic-head">
+        <input type="checkbox" class="pdfb-tcheck" aria-label="בחירת כל הערכים בנושא ${escapeAttr(t.title)}"
+               onchange="pdfToggleTopic('${escapeAttr(t.id)}', this.checked)"/>
+        <div class="pdfb-topic-title" role="button" tabindex="0" data-kb aria-expanded="false"
+             onclick="pdfExpandTopic(this)">${PDF_CARET}<span>${escapeHtml(t.title)}</span></div>
+        <span class="pdfb-topic-count"></span>
+      </div>
+      <div class="pdfb-entries"></div>
+    </div>`;
+}
+function renderPdfBuilder(){
+  const sel = getPdfSel();
+  for(const id of [...sel]) if(!entryIndex.has(id)) sel.delete(id);   // ערכים שכבר אינם במילון
+  const o = pdfOpts();
+  const tree = data.sections.map(sec => {
+    const topics = sec.topics.map(getTopic).filter(t => t && t.entries.length);
+    if(!topics.length) return '';
+    return `<div class="pdfb-sec-title">${escapeHtml(sec.title || 'ערכים')}</div>` + topics.map(pdfTopicRowHtml).join('');
+  }).join('');
+  return `
+    <div class="info-page pdfb">
+      <div class="info-eyebrow">הפקת PDF</div>
+      <h1 class="info-title">קובץ PDF מערכים נבחרים</h1>
+      <div class="info-subtitle">בחרו ערכים, והמילון יפיק מהם קובץ מעוצב — מסודר לפי נושאים, ובסוף כל ערך רשימת ההפניות שלו</div>
+      <div class="info-rule"></div>
+
+      <div class="pdfb-step"><span class="pdfb-step-num">א</span><span>בחירת הערכים</span></div>
+      <div class="pdfb-actions">
+        <button type="button" class="pdfb-btn" onclick="pdfAddBookmarks()">＋ הסימניות שלי (${getBookmarks().size})</button>
+        <button type="button" class="pdfb-btn" onclick="pdfSelectAll(true)">בחירת הכל</button>
+        <button type="button" class="pdfb-btn" onclick="pdfSelectAll(false)">ניקוי הבחירה</button>
+      </div>
+      <input class="pdfb-filter" id="pdfb-filter" type="search" placeholder="סינון לפי שם ערך…" autocomplete="off"
+             aria-label="סינון לפי שם ערך" oninput="pdfFilter(this.value)"/>
+      <div class="pdfb-filter-results" id="pdfb-filter-results" hidden></div>
+      <div class="pdfb-tree" id="pdfb-tree">${tree}</div>
+
+      <div class="pdfb-step"><span class="pdfb-step-num">ב</span><span>הערכים שנבחרו</span><span class="pdfb-count" id="pdfb-count"></span></div>
+      <div class="pdfb-chips" id="pdfb-chips"></div>
+
+      <div class="pdfb-step"><span class="pdfb-step-num">ג</span><span>אפשרויות</span></div>
+      <div class="pdfb-opts">
+        <label class="pdfb-field"><span>כותרת הקובץ:</span>
+          <input type="text" id="pdfb-title" maxlength="80" placeholder="לקט ערכים" value="${escapeAttr(o.title || '')}"
+                 oninput="pdfSetOpt('title', this.value)"/></label>
+        <div class="pdfb-radio"><span>סדר הערכים:</span>
+          <label><input type="radio" name="pdfb-order" value="topics"${o.order !== 'abc' ? ' checked' : ''} onchange="pdfSetOpt('order', 'topics')"/><span>לפי נושאי המפתח</span></label>
+          <label><input type="radio" name="pdfb-order" value="abc"${o.order === 'abc' ? ' checked' : ''} onchange="pdfSetOpt('order', 'abc')"/><span>לפי סדר א״ב</span></label>
+        </div>
+        <label><input type="checkbox"${o.toc ? ' checked' : ''} onchange="pdfSetOpt('toc', this.checked)"/><span>תוכן עניינים בתחילת הקובץ</span></label>
+        <label><input type="checkbox"${o.refs ? ' checked' : ''} onchange="pdfSetOpt('refs', this.checked)"/><span>רשימת ההפניות בסוף כל ערך</span></label>
+      </div>
+
+      <div class="pdfb-go">
+        <div class="pdfb-go-status" id="pdfb-status" role="status"></div>
+        <button type="button" class="pdfb-btn primary" id="pdfb-make" onclick="pdfGenerate()">יצירת הקובץ</button>
+      </div>
+    </div>`;
+}
+// מסנכרן את כל המסך עם הבחירה: תיבות הסימון (ערך יכול להופיע בכמה נושאים), המונים והרשימה
+const PDF_CHIPS_MAX = 80;
+function pdfRefresh(){
+  updatePdfBadge();
+  const root = document.querySelector('.pdfb');
+  if(!root || !data) return;
+  const sel = getPdfSel();
+  root.querySelectorAll('input[data-entry]').forEach(cb => { cb.checked = sel.has(cb.dataset.entry); });
+  root.querySelectorAll('.pdfb-topic').forEach(el => {
+    const t = getTopic(el.dataset.topic);
+    if(!t) return;
+    let n = 0;
+    for(const e of t.entries) if(sel.has(e.id)) n++;
+    const cb = el.querySelector('.pdfb-tcheck');
+    cb.checked = n > 0 && n === t.entries.length;
+    cb.indeterminate = n > 0 && n < t.entries.length;
+    el.querySelector('.pdfb-topic-count').textContent = n ? n + ' מתוך ' + t.entries.length : t.entries.length + ' ערכים';
+    el.classList.toggle('has-sel', n > 0);
+  });
+  const ids = pdfOrdered();
+  const chips = document.getElementById('pdfb-chips');
+  if(chips){
+    chips.innerHTML = !ids.length
+      ? '<div class="pdfb-empty">עדיין לא נבחרו ערכים. סמנו ערכים ברשימה שלמעלה, או הוסיפו ערך מתוך הדף שלו בכפתור ה-PDF שליד שמו.</div>'
+      : ids.slice(0, PDF_CHIPS_MAX).map(id =>
+          `<span class="pdfb-chip">${escapeHtml(entryIndex.get(id).entry.term)}<button type="button" aria-label="הסרה" title="הסרה"
+                 onclick="pdfToggleEntry('${escapeAttr(id)}', false)">×</button></span>`).join('') +
+        (ids.length > PDF_CHIPS_MAX ? `<div class="pdfb-empty">ועוד ${ids.length - PDF_CHIPS_MAX} ערכים</div>` : '');
+  }
+  const cnt = document.getElementById('pdfb-count');
+  if(cnt) cnt.textContent = ids.length ? ids.length + ' ערכים' : '';
+  const make = document.getElementById('pdfb-make');
+  if(make) make.disabled = !ids.length || _pdfBusy;
+  const st = document.getElementById('pdfb-status');
+  if(st && !_pdfBusy){
+    st.classList.remove('err');
+    st.textContent = !ids.length ? 'בחרו לפחות ערך אחד'
+      : ids.length + ' ערכים ייכנסו לקובץ' + (ids.length > 150 ? ' — קובץ גדול, ההפקה תיקח מעט זמן' : '');
+  }
+}
+window.pdfToggleEntry = function(id, on){
+  const sel = getPdfSel();
+  if(on) sel.add(id); else sel.delete(id);
+  savePdfSel();
+  pdfRefresh();
+};
+window.pdfToggleTopic = function(tid, on){
+  const t = getTopic(tid);
+  if(!t) return;
+  const sel = getPdfSel();
+  for(const e of t.entries){ if(on) sel.add(e.id); else sel.delete(e.id); }
+  savePdfSel();
+  pdfRefresh();
+};
+window.pdfExpandTopic = function(head){
+  const box = head.closest('.pdfb-topic');
+  const t = box && getTopic(box.dataset.topic);
+  if(!t) return;
+  const list = box.querySelector('.pdfb-entries');
+  const open = !box.classList.contains('open');
+  if(open && !list.innerHTML) list.innerHTML = t.entries.map(pdfEntryCheckHtml).join('');   // נבנה רק בפתיחה
+  box.classList.toggle('open', open);
+  head.setAttribute('aria-expanded', open ? 'true' : 'false');
+};
+window.pdfSelectAll = function(on){
+  const sel = getPdfSel();
+  if(on) for(const e of data.all) sel.add(e.id); else sel.clear();
+  savePdfSel();
+  pdfRefresh();
+};
+window.pdfAddBookmarks = function(){
+  const sel = getPdfSel();
+  for(const id of getBookmarks()) if(entryIndex.has(id)) sel.add(id);
+  savePdfSel();
+  pdfRefresh();
+};
+window.pdfFilter = function(q){
+  const res = document.getElementById('pdfb-filter-results'), tree = document.getElementById('pdfb-tree');
+  if(!res || !tree) return;
+  const nq = tokenize(q).join(' ');
+  if(!nq){ res.hidden = true; res.innerHTML = ''; tree.hidden = false; return; }
+  const hits = [];
+  for(const e of data.allTopic.entries){
+    if(e.norm === undefined) e.norm = tokenize(e.term).join(' ');
+    if(e.norm.indexOf(nq) >= 0) hits.push(e);
+  }
+  res.innerHTML = hits.length ? hits.slice(0, 120).map(pdfEntryCheckHtml).join('')
+                              : '<div class="pdfb-empty">אין ערך בשם הזה</div>';
+  res.hidden = false;
+  tree.hidden = true;
+};
+// כפתור ה-PDF שבדף הערך
+window.onTogglePdf = function(id, btn){
+  const sel = getPdfSel();
+  const now = !sel.has(id);
+  if(now) sel.add(id); else sel.delete(id);
+  savePdfSel();
+  if(btn){
+    btn.classList.toggle('active', now);
+    btn.setAttribute('aria-pressed', now ? 'true' : 'false');
+    const label = now ? 'הסר מקובץ ה-PDF' : 'הוסף לקובץ PDF';
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('title', label);
+  }
+  announce(now ? 'הערך נוסף לקובץ ה-PDF. ' + sel.size + ' ערכים נבחרו' : 'הערך הוסר מקובץ ה-PDF');
+};
+
+// ─── טעינת הערכים שנבחרו (עד 8 במקביל) ───
+async function pdfLoadEntries(ids, onProgress){
+  const out = new Array(ids.length);
+  let next = 0, done = 0, failed = 0;
+  async function worker(){
+    while(next < ids.length){
+      const i = next++;
+      try{ out[i] = await loadEntry(ids[i]); }catch(e){ failed++; }
+      onProgress(++done);
+    }
+  }
+  const workers = [];
+  for(let k = 0; k < Math.min(8, ids.length); k++) workers.push(worker());
+  await Promise.all(workers);
+  return { entries: out, failed: failed };
+}
+
+// ─── בניית המסמך ───
+// מספר → אותיות: 7 → ז׳, 15 → ט״ו, 787 → תשפ״ז
+function hebNumeral(n){
+  const ones = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט'];
+  const tens = ['', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ'];
+  const hund = ['', 'ק', 'ר', 'ש', 'ת'];
+  let out = '';
+  n = n % 1000;
+  while(n >= 400){ out += 'ת'; n -= 400; }
+  if(n >= 100){ out += hund[Math.floor(n / 100)]; n %= 100; }
+  if(n === 15) out += 'טו';            // לא י״ה
+  else if(n === 16) out += 'טז';       // לא י״ו
+  else { out += tens[Math.floor(n / 10)] + ones[n % 10]; }
+  return out.length === 1 ? out + '׳' : out.slice(0, -1) + '״' + out.slice(-1);
+}
+// התאריך העברי של היום, באותיות. הלוח העברי מגיע מהדפדפן (Intl); אם אינו
+// זמין — תאריך לועזי, כדי שהשער לא יישאר ריק.
+function pdfHebrewDate(){
+  const d = new Date();
+  try{
+    const parts = new Intl.DateTimeFormat('he-u-ca-hebrew', { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
+    const get = t => (parts.find(p => p.type === t) || {}).value || '';
+    const day = parseInt(get('day').replace(/[^0-9]/g, ''), 10);
+    const year = parseInt(get('year').replace(/[^0-9]/g, ''), 10);
+    const month = get('month').replace(/^ב/, '');
+    if(day && year && month) return hebNumeral(day) + ' ב' + month + ' ' + hebNumeral(year);
+  }catch(e){}
+  try{ return d.toLocaleDateString('he-IL'); }catch(e2){ return ''; }
+}
+function pdfDocHtml(entries, o){
+  const inDoc = new Set(entries.map(e => e.id));
+  const title = (o.title || '').trim() || 'לקט ערכים';
+  const host = SITE_URL.split('//')[1] || SITE_URL;
+  const siteLink = `<a href="${SITE_URL}">${escapeHtml(host)}</a>`;
+  const byTopics = o.order !== 'abc';
+  const hEntry = byTopics ? 'h4' : 'h3';
+
+  const entryHtml = e => {
+    const defs = (e.definitions || []).map((d, i) => `
+      <div class="pdf-def${i > 0 && e.definitions[i - 1].source ? ' new-block' : ''}">
+        <div class="pdf-def-text">${d.text}</div>${d.source ? `
+        <div class="pdf-src">${d.source}</div>` : ''}
+      </div>`).join('');
+    let refs = '';
+    if(o.refs){
+      const rel = (e.related || []).map(rid => entryIndex.get(rid)).filter(Boolean);
+      if(rel.length){
+        refs = `
+      <div class="pdf-refs">
+        <div class="pdf-refs-title">הפניות · ראה גם</div>
+        <ul>${rel.map(r => inDoc.has(r.entry.id)
+          ? `<li><a href="#pdfe-${escapeHtml(r.entry.id)}">${escapeHtml(r.entry.term)}</a></li>`
+          : `<li>${escapeHtml(r.entry.term)}</li>`).join('')}</ul>
+      </div>`;
+      }
+    }
+    return `
+    <article class="pdf-entry" id="pdfe-${escapeHtml(e.id)}">
+      <${hEntry} class="pdf-entry-title">${escapeHtml(e.term)}</${hEntry}>${defs}${refs}
+    </article>`;
+  };
+  const tocList = list => `<ul>${list.map(e => `<li><a href="#pdfe-${escapeHtml(e.id)}">${escapeHtml(e.term)}</a></li>`).join('')}</ul>`;
+
+  let body = '', toc = '';
+  if(byTopics){
+    // מדור ← נושא ← ערך. הערכים כבר מסודרים כך (ראה pdfOrdered); כאן רק מקבצים.
+    let curSec = null, curTopic = null, group = [], secNum = 0;
+    const flushToc = () => { if(group.length){ toc += tocList(group); group = []; } };
+    for(const e of entries){
+      const rec = entryIndex.get(e.id);
+      const t = (rec && rec.topics[0]) || data.allTopic;
+      const sec = data.sections[t.section] || { title: '' };
+      if(sec !== curSec){
+        flushToc();
+        curSec = sec; curTopic = null;
+        const name = sec.title || 'ערכים';
+        const eyebrow = sec.auto || !sec.title ? '' : `<span class="pdf-sec-eyebrow">מדור ${HEB_NUM[secNum++] || ''}</span>`;
+        body += `\n    <h2 class="pdf-sec">${eyebrow}${escapeHtml(name)}</h2>`;
+        toc += `<div class="pdf-toc-sec">${escapeHtml(name)}</div>`;
+      }
+      if(t !== curTopic){
+        flushToc();
+        curTopic = t;
+        body += `\n    <h3 class="pdf-topic">${escapeHtml(t.title)}</h3>`;
+        toc += `<div class="pdf-toc-topic">${escapeHtml(t.title)}</div>`;
+      }
+      group.push(e);
+      body += entryHtml(e);
+    }
+    flushToc();
+  }else{
+    let curLetter = null;
+    for(const e of entries){
+      const ch = sortKey(e.term).charAt(0);
+      const letter = (ch >= 'א' && ch <= 'ת') ? ch : '#';
+      if(letter !== curLetter){
+        curLetter = letter;
+        body += `\n    <h2 class="pdf-letter">${escapeHtml(letter)}</h2>`;
+      }
+      body += entryHtml(e);
+    }
+    toc = tocList(entries);
+  }
+
+  const canPrint = typeof window.print === 'function' && typeof window.Capacitor === 'undefined';
+  return `
+  <div class="pdf-bar">
+    <button type="button" class="pdf-bar-btn" onclick="history.back()">→ חזרה לבחירה</button>
+    <div class="pdf-bar-info">${canPrint
+      ? 'תצוגה מקדימה · בחלון שייפתח בחרו ביעד <strong>״שמירה כ-PDF״</strong>'
+      : 'תצוגה מקדימה · שמירה כ-PDF אפשרית מהאתר בדפדפן: ' + escapeHtml(host)}</div>
+    ${canPrint ? '<button type="button" class="pdf-bar-btn primary" onclick="window.print()">שמירה כ-PDF / הדפסה</button>' : ''}
+  </div>
+  <div class="pdf-doc" lang="he" dir="rtl">
+    <div class="pdf-cover-page">
+      <div class="pdf-credit">קובץ זה הופק מתוך מאגר הערכים שבאתר ״${escapeHtml(data.title || 'מילון מונחים בפנימיות התורה')}״ · ${siteLink}</div>
+      <div class="pdf-cover">
+        <img src="assets/logo-mlh.png" alt=""/>
+        <div class="pdf-cover-eyebrow">${escapeHtml(data.title || 'מילון מונחים בפנימיות התורה')}</div>
+        <h1 class="pdf-cover-title">${escapeHtml(title)}</h1>
+        <div class="pdf-cover-sub">${escapeHtml(data.subtitle || '')}</div>
+        <div class="pdf-rule"></div>
+        <div class="pdf-cover-meta">${entries.length === 1 ? 'ערך אחד' : entries.length + ' ערכים'} · ${escapeHtml(pdfHebrewDate())}</div>
+      </div>
+    </div>${o.toc && entries.length > 1 ? `
+    <div class="pdf-toc">
+      <h2 class="pdf-h-toc">תוכן העניינים</h2>
+      ${toc}
+    </div>` : ''}
+    <div class="pdf-body">${body}
+    </div>
+    <div class="pdf-end">
+      ${o.refs ? 'ברשימות ההפניות, ערך מודגש הוא ערך שנמצא בקובץ זה.<br/>' : ''}
+      הופק מתוך מאגר הערכים שבאתר · ${siteLink}<br/>
+      כל הזכויות שמורות לרב ראובן ששון שליט&quot;א. הדברים הם סיכומים וציטוטים מתוך ספריו.
+    </div>
+  </div>`;
+}
+
+window.pdfGenerate = async function(){
+  if(_pdfBusy || !data) return;
+  const ids = pdfOrdered();
+  if(!ids.length) return;
+  const st = document.getElementById('pdfb-status'), make = document.getElementById('pdfb-make');
+  _pdfBusy = true;
+  if(make) make.disabled = true;
+  if(st){ st.classList.remove('err'); st.textContent = 'טוען את הערכים…'; }
+  let res;
+  try{
+    res = await pdfLoadEntries(ids, n => { if(st) st.textContent = 'טוען את הערכים… ' + n + ' מתוך ' + ids.length; });
+  }finally{
+    _pdfBusy = false;
+  }
+  if(res.failed){
+    if(st){ st.classList.add('err'); st.textContent = 'טעינת ' + res.failed + ' ערכים נכשלה. בדקו את החיבור לרשת ונסו שוב.'; }
+    if(make) make.disabled = false;
+    return;
+  }
+  const o = pdfOpts();
+  openPdfPreview(pdfDocHtml(res.entries, o), ((o.title || '').trim() || 'לקט ערכים') + ' – מילון פנימיות התורה');
+  pdfRefresh();
+};
+function openPdfPreview(html, docTitle){
+  const root = document.getElementById('print-root');
+  if(!root) return;
+  root.innerHTML = html;
+  document.body.classList.add('pdf-preview');
+  root.scrollTop = 0;
+  // שם הקובץ שהדפדפן מציע ב"שמירה כ-PDF" נלקח מכותרת הדף
+  _pdfPrevTitle = document.title;
+  document.title = docTitle;
+  // רשומת היסטוריה משלה — כדי ש"אחורה" (גם באנדרואיד) יסגור את התצוגה ולא ייצא מהמסך
+  try{ history.pushState({ k: 'page', p: 'pdf', pv: 1 }, ''); }catch(e){}
+}
+function closePdfPreview(){
+  if(!document.body.classList || !document.body.classList.contains('pdf-preview')) return false;
+  document.body.classList.remove('pdf-preview');
+  const root = document.getElementById('print-root');
+  if(root) root.innerHTML = '';
+  if(_pdfPrevTitle) document.title = _pdfPrevTitle;
+  return true;
+}
+
 // Page switching (about/contact)
 let currentPage = 'dictionary';
 function setPage(p){
@@ -4100,6 +4809,10 @@ function setPage(p){
   }else if(p === 'bookmarks'){
     setBreadcrumb(['אוצר המונחים', 'סימניות']);
     fadeContent(renderBookmarks());
+  }else if(p === 'pdf'){
+    setBreadcrumb(['אוצר המונחים', 'הפקת PDF']);
+    fadeContent(data ? renderPdfBuilder() : '');
+    pdfRefresh();
   }else{
     // ─── חזרה לעמוד הראשי של המילון: מפתח הנושאים ───
     currentEntry = null;
@@ -4150,6 +4863,9 @@ function renderBookmarks(){
       <div class="info-eyebrow">סימניות</div>
       <h1 class="info-title">הערכים השמורים שלי</h1>
       <div class="info-subtitle">${items.length} ערכים בארכיון האישי</div>
+      <div style="text-align:center;margin-top:14px">
+        <button type="button" class="home-pdf-btn" style="margin-top:0" onclick="pdfAddBookmarks(); setPage('pdf')">הפקת קובץ PDF מהסימניות</button>
+      </div>
       <div class="info-rule"></div>
       ${Object.values(byTopic).map(g => `
         <div class="bookmark-group">
@@ -4404,7 +5120,7 @@ function tabTitle(st){
   }
   if(st.k === 'search') return 'חיפוש: ' + st.q;
   if(st.k === 'suggest') return 'הצעות: ' + st.q;
-  if(st.k === 'page') return ({about:'אודות', contact:'צור קשר', bookmarks:'סימניות'})[st.p] || 'מפתח הנושאים';
+  if(st.k === 'page') return ({about:'אודות', contact:'צור קשר', bookmarks:'סימניות', pdf:'הפקת PDF'})[st.p] || 'מפתח הנושאים';
   return 'מפתח הנושאים';
 }
 
@@ -4497,6 +5213,7 @@ function restoreTabs(){
 window.addEventListener('popstate', e => {
   // במובייל: אם המגירה פתוחה, "אחורה" קודם כל סוגר אותה
   if(document.body.classList.contains('nav-open')){ setNavOpen(false); }
+  closePdfPreview();      // "אחורה" מתוך התצוגה המקדימה של ה-PDF חוזר למסך הבחירה
   applyNav(e.state);
 });
 
